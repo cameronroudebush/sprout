@@ -118,7 +118,7 @@ const materialIconNames = {
   category: "category",
 } as const;
 
-/** Resolves a category icon key to an image suitable for email clients. */
+/** Resolves category icons to the same Material Icons glyphs used by Flutter. */
 export class CategoryIcon {
   static getKey(icon?: string | null): string {
     return icon && icon in materialIconNames ? icon : "unknown";
@@ -129,7 +129,7 @@ export class CategoryIcon {
   }
 
   static getUrl(icon?: string | null): string {
-    const iconName = this.getName(icon).replaceAll("_", "-");
-    return `https://api.iconify.design/material-symbols/${iconName}.svg?height=28&color=%23a0cafd`;
+    const collection = this.getKey(icon) === "unknown" ? "materialiconsround" : "materialicons";
+    return `https://fonts.gstatic.com/s/i/${collection}/${this.getName(icon)}/v1/24px.svg`;
   }
 }

@@ -90,7 +90,7 @@
                 <tr class="<%= tx.pending ? 'pending' : '' %>" style="<%= tx.pending ? 'background-color: rgba(160, 202, 253, 0.15);' : '' %>">
                     <!-- Merchant Icon -->
                     <td style="width: 36px; text-align: center; padding-left: 0.5rem;">
-                      <img src="<%= tx.iconUrl %>" alt="" width="28" height="28" style="border-radius: 20%; display: block; object-fit: cover; background-color: #1d2127; margin: 0 auto;" />
+                      <img src="<%= tx.iconUrl %>" alt="" width="28" height="28" style="border-radius: 20%; display: block; object-fit: cover; background-color: #1d2127; margin: 0 auto;<%= tx.categoryIcon ? ' filter: invert(79%) sepia(29%) saturate(1000%) hue-rotate(177deg) brightness(102%) contrast(101%);' : '' %>" />
                     </td>
                     <!-- Title & Category -->
                     <td class="table-description" style="text-align: left; padding-left: 0.25rem;">

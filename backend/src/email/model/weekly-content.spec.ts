@@ -31,7 +31,8 @@ describe("WeeklyEmailContent", () => {
     expect(content.transactions[0]!.amountText).toBe("-$50.00");
     expect(content.transactions[0]!.description).toBe("Very long ...");
     expect(content.transactions[0]!.category).toBe("Food");
-    expect(content.transactions[0]!.iconUrl).toContain("material-symbols/fastfood.svg");
+    expect(content.transactions[0]!.iconUrl).toContain("materialicons/fastfood/v1/24px.svg");
+    expect(content.transactions[0]!.categoryIcon).toBe(true);
   });
 
   it("should handle transactions without description or category", () => {
@@ -39,7 +40,8 @@ describe("WeeklyEmailContent", () => {
     const content = new WeeklyEmailContent(user, 5000, 100, 0, 1, [tx as any]);
     expect(content.transactions[0]!.description).toBe("");
     expect(content.transactions[0]!.category).toBe("");
-    expect(content.transactions[0]!.iconUrl).toContain("material-symbols/question-mark.svg");
+    expect(content.transactions[0]!.iconUrl).toContain("materialiconsround/question_mark/v1/24px.svg");
+    expect(content.transactions[0]!.categoryIcon).toBe(true);
   });
 
   it("should ignore negative transactions posted outside the past week", () => {
