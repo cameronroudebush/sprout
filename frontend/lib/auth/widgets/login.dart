@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart' hide Badge;
 import 'package:sprout/auth/widgets/login_bg.dart';
 import 'package:sprout/auth/widgets/login_form.dart';
-import 'package:sprout/shared/widgets/badge.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/logo.dart';
@@ -18,16 +18,20 @@ class LoginPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final packageInfo = ref.watch(packageInfoProvider).value;
-    final versionInfo = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 8,
-      children: [
-        Badge(
-          label: packageInfo?.version ?? "",
-          icon: Icons.web,
-          variant: BadgeVariant.outline,
-        ),
-      ],
+    final unsecureConfig = ref.watch(unsecureConfigProvider).value;
+    final versionInfo = Text(
+      [
+        if (packageInfo != null && packageInfo.version.isNotEmpty)
+          "v${packageInfo.version.split("-").take(2).join("-")}",
+        if (unsecureConfig != null && unsecureConfig.version.isNotEmpty)
+          unsecureConfig.version.split("-").take(2).join("-"),
+      ].join(" · "),
+      style: theme.textTheme.labelSmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
 
     return Scaffold(

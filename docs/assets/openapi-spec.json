@@ -4883,11 +4883,6 @@
             "type": "string",
             "description": "The icon to use for this category. If one is not given, we'll use the default."
           },
-          "iconName": {
-            "type": "string",
-            "description": "The resolved category icon key for this category.",
-            "readOnly": true
-          },
           "excludeFromCashFlow": {
             "type": "boolean",
             "description": "If true, drops this category from the cash flow calculation engine entirely.\nUse this for absolute exclusions where transactions shouldn't impact net income/expense totals or show up in charts.",

@@ -151,10 +151,8 @@ class WidgetSync extends _$WidgetSync {
                 );
               }
             }
-            final fallbackIconData =
-                CategoryIcon.iconLibrary[category?.iconName] ??
-                    CategoryIcon.iconLibrary[category?.icon] ??
-                    Icons.question_mark_rounded;
+            final fallbackIconData = CategoryIcon.iconLibrary[category?.icon] ??
+                Icons.question_mark_rounded;
             final iconBase64 = await WidgetImageUtility.getSquircleBase64(
               imageUrl: resolvedIconUrl,
               fallbackIcon: fallbackIconData,
