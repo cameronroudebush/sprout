@@ -20,6 +20,7 @@ type ProfileData = {
   sub: string;
   preferred_username: string;
   email: string;
+  name?: string;
   given_name?: string;
   family_name?: string;
   firstName?: string;
@@ -78,22 +79,36 @@ export class OIDCStrategy extends PassportStrategy(Strategy, "oidc") {
       profileData = await this.getUserInfo(accessToken);
     }
 
+    // OIDC Core requires the UserInfo subject to exactly match the ID Token subject.
+    const idTokenSubject = profileIntrospect.subject ?? data.sub;
+    if (profileData && (!idTokenSubject || profileData.sub !== idTokenSubject))
+      throw new UnauthorizedException("User info subject does not match ID token subject.");
+
     // Make sure we have the user info
     if (!profileData?.preferred_username) throw new UnauthorizedException("Could not determine username from token.");
     // Find user based on our profile data
     const user = await User.findOne({ where: { id: profileData.sub } });
-    const firstName = profileData.given_name ?? profileData.firstName;
-    const lastName = profileData.family_name ?? profileData.lastName;
+    // OIDC's `name` is a display name, so use its first token as given name and remainder as family name.
+    const [nameFirst, ...nameLastParts] = profileData.name?.trim().split(/\s+/).filter(Boolean) ?? [];
+    const nameLast = nameLastParts.join(" ") || undefined;
+    const capitalizeInitial = (name?: string) => {
+      const trimmedName = name?.trim();
+      return trimmedName ? `${trimmedName[0]?.toUpperCase()}${trimmedName.slice(1)}` : undefined;
+    };
+    const firstName = capitalizeInitial(profileData.given_name) ?? capitalizeInitial(profileData.firstName) ?? capitalizeInitial(nameFirst);
+    const lastName = capitalizeInitial(profileData.family_name) ?? capitalizeInitial(profileData.lastName) ?? capitalizeInitial(nameLast);
     // Set request context for any data we have for setup of new users
     (req as any).setupUser = new UserSetupContext(profileData.sub, profileData.preferred_username, profileData.email, firstName, lastName);
     // No user? Probably should fail then
     if (!user) throw new UnauthorizedException(`User ${profileData.preferred_username} not found`);
 
     // Keep the local profile synchronized with the identity provider.
-    if (user.firstName !== firstName || user.lastName !== lastName) {
-      user.firstName = firstName;
-      user.lastName = lastName;
+    const nameChanged = (firstName !== undefined && user.firstName !== firstName) || (lastName !== undefined && user.lastName !== lastName);
+    if (nameChanged) {
+      if (firstName !== undefined) user.firstName = firstName;
+      if (lastName !== undefined) user.lastName = lastName;
       await user.update();
+      this.logger.debug("Updated first and last name from OIDC profile.");
     }
     return user;
   }

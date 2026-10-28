@@ -47,6 +47,7 @@ describe("OIDCStrategy", () => {
     tokenPayload = {
       issuer: "https://identity.provider.local",
       authorizedParty: "app-client-id",
+      sub: "user-uuid",
     };
 
     strategy = new OIDCStrategy(httpService, authService, cacheManager);
@@ -107,8 +108,41 @@ describe("OIDCStrategy", () => {
         sub: "user-uuid",
         preferred_username: "john_doe",
         email: "john@domain.local",
-        given_name: "John",
-        family_name: "Doe",
+        given_name: "john",
+        family_name: "doe",
+      });
+
+      const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe" });
+      vi.spyOn(mockDbUser, "update").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+      vi.spyOn((strategy as any).logger, "debug");
+
+      await strategy.validate(mockRequest as Request, tokenPayload);
+
+      expect(mockDbUser.firstName).toBe("John");
+      expect(mockDbUser.lastName).toBe("Doe");
+      expect(mockDbUser.update).toHaveBeenCalled();
+      expect(mockRequest.setupUser.firstName).toBe("John");
+      expect(mockRequest.setupUser.lastName).toBe("Doe");
+      expect((strategy as any).logger.debug).toHaveBeenCalledWith("Updated first and last name from OIDC profile.");
+    });
+
+    it("should split the standard OIDC name claim into first and last names", async () => {
+      const mockProfileIntrospect = {
+        issuer: "https://identity.provider.local",
+        authorizedParty: "app-client-id",
+        subject: "user-uuid",
+        isExpired: false,
+        checkIssuedState: vi.fn(),
+      } as any;
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+
+      authService.getCookie.mockReturnValue("valid-cookie-access-token");
+      cacheManager.get.mockResolvedValue({
+        sub: "user-uuid",
+        preferred_username: "john_doe",
+        email: "john@domain.local",
+        name: "john doe",
       });
 
       const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe" });
@@ -119,9 +153,88 @@ describe("OIDCStrategy", () => {
 
       expect(mockDbUser.firstName).toBe("John");
       expect(mockDbUser.lastName).toBe("Doe");
-      expect(mockDbUser.update).toHaveBeenCalled();
       expect(mockRequest.setupUser.firstName).toBe("John");
       expect(mockRequest.setupUser.lastName).toBe("Doe");
+    });
+
+    it("should retain stored names when identity provider omits a name claim", async () => {
+      const mockProfileIntrospect = {
+        issuer: "https://identity.provider.local",
+        authorizedParty: "app-client-id",
+        subject: "user-uuid",
+        isExpired: false,
+        checkIssuedState: vi.fn(),
+      } as any;
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+
+      authService.getCookie.mockReturnValue("valid-cookie-access-token");
+      cacheManager.get.mockResolvedValue({
+        sub: "user-uuid",
+        preferred_username: "john_doe",
+        email: "john@domain.local",
+        given_name: "john",
+      });
+
+      const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe", firstName: "Old", lastName: "Doe" });
+      vi.spyOn(mockDbUser, "update").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+
+      await strategy.validate(mockRequest as Request, tokenPayload);
+
+      expect(mockDbUser.firstName).toBe("John");
+      expect(mockDbUser.lastName).toBe("Doe");
+      expect(mockDbUser.update).toHaveBeenCalled();
+    });
+
+    it("should update family name without overwriting first name when only family name is provided", async () => {
+      const mockProfileIntrospect = {
+        issuer: "https://identity.provider.local",
+        authorizedParty: "app-client-id",
+        subject: "user-uuid",
+        isExpired: false,
+        checkIssuedState: vi.fn(),
+      } as any;
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+
+      authService.getCookie.mockReturnValue("valid-cookie-access-token");
+      cacheManager.get.mockResolvedValue({
+        sub: "user-uuid",
+        preferred_username: "john_doe",
+        email: "john@domain.local",
+        family_name: "doe",
+      });
+
+      const mockDbUser = User.fromPlain({ id: "user-uuid", username: "john_doe", firstName: "Jane", lastName: "Old" });
+      vi.spyOn(mockDbUser, "update").mockResolvedValue(mockDbUser);
+      vi.spyOn(User, "findOne").mockResolvedValue(mockDbUser);
+
+      await strategy.validate(mockRequest as Request, tokenPayload);
+
+      expect(mockDbUser.firstName).toBe("Jane");
+      expect(mockDbUser.lastName).toBe("Doe");
+      expect(mockDbUser.update).toHaveBeenCalled();
+    });
+
+    it("should reject UserInfo when its subject differs from the ID Token subject", async () => {
+      const mockProfileIntrospect = {
+        issuer: "https://identity.provider.local",
+        authorizedParty: "app-client-id",
+        subject: "different-user",
+        isExpired: false,
+        checkIssuedState: vi.fn(),
+      } as any;
+      vi.spyOn(OIDCIDTokenIntrospectionResult, "fromPlain").mockReturnValue(mockProfileIntrospect);
+
+      authService.getCookie.mockReturnValue("valid-cookie-access-token");
+      cacheManager.get.mockResolvedValue({
+        sub: "user-uuid",
+        preferred_username: "john_doe",
+        email: "john@domain.local",
+      });
+
+      await expect(strategy.validate(mockRequest as Request, tokenPayload)).rejects.toThrow(
+        new UnauthorizedException("User info subject does not match ID token subject."),
+      );
     });
 
     it("should invoke refresh orchestration when token reports expired and successfully recover with updated access credentials", async () => {
@@ -196,6 +309,7 @@ describe("OIDCStrategy", () => {
         preferred_username: "ghost_rider",
         email: "ghost@domain.local",
       });
+      tokenPayload.sub = "user-absent";
 
       vi.spyOn(User, "findOne").mockResolvedValue(null);
 

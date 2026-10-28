@@ -29,6 +29,7 @@ describe("OIDCIntrospection", () => {
   it("should validate ID Token introspection result", () => {
     const idTokenRes = new OIDCIDTokenIntrospectionResult();
     idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.audience = "client-123";
     idTokenRes.authorizedParty = "client-123";
 
     Configuration.server.auth.oidc.issuer = "https://issuer.com";
@@ -40,9 +41,56 @@ describe("OIDCIntrospection", () => {
     expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token issuer."));
   });
 
+  it("should allow a single audience without an authorized party", () => {
+    const idTokenRes = new OIDCIDTokenIntrospectionResult();
+    idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.audience = "client-123";
+
+    Configuration.server.auth.oidc.issuer = "https://issuer.com";
+    Configuration.server.auth.oidc.clientId = "client-123";
+
+    expect(() => idTokenRes.checkIssuedState()).not.toThrow();
+  });
+
+  it("should reject a missing audience", () => {
+    const idTokenRes = new OIDCIDTokenIntrospectionResult();
+    idTokenRes.issuer = "https://issuer.com";
+
+    Configuration.server.auth.oidc.issuer = "https://issuer.com";
+    Configuration.server.auth.oidc.clientId = "client-123";
+
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token audience."));
+  });
+
+  it("should reject an audience that does not include the client", () => {
+    const idTokenRes = new OIDCIDTokenIntrospectionResult();
+    idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.audience = "another-client";
+
+    Configuration.server.auth.oidc.issuer = "https://issuer.com";
+    Configuration.server.auth.oidc.clientId = "client-123";
+
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token audience."));
+  });
+
+  it("should require a matching authorized party for multiple audiences", () => {
+    const idTokenRes = new OIDCIDTokenIntrospectionResult();
+    idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.audience = ["client-123", "another-client"];
+
+    Configuration.server.auth.oidc.issuer = "https://issuer.com";
+    Configuration.server.auth.oidc.clientId = "client-123";
+
+    expect(() => idTokenRes.checkIssuedState()).toThrow(new UnauthorizedException("Invalid token audience."));
+
+    idTokenRes.authorizedParty = "client-123";
+    expect(() => idTokenRes.checkIssuedState()).not.toThrow();
+  });
+
   it("should throw UnauthorizedException when authorizedParty does not match clientId", () => {
     const idTokenRes = new OIDCIDTokenIntrospectionResult();
     idTokenRes.issuer = "https://issuer.com";
+    idTokenRes.audience = "client-123";
     idTokenRes.authorizedParty = "wrong-client";
 
     Configuration.server.auth.oidc.issuer = "https://issuer.com";

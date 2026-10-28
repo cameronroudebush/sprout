@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -8,6 +8,7 @@ import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/widgets/calendar.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/transaction/models/extensions/transaction_subscription_extensions.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
@@ -92,7 +93,9 @@ class _SubscriptionCalendarWidgetState
       child: SproutCalendar(
         subs,
         (day, event) => event.isBilledOn(day),
-        subheader: "Subscriptions",
+        header: SproutChartHeader(
+          subheader: "Subscriptions",
+        ),
         onDaySelected: (day, events, wasAutomatic) {
           setState(() => _selectedDay = day);
           ref.read(selectedCalendarMonthProvider.notifier).state = day;

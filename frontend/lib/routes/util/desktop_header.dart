@@ -1,6 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/notification/widgets/notification_bell.dart';
 import 'package:sprout/routes/reports.dart';
@@ -27,9 +27,12 @@ class SproutDesktopHeader extends ConsumerWidget {
     if (uri.path == "/") {
       final user = ref.watch(authProvider).value;
       final greeting = SproutMoreSheet.getGreeting();
+      final firstName = user?.firstName?.trim();
+      final displayName =
+          firstName?.isNotEmpty == true ? firstName : user?.username;
       return [
         SproutBreadcrumbItem(
-          label: "$greeting ${user?.username}",
+          label: "$greeting $displayName!",
           location: "/",
         ),
       ];
