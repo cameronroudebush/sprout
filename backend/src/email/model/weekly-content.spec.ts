@@ -8,13 +8,18 @@ import { TestEntities } from "@backend/test/entities.js";
 describe("WeeklyEmailContent", () => {
   const user = TestEntities.user;
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Configuration.server.brandFetch.getWebsiteIconUrl.mockReturnValue(null);
+  });
+
   it("should format weekly update context fields properly", () => {
     const tx = TestEntities.transaction;
     tx.amount = -50;
     tx.posted = new Date();
     tx.account = TestEntities.account;
     tx.description = "Very long transaction description that exceeds the max limit";
-    tx.category = { name: "Food" } as any;
+    tx.category = { name: "Food", icon: "food_drink" } as any;
 
     Configuration.server.email.maxDescriptionLength = 10;
 
@@ -26,6 +31,8 @@ describe("WeeklyEmailContent", () => {
     expect(content.transactions[0]!.amountText).toBe("-$50.00");
     expect(content.transactions[0]!.description).toBe("Very long ...");
     expect(content.transactions[0]!.category).toBe("Food");
+    expect(content.transactions[0]!.iconUrl).toContain("materialicons/fastfood/v1/24px.svg");
+    expect(content.transactions[0]!.categoryIcon).toBe(true);
   });
 
   it("should handle transactions without description or category", () => {
@@ -33,6 +40,8 @@ describe("WeeklyEmailContent", () => {
     const content = new WeeklyEmailContent(user, 5000, 100, 0, 1, [tx as any]);
     expect(content.transactions[0]!.description).toBe("");
     expect(content.transactions[0]!.category).toBe("");
+    expect(content.transactions[0]!.iconUrl).toContain("materialiconsround/question_mark/v1/24px.svg");
+    expect(content.transactions[0]!.categoryIcon).toBe(true);
   });
 
   it("should ignore negative transactions posted outside the past week", () => {
