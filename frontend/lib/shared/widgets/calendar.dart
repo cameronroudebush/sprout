@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/shared/models/extensions/box_decoration_extensions.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -29,7 +29,8 @@ class SproutCalendar<T> extends StatefulWidget {
   /// If we should allow changing months, days, etc.
   final bool allowSelection;
 
-  final String? subheader;
+  /// Optional header to render instead of the default
+  final SproutChartHeader? header;
 
   const SproutCalendar(this.events, this.isOnDay,
       {super.key,
@@ -38,7 +39,7 @@ class SproutCalendar<T> extends StatefulWidget {
       this.displayOutsideDays = false,
       this.allowSelection = true,
       this.cellDecorationBuilder,
-      this.subheader});
+      this.header});
 
   @override
   State<SproutCalendar> createState() => _SproutCalendarState<T>();
@@ -135,8 +136,7 @@ class _SproutCalendarState<T> extends State<SproutCalendar<T>> {
                 Expanded(
                   child: SproutChartHeader(
                     title: DateFormat.yMMM().format(_focusedDate),
-                    subheader: widget.subheader,
-                  ),
+                  ).merge(widget.header),
                 ),
                 if (widget.allowSelection)
                   Expanded(

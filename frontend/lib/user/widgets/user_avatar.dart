@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/user/models/extensions/user_extensions.dart';
 
@@ -16,7 +16,7 @@ class UserAvatar extends ConsumerWidget {
       radius: 16,
       backgroundColor: theme.colorScheme.primary,
       child: Text(
-        user?.prettyName[0].toUpperCase() ?? "",
+        user?.initials ?? "",
         style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 12),
       ),
     );

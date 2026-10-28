@@ -44,14 +44,19 @@ export class OIDCIDTokenIntrospectionResult extends OIDCIntrospectionResult {
   @Expose({ name: "iss" })
   issuer!: string;
   @Expose({ name: "aud" })
-  audience!: Array<string>;
+  audience!: string | Array<string>;
   @Expose({ name: "azp" })
-  authorizedParty!: string;
+  authorizedParty?: string;
 
   /** Checks if the current introspection result was issued for us. If not, throws an error. */
   override checkIssuedState() {
     const config = Configuration.server.auth.oidc;
     if (this.issuer !== config.issuer) throw new UnauthorizedException("Invalid token issuer.");
-    if (this.authorizedParty !== config.clientId) throw new UnauthorizedException("Invalid token audience.");
+
+    const audiences = Array.isArray(this.audience) ? this.audience : this.audience ? [this.audience] : [];
+    if (!audiences.includes(config.clientId)) throw new UnauthorizedException("Invalid token audience.");
+    if ((audiences.length > 1 && !this.authorizedParty) || (this.authorizedParty && this.authorizedParty !== config.clientId)) {
+      throw new UnauthorizedException("Invalid token audience.");
+    }
   }
 }

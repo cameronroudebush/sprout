@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/config_provider.dart';
@@ -212,15 +212,18 @@ class _UserProfileTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          authUser?.prettyName ?? "",
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: isSettings
-                                ? theme.colorScheme.onSecondaryContainer
-                                : null,
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            authUser?.prettyName ?? "",
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: isSettings
+                                  ? theme.colorScheme.onSecondaryContainer
+                                  : null,
+                            ),
+                            maxLines: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
                         Text(
                           "Account Settings",

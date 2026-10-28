@@ -15,7 +15,7 @@ import 'package:sprout/transaction/widgets/transaction_row.dart';
 
 /// A widget that is used to show cash flow in a calendar like format
 class CashFlowCalendarWidget extends ConsumerWidget {
-  /// Optional title and explanation shown above the calendar.
+  /// Optional title and explanation shown above the calendar. If not provided renders the default calendar one.
   final SproutChartHeader? header;
 
   /// Whether to include pending transactions. Defaults to true.
@@ -60,7 +60,6 @@ class CashFlowCalendarWidget extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (header != null) header!,
             SproutCalendar(
               listDaysInMonth,
               (DateTime gridDay, int dayItem) {
@@ -71,7 +70,9 @@ class CashFlowCalendarWidget extends ConsumerWidget {
 
                 return dateMatches && hasFinancialActivity;
               },
-              subheader: "Cash Flow",
+              header: SproutChartHeader(
+                subheader: "Cash Flow",
+              ).merge(header),
               allowSelection: false,
               onDaySelected: (day, events, wasAutomatic) {
                 if (events.isEmpty || wasAutomatic) return;

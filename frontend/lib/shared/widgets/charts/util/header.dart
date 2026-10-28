@@ -21,6 +21,18 @@ class SproutChartHeader extends StatelessWidget {
     this.right,
   });
 
+  SproutChartHeader merge(SproutChartHeader? other) {
+    if (other == null) return this;
+    return SproutChartHeader(
+      key: other.key ?? key,
+      title: other.title ?? title,
+      subheader: other.subheader ?? subheader,
+      subheaderWidget: other.subheaderWidget ?? subheaderWidget,
+      left: other.left ?? left,
+      right: other.right ?? right,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

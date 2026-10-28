@@ -1,5 +1,6 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_amortization.dart';
 import 'package:sprout/cash-flow/widgets/cash_flow_calendar.dart';
@@ -159,11 +160,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     DateTime selectedDate,
     bool isDesktop,
   ) {
+    final now = DateTime.now();
     switch (reportView) {
       case 'calendar':
-        return const CashFlowCalendarWidget(
+        return CashFlowCalendarWidget(
           header: SproutChartHeader(
-            title: 'Cash Flow Calendar',
+            title: 'Cash Flow for ${DateFormat.yMMM().format(now)}',
             subheader:
                 'Daily net cash flow is shown by date; tap a day to view its transactions.',
           ),

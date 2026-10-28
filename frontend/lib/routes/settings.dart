@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/auth/biometric_provider.dart';
@@ -21,6 +21,7 @@ import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/theme/widgets/theme_picker.dart';
 import 'package:sprout/user/models/extensions/use_config_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
+import 'package:sprout/user/widgets/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A page that allows customization of Sprout
@@ -84,6 +85,11 @@ class SettingsPage extends ConsumerWidget {
 
     final userHasEmail =
         user != null && user.email != null && user.email!.isNotEmpty;
+    final fullName = [user?.firstName, user?.lastName]
+        .whereType<String>()
+        .map((name) => name.trim())
+        .where((name) => name.isNotEmpty)
+        .join(" ");
     final settingElevation = onlyShowSetup ? 0.0 : null;
 
 // Sections, defined by a map for easier modification
@@ -95,6 +101,13 @@ class SettingsPage extends ConsumerWidget {
           icon: Icons.person_outline,
           trailing: const SizedBox.shrink(),
         ),
+        if (fullName.isNotEmpty)
+          ActionSettingTile(
+            title: "Full Name",
+            subtitle: fullName,
+            icon: UserAvatar(user),
+            trailing: const SizedBox.shrink(),
+          ),
         ActionSettingTile(
           title: "Email Address",
           subtitle: user?.email ?? "No email set",
