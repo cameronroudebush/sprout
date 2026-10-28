@@ -2,9 +2,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/theme/helpers.dart';
 
 /// A private class to cache heavy mathematical layout computations.
 class _SankeyLayoutData {
@@ -313,33 +315,52 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(node,
-                  style:
-                      const TextStyle(color: Color(0xFFE2E8F0), fontSize: 14)),
+              Text(
+                node,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFE2E8F0),
+                  fontSize: 14,
+                ),
+              ),
               Text(
                 widget.formatter != null
                     ? widget.formatter!(value)
                     : value.toStringAsFixed(0),
+                textAlign: TextAlign.center,
                 style: const TextStyle(
-                    color: Color(0xFF68D391),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold),
+                  color: Color(0xFF68D391),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               if (description != null && description.isNotEmpty)
-                Text(description,
-                    style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic)),
-              TextButton(
-                onPressed: () => widget.onTooltipAction!(node),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF68D391),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  minimumSize: Size.zero,
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
-                child: const Text('View transactions'),
-              ),
+              if (kIsWeb)
+                const Text(
+                  'Click to view transactions',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                )
+              else
+                Padding(
+                    padding: EdgeInsetsGeometry.only(top: 8),
+                    child: FilledButton(
+                      onPressed: () => widget.onTooltipAction!(node),
+                      style: ThemeHelpers.secondaryButton,
+                      child: const Text('View transactions'),
+                    )),
             ],
           ),
         ),

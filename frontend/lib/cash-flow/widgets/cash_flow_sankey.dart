@@ -1,5 +1,6 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
 import 'package:sprout/category/category_provider.dart';
@@ -33,6 +34,8 @@ class CashFlowSankeyChart extends ConsumerWidget {
       ...?ref.watch(categoriesProvider).value?.map((category) => category.name),
       CategoryDropdown.unknownCategory.name,
     };
+    bool isCategoryNode(String node) =>
+        node != 'Flow Through' && categoryNames.contains(node.trim());
 
     return sankeyAsync.whenDefault(
       emptyCondition: (sankeyData) => sankeyData.nodes.isEmpty,
@@ -43,11 +46,17 @@ class CashFlowSankeyChart extends ConsumerWidget {
             data: sankeyData,
             formatter: formatter.format,
             header: header,
+            onNodeTap: kIsWeb
+                ? (node, _) {
+                    if (isCategoryNode(node)) {
+                      NavigationProvider.redirectToCatFilter(ref, node);
+                    }
+                  }
+                : null,
             onTooltipAction: (node) {
               NavigationProvider.redirectToCatFilter(ref, node);
             },
-            isTooltipActionEnabled: (node) =>
-                categoryNames.contains(node.trim()),
+            isTooltipActionEnabled: isCategoryNode,
           ),
         );
       },
