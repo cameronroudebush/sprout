@@ -2,9 +2,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
+import 'package:sprout/theme/helpers.dart';
 
 /// A private class to cache heavy mathematical layout computations.
 class _SankeyLayoutData {
@@ -26,6 +28,8 @@ class SproutSankeyChart extends StatefulWidget {
   final String Function(num val)? formatter;
   final void Function(String node, double value)? onNodeTap;
   final void Function(SankeyLink link)? onLinkTap;
+  final void Function(String node)? onTooltipAction;
+  final bool Function(String node)? isTooltipActionEnabled;
 
   /// Minimum width before the chart becomes horizontally scrollable on mobile.
   final double minWidth;
@@ -37,6 +41,8 @@ class SproutSankeyChart extends StatefulWidget {
     this.formatter,
     this.onNodeTap,
     this.onLinkTap,
+    this.onTooltipAction,
+    this.isTooltipActionEnabled,
     this.minWidth = 600.0,
   });
 
@@ -216,29 +222,47 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
         }
 
         final chartArea = MouseRegion(
-          onHover: (event) => _handleInteraction(event.localPosition),
+          onHover: (event) {
+            if (!_tooltipContains(chartSize, event.localPosition)) {
+              _handleInteraction(event.localPosition);
+            }
+          },
           onExit: (_) => _clearInteraction(),
-          child: GestureDetector(
-            onTapDown: (details) => _handleInteraction(details.localPosition),
-            onTapUp: (_) => _handleTap(),
-            onTapCancel: _clearInteraction,
-            onLongPressStart: (details) =>
-                _handleInteraction(details.localPosition),
-            onLongPressMoveUpdate: (details) =>
-                _handleInteraction(details.localPosition),
-            onLongPressEnd: (_) => _clearInteraction(),
-            child: CustomPaint(
-              size: chartSize,
-              painter: _SankeyPainter(
-                layoutData: _layoutData!,
-                sankeyData: widget.data,
-                theme: theme,
-                hoveredNode: _hoveredNode,
-                hoveredLink: _hoveredLink,
-                hoverPosition: _hoverPosition,
-                formatter: widget.formatter,
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTapDown: (details) =>
+                    _handleInteraction(details.localPosition),
+                onTapUp: (_) => _handleTap(),
+                onTapCancel: _clearInteraction,
+                onLongPressStart: (details) =>
+                    _handleInteraction(details.localPosition),
+                onLongPressMoveUpdate: (details) =>
+                    _handleInteraction(details.localPosition),
+                onLongPressEnd: (_) => _clearInteraction(),
+                child: CustomPaint(
+                  size: chartSize,
+                  painter: _SankeyPainter(
+                    layoutData: _layoutData!,
+                    sankeyData: widget.data,
+                    theme: theme,
+                    hoveredNode: _hoveredNode,
+                    hoveredLink: _hoveredLink,
+                    hoverPosition: _hoverPosition,
+                    formatter: widget.formatter,
+                    paintTooltip: widget.onTooltipAction == null ||
+                        _hoveredNode == null ||
+                        !(widget.isTooltipActionEnabled?.call(_hoveredNode!) ??
+                            true),
+                  ),
+                ),
               ),
-            ),
+              if (widget.onTooltipAction != null &&
+                  _hoveredNode != null &&
+                  _hoverPosition != null &&
+                  (widget.isTooltipActionEnabled?.call(_hoveredNode!) ?? true))
+                _buildNodeTooltip(chartSize),
+            ],
           ),
         );
 
@@ -261,6 +285,107 @@ class _SproutSankeyChartState extends State<SproutSankeyChart> {
         return horizontallyScrollableChart;
       },
     );
+  }
+
+  Widget _buildNodeTooltip(Size chartSize) {
+    final node = _hoveredNode!;
+    final value = _layoutData!.nodeValues[node] ?? 0.0;
+    final description = widget.data.links
+        .firstWhereOrNull((link) => link.source_ == node || link.target == node)
+        ?.description;
+    const tooltipWidth = 220.0;
+    const tooltipHeight = 112.0;
+    final left = (_hoverPosition!.dx + 15)
+        .clamp(0.0, max(0.0, chartSize.width - tooltipWidth))
+        .toDouble();
+    final top = (_hoverPosition!.dy + 15)
+        .clamp(0.0, max(0.0, chartSize.height - tooltipHeight))
+        .toDouble();
+
+    return Positioned(
+      left: left,
+      top: top,
+      width: tooltipWidth,
+      child: Material(
+        color: Theme.of(context).primaryColorDark,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                node,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFFE2E8F0),
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                widget.formatter != null
+                    ? widget.formatter!(value)
+                    : value.toStringAsFixed(0),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Color(0xFF68D391),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (description != null && description.isNotEmpty)
+                Text(
+                  description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              if (kIsWeb)
+                const Text(
+                  'Click to view transactions',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
+                )
+              else
+                Padding(
+                    padding: EdgeInsetsGeometry.only(top: 8),
+                    child: FilledButton(
+                      onPressed: () => widget.onTooltipAction!(node),
+                      style: ThemeHelpers.secondaryButton,
+                      child: const Text('View transactions'),
+                    )),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _tooltipContains(Size chartSize, Offset position) {
+    if (widget.onTooltipAction == null ||
+        _hoveredNode == null ||
+        _hoverPosition == null ||
+        !(widget.isTooltipActionEnabled?.call(_hoveredNode!) ?? true)) {
+      return false;
+    }
+
+    const tooltipWidth = 220.0;
+    const tooltipHeight = 112.0;
+    final left = (_hoverPosition!.dx + 15)
+        .clamp(0.0, max(0.0, chartSize.width - tooltipWidth))
+        .toDouble();
+    final top = (_hoverPosition!.dy + 15)
+        .clamp(0.0, max(0.0, chartSize.height - tooltipHeight))
+        .toDouble();
+    return Rect.fromLTWH(left, top, tooltipWidth, tooltipHeight)
+        .contains(position);
   }
 
   /// The heavy math engine. Extracted here so it only runs when size or data changes.
@@ -441,6 +566,7 @@ class _SankeyPainter extends CustomPainter {
   final SankeyLink? hoveredLink;
   final Offset? hoverPosition;
   final String Function(num val)? formatter;
+  final bool paintTooltip;
 
   final Color _defaultNodeColor = const Color(0xFF38A169);
 
@@ -452,6 +578,7 @@ class _SankeyPainter extends CustomPainter {
     this.hoveredLink,
     this.hoverPosition,
     this.formatter,
+    this.paintTooltip = true,
   });
 
   @override
@@ -490,7 +617,7 @@ class _SankeyPainter extends CustomPainter {
       }
     });
 
-    if (hoverPosition != null) {
+    if (paintTooltip && hoverPosition != null) {
       _paintTooltip(canvas, size);
     }
   }
@@ -630,6 +757,7 @@ class _SankeyPainter extends CustomPainter {
     return oldDelegate.layoutData != layoutData ||
         oldDelegate.hoveredNode != hoveredNode ||
         oldDelegate.hoveredLink != hoveredLink ||
-        oldDelegate.hoverPosition != hoverPosition;
+        oldDelegate.hoverPosition != hoverPosition ||
+        oldDelegate.paintTooltip != paintTooltip;
   }
 }

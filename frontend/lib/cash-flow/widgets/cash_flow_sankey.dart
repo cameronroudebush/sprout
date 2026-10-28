@@ -1,7 +1,11 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/cash-flow/cash_flow_provider.dart';
 import 'package:sprout/cash-flow/models/cash_flow_view.dart';
+import 'package:sprout/category/category_provider.dart';
+import 'package:sprout/category/widgets/category_dropdown.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/charts/sankey.dart';
@@ -26,6 +30,12 @@ class CashFlowSankeyChart extends ConsumerWidget {
     final month = view == CashFlowView.monthly ? selectedDate.month : null;
     final sankeyAsync = ref.watch(sankeyDataProvider(year: year, month: month));
     final formatter = ref.watch(currencyFormatterProvider);
+    final categoryNames = {
+      ...?ref.watch(categoriesProvider).value?.map((category) => category.name),
+      CategoryDropdown.unknownCategory.name,
+    };
+    bool isCategoryNode(String node) =>
+        node != 'Flow Through' && categoryNames.contains(node.trim());
 
     return sankeyAsync.whenDefault(
       emptyCondition: (sankeyData) => sankeyData.nodes.isEmpty,
@@ -36,6 +46,17 @@ class CashFlowSankeyChart extends ConsumerWidget {
             data: sankeyData,
             formatter: formatter.format,
             header: header,
+            onNodeTap: kIsWeb
+                ? (node, _) {
+                    if (isCategoryNode(node)) {
+                      NavigationProvider.redirectToCatFilter(ref, node);
+                    }
+                  }
+                : null,
+            onTooltipAction: (node) {
+              NavigationProvider.redirectToCatFilter(ref, node);
+            },
+            isTooltipActionEnabled: isCategoryNode,
           ),
         );
       },
