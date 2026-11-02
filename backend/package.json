@@ -9,7 +9,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^2.0.1",
-    "@keyv/redis": "^5.1.6",
+    "@keyv/redis": "^6.1.0",
     "@nestjs-modules/mailer": "^3.0.2",
     "@nestjs/axios": "^12.0.0",
     "@nestjs/bullmq": "^12.0.0",
@@ -46,10 +46,10 @@
     "nodemailer": "^10.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "plaid": "^47.0.0",
+    "plaid": "^48.0.0",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.2",
-    "snaptrade-typescript-sdk": "^12.1.1",
+    "snaptrade-typescript-sdk": "^13.1.1",
     "ts-mixer": "^6.0.4",
     "yahoo-finance2": "^4.0.0",
     "yaml": "^2.4.1"
