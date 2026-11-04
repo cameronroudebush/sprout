@@ -4,6 +4,7 @@ setupTests();
 import { AccountHistory } from "@backend/account/model/account.history.model.js";
 import { Account } from "@backend/account/model/account.model.js";
 import { BudgetService } from "@backend/budget/budget.service.js";
+import { Category } from "@backend/category/model/category.model.js";
 import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
@@ -24,6 +25,7 @@ describe("ChatPromptService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    user.config.enableBudgeting = true;
 
     transactionService = {
       findSubscriptions: vi.fn().mockResolvedValue([
@@ -43,6 +45,8 @@ describe("ChatPromptService", () => {
         month: 6,
         totalBudgeted: 500,
         totalSpent: 175,
+        totalRemaining: 325,
+        totalOverBudgetAmount: 50,
         items: [
           {
             category: { name: "Groceries" },
@@ -76,6 +80,7 @@ describe("ChatPromptService", () => {
 
     vi.spyOn(Transaction, "find").mockResolvedValue([TestEntities.transaction]);
     vi.spyOn(Transaction, "convertListToTargetCurrency").mockImplementation((list: any) => list);
+    vi.spyOn(Category, "find").mockResolvedValue([]);
     vi.spyOn(Holding, "find").mockResolvedValue([TestEntities.holding]);
     vi.spyOn(Holding, "convertListToTargetCurrency").mockImplementation((list: any) => list);
 
@@ -88,9 +93,62 @@ describe("ChatPromptService", () => {
   describe("buildChatPrompt, buildDailyOverviewPrompt, buildHoldingsOverviewPrompt", () => {
     it("should build chat prompt with charts allowed and timeframe filtering", async () => {
       const payload = await service.buildChatPrompt(user, ChatTimeframe.sixMonths, true);
+      const promptText = payload.contents[0]!.parts[0]!.text;
+      const contextData = JSON.parse(promptText.split("CONTEXTUAL DATA:")[1]!);
       expect(payload.contents).toBeDefined();
       expect(payload.idMap).toBeDefined();
-      expect(payload.contents[0]!.parts[0]!.text).toContain("NEVER use Markdown tables");
+      expect(promptText).toContain("NEVER use Markdown tables");
+      expect(contextData.budget).toEqual({
+        month: "June 2026",
+        totalBudgeted: 500,
+        totalSpent: 175,
+        totalRemaining: 325,
+        totalOverBudgetAmount: 50,
+        categories: [
+          { category: "Cat_0", hasLimit: true, limit: 300, spent: 125, remaining: 175, overLimit: false },
+          { category: "Cat_1", hasLimit: false, limit: 0, spent: 50, remaining: -50, overLimit: false },
+        ],
+      });
+      expect(contextData.transactions[0].split("|")[3]).toBe("Cat_0");
+      expect(JSON.stringify(contextData)).not.toContain("Groceries");
+      expect(JSON.stringify(contextData)).not.toContain("Dining");
+      expect(JSON.stringify(contextData)).not.toContain("budget-1");
+      expect(JSON.stringify(contextData)).not.toContain("category-default-id");
+      expect(payload.idMap.get("Groceries")).toBe("Cat_0");
+      expect(budgetService.getBudgetOverview).toHaveBeenCalledWith(user);
+    });
+
+    it("should omit budget context when budgeting is disabled", async () => {
+      user.config.enableBudgeting = false;
+
+      const payload = await service.buildChatPrompt(user, ChatTimeframe.threeMonths, false);
+
+      expect(payload.contents[0]!.parts[0]!.text).not.toContain('"budget"');
+      expect(budgetService.getBudgetOverview).not.toHaveBeenCalled();
+    });
+
+    it("should include an empty current-month budget when user has no budget categories", async () => {
+      budgetService.getBudgetOverview.mockResolvedValue({
+        year: 2026,
+        month: 6,
+        totalBudgeted: 0,
+        totalSpent: 0,
+        totalRemaining: 0,
+        totalOverBudgetAmount: 0,
+        items: [],
+      } as any);
+
+      const payload = await service.buildChatPrompt(user, ChatTimeframe.threeMonths, false);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.budget).toEqual({
+        month: "June 2026",
+        totalBudgeted: 0,
+        totalSpent: 0,
+        totalRemaining: 0,
+        totalOverBudgetAmount: 0,
+        categories: [],
+      });
     });
 
     it("should deduplicate daily and monthly account/holding history and preserve current snapshots", async () => {
@@ -130,25 +188,51 @@ describe("ChatPromptService", () => {
 
     it("should build daily overview prompt", async () => {
       const payload = await service.buildDailyOverviewPrompt(user);
-      expect(payload.contents).toBeDefined();
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+      expect(contextData).not.toHaveProperty("budget");
+      expect(budgetService.getBudgetOverview).not.toHaveBeenCalled();
     });
 
     it("should build holdings overview prompt", async () => {
       const payload = await service.buildHoldingsOverviewPrompt(user);
-      expect(payload.contents).toBeDefined();
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+      expect(contextData).not.toHaveProperty("budget");
+      expect(budgetService.getBudgetOverview).not.toHaveBeenCalled();
+    });
+
+    it("should deidentify overlapping custom category names in saved chat history", async () => {
+      vi.spyOn(Category, "find").mockResolvedValue([
+        Category.fromPlain({ id: "food-id", name: "Food", user }),
+        Category.fromPlain({ id: "food-dining-id", name: "Food & Dining", user }),
+      ]);
+      vi.spyOn(ChatHistory, "find").mockResolvedValue([new ChatHistory(user, "Spend in food & dining, then food; not seafood.", "user")]);
+
+      const payload = await service.buildChatPrompt(user, ChatTimeframe.threeMonths, false);
+
+      expect(payload.contents[1]!.parts[0]!.text).toBe("Spend in Cat_1, then Cat_0; not seafood.");
+      expect(payload.idMap.get("Food")).toBe("Cat_0");
+      expect(payload.idMap.get("Food & Dining")).toBe("Cat_1");
+      expect(Category.find).toHaveBeenCalledWith({ where: { user: { id: user.id } } });
     });
 
     it("should build budget overview prompt with budget performance context", async () => {
       const payload = await service.buildBudgetOverviewPrompt(user, 2025, 2);
       const promptText = payload.contents[0]!.parts[0]!.text;
+      const contextData = JSON.parse(promptText.split("CONTEXTUAL DATA:")[1]!);
 
       expect(budgetService.getBudgetOverview).toHaveBeenCalledWith(user, 2025, 2);
-      expect(payload.idMap.size).toBe(0);
-      expect(promptText).toContain("Groceries");
-      expect(promptText).toContain("Dining");
+      expect(payload.idMap.get("Groceries")).toBe("Cat_0");
+      expect(payload.idMap.get("Dining")).toBe("Cat_1");
+      expect(promptText).not.toContain("Groceries");
+      expect(promptText).not.toContain("Dining");
+      expect(promptText).toContain("Cat_0");
+      expect(promptText).toContain("Cat_1");
       expect(promptText).toContain('"hasLimit":false');
       expect(promptText).toContain("Analyze the full budget month, not only the last 24 hours.");
       expect(promptText).toContain("Never describe unbudgeted spending as over budget.");
+      expect(contextData.categories[1].overLimit).toBe(false);
+      expect(JSON.stringify(contextData)).not.toContain("budget-1");
+      expect(JSON.stringify(contextData)).not.toContain("category-default-id");
     });
   });
 

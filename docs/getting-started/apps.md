@@ -27,10 +27,11 @@ The Android app includes native home screen widgets designed to keep you updated
 
 - **Overview Widget:** Displays a quick snapshot of your current net worth, including recent numerical and percentage changes.
 - **Transactions Widget:** Shows a scrolling list of your most recent transactions, displaying the merchant, category, amount, and pending status.
+- **Portfolio Widget:** Shows your portfolio's daily percentage and dollar change alongside the S&P 500, DJIA, and NASDAQ daily percentage and point changes.
 
 !!! note "Widget Requirements"
 
-    - **Background Updates:** Widgets automatically refresh roughly once every hour to keep your data fresh without impacting battery life.
+    - **Background Updates:** Widgets automatically refresh roughly every 30 minutes to keep your data fresh without impacting battery life.
     - **Configuration Required:** To see widget support on your home screen, you must explicitly enable the widget permissions under your **User Settings** inside the app.
 
 ---

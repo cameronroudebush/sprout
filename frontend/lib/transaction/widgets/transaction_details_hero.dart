@@ -6,7 +6,7 @@ import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
-import 'package:sprout/transaction/widgets/website_icon.dart';
+import 'package:sprout/transaction/widgets/effective_transaction_icon.dart';
 
 class TransactionHeroCard extends ConsumerWidget {
   final Transaction transaction;
@@ -24,8 +24,6 @@ class TransactionHeroCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
-    final websiteUrl = transaction.extra?.website;
-
     return SproutCard(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -39,10 +37,8 @@ class TransactionHeroCard extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (websiteUrl != null && websiteUrl.isNotEmpty) ...[
-                        WebsiteIconWidget(websiteUrl, size: 24),
-                        const SizedBox(width: 8),
-                      ],
+                      EffectiveTransactionIcon(transaction, size: 24),
+                      const SizedBox(width: 8),
                       Flexible(
                         fit: FlexFit.loose,
                         child: Text(

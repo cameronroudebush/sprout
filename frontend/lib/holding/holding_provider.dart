@@ -69,6 +69,30 @@ class MajorIndices extends _$MajorIndices {
   }
 }
 
+/// Provides the current portfolio total, daily change, and S&P 500 quote.
+@Riverpod(keepAlive: true)
+class PortfolioSummary extends _$PortfolioSummary {
+  Timer? _refreshTimer;
+
+  @override
+  Future<PortfolioSummaryDto> build() async {
+    ref.refreshOnForceUpdate();
+    _refreshTimer = Timer.periodic(
+      const Duration(minutes: 15),
+      (_) => ref.invalidateSelf(),
+    );
+    ref.onDispose(() => _refreshTimer?.cancel());
+
+    final api = await ref.watch(holdingApiProvider.future);
+    return await api.holdingControllerGetPortfolioSummary() ??
+        PortfolioSummaryDto(
+          totalValue: 0,
+          dayChange: 0,
+          dayChangePercent: 0,
+        );
+  }
+}
+
 /// A DataLoader style provider that batches requests from the UI
 @Riverpod(keepAlive: true)
 class BatchedLivePrices extends _$BatchedLivePrices {

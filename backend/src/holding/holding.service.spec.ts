@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 setupTests();
 
 import { MarketQuoteType } from "@backend/holding/model/api/mark.index.dto.js";
+import { Holding } from "@backend/holding/model/holding.model.js";
 import { HttpException } from "@nestjs/common";
 import { HoldingService } from "./holding.service.js";
 
@@ -152,6 +153,107 @@ describe("HoldingService", () => {
       const indices = await service.getMajorIndices();
       expect(indices.length).toBeGreaterThan(0);
       expect(indices.some((idx) => idx.name === "UNKNOWN_INDEX")).toBe(true);
+    });
+  });
+
+  describe("getPortfolioSummary", () => {
+    it("should total live holdings and daily movement", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([mockHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "AAPL", price: 200, change: 2, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(Holding.find).toHaveBeenCalledWith({ where: { account: { user: { id: TestEntities.user.id } }, shares: expect.anything() } });
+      expect(service.getLiveHoldingPrices).toHaveBeenCalledWith(["AAPL"]);
+      expect(result).toEqual({
+        totalValue: 2000,
+        dayChange: 20,
+        dayChangePercent: expect.closeTo(1.0101, 3),
+      });
+    });
+
+    it("should fall back to stored values and close price when live quote is invalid", async () => {
+      const holding = { ...mockHolding, marketValue: 1800, shares: 10, currency: "USD", extra: { closePrice: 175 } } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([holding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([{ symbol: "AAPL", price: 0, type: MarketQuoteType.INVALID } as any]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 1800,
+        dayChange: 50,
+        dayChangePercent: expect.closeTo(2.8571, 3),
+      });
+    });
+
+    it("should use stored value without daily change when quote and close price are missing", async () => {
+      const holding = { ...mockHolding, marketValue: 500, shares: 10, currency: "USD", extra: {} } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([holding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 500,
+        dayChange: 0,
+        dayChangePercent: 0,
+      });
+    });
+
+    it("should fall back to USD, holding currency, and zero quote change when values are missing", async () => {
+      const holding = { ...mockHolding, marketValue: 500, shares: 10, currency: "USD" } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([holding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([{ symbol: "AAPL", price: 20, type: MarketQuoteType.EQUITY } as any]);
+
+      const result = await service.getPortfolioSummary({ ...TestEntities.user, config: undefined } as any);
+
+      expect(result).toEqual({
+        totalValue: 200,
+        dayChange: 0,
+        dayChangePercent: 0,
+      });
+    });
+
+    it("should return zero percentage when daily change makes previous value zero", async () => {
+      const holding = { ...mockHolding, marketValue: 500, shares: 10, currency: "USD" } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([holding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "AAPL", price: 20, change: 20, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 200,
+        dayChange: 200,
+        dayChangePercent: 0,
+      });
+    });
+
+    it("should guard against a non-finite daily change percentage", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([mockHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "AAPL", price: Infinity, change: Infinity, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result.dayChangePercent).toBe(0);
+    });
+
+    it("should return zero summary for users without holdings", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 0,
+        dayChange: 0,
+        dayChangePercent: 0,
+      });
     });
   });
 

@@ -21,6 +21,7 @@ describe("HoldingController", () => {
     holdingService = {
       getMajorIndices: vi.fn(),
       getMajorIndicesTimeline: vi.fn(),
+      getPortfolioSummary: vi.fn(),
       getTimelineForHolding: vi.fn(),
       getLiveHoldingPrices: vi.fn(),
     } as any;
@@ -115,6 +116,18 @@ describe("HoldingController", () => {
 
       expect(holdingService.getMajorIndicesTimeline).toHaveBeenCalled();
       expect(res).toEqual([]);
+    });
+  });
+
+  describe("getPortfolioSummary", () => {
+    it("should return the authenticated user's portfolio summary", async () => {
+      const summary = { totalValue: 1000, dayChange: 10 };
+      holdingService.getPortfolioSummary.mockResolvedValue(summary as any);
+
+      const result = await controller.getPortfolioSummary(user);
+
+      expect(holdingService.getPortfolioSummary).toHaveBeenCalledWith(user);
+      expect(result).toBe(summary);
     });
   });
 

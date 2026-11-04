@@ -255,10 +255,14 @@ async function createHorizontalBanner(
   },
 ) {
   const background = await getBackground(c.width, c.height, "right");
+  const scale = Math.min(c.width / 1920, c.height / 1080);
+  const corner = Math.round(c.corner * scale);
 
   // Helper to process and resize card height so the full UI fits neatly
-  const processCard = async (buf: Buffer, targetHeight = 820) => {
-    const resized = await sharp(buf).resize({ height: targetHeight, fit: "inside" }).toBuffer();
+  const processCard = async (buf: Buffer, targetHeight = 820 * scale) => {
+    const resized = await sharp(buf)
+      .resize({ height: Math.round(targetHeight), fit: "inside" })
+      .toBuffer();
     const meta = await sharp(resized).metadata();
 
     return sharp(resized)
@@ -266,7 +270,7 @@ async function createHorizontalBanner(
         {
           input: Buffer.from(`
             <svg width="${meta.width}" height="${meta.height}">
-              <rect x="0" y="0" width="${meta.width}" height="${meta.height}" rx="${c.corner}" ry="${c.corner}" />
+              <rect x="0" y="0" width="${meta.width}" height="${meta.height}" rx="${corner}" ry="${corner}" />
             </svg>
           `),
           blend: "dest-in",
@@ -277,9 +281,9 @@ async function createHorizontalBanner(
   };
 
   // Process screenshots with fixed height for uniform scaling
-  const mainCard = await processCard(mainScreenshot, 840);
-  const backCard1 = await processCard(extraScreenshots[0]!, 780); // Left background card
-  const backCard2 = await processCard(extraScreenshots[1]!, 780); // Right background card
+  const mainCard = await processCard(mainScreenshot, 840 * scale);
+  const backCard1 = await processCard(extraScreenshots[0]!, 780 * scale); // Left background card
+  const backCard2 = await processCard(extraScreenshots[1]!, 780 * scale); // Right background card
 
   // Rotate background cards for the soft fan effect
   const card1Rotated = await sharp(backCard1)
@@ -291,30 +295,36 @@ async function createHorizontalBanner(
     .toBuffer();
 
   // Assets
-  const logoBuffer = await sharp(logoPath).resize({ width: 900, fit: "inside" }).png().toBuffer();
-  const badgeBuffer = await sharp(playBadgePath).resize({ width: 550, height: 300, fit: "inside" }).png().toBuffer();
+  const logoBuffer = await sharp(logoPath)
+    .resize({ width: Math.round(900 * scale), fit: "inside" })
+    .png()
+    .toBuffer();
+  const badgeBuffer = await sharp(playBadgePath)
+    .resize({ width: Math.round(550 * scale), height: Math.round(300 * scale), fit: "inside" })
+    .png()
+    .toBuffer();
 
   const brandingOverlay = Buffer.from(`
     <svg width="${c.width}" height="${c.height}" xmlns="http://www.w3.org/2000/svg">
-      <style>.disclaimer { fill: white; font-size: 18px; font-family: 'Sprout'; }</style>
-      <text x="150" y="875" class="disclaimer">*Requires self hosted application</text>
+      <style>.disclaimer { fill: white; font-size: ${18 * scale}px; font-family: 'Sprout'; }</style>
+      <text x="${150 * scale}" y="${875 * scale}" class="disclaimer">*Requires self hosted application</text>
     </svg>
   `);
 
   const xCenter = c.width * 0.7;
-  const yPos = 180;
+  const yPos = 180 * scale;
 
   return sharp(background)
     .composite([
       { input: brandingOverlay, top: 0, left: 0 },
-      { input: logoBuffer, top: 140, left: 60 },
-      { input: badgeBuffer, top: 680, left: 130 },
+      { input: logoBuffer, top: Math.round(140 * scale), left: Math.round(60 * scale) },
+      { input: badgeBuffer, top: Math.round(680 * scale), left: Math.round(130 * scale) },
       // Left card
-      { input: card1Rotated, top: Math.round(yPos), left: Math.round(xCenter - 340) },
+      { input: card1Rotated, top: Math.round(yPos), left: Math.round(xCenter - 340 * scale) },
       // Right card
-      { input: card2Rotated, top: Math.round(yPos), left: Math.round(xCenter + 130) },
+      { input: card2Rotated, top: Math.round(yPos), left: Math.round(xCenter + 130 * scale) },
       // Center card
-      { input: mainCard, top: Math.round(yPos - 20), left: Math.round(xCenter - 80) },
+      { input: mainCard, top: Math.round(yPos - 20 * scale), left: Math.round(xCenter - 80 * scale) },
     ])
     .toBuffer();
 }
@@ -432,16 +442,21 @@ async function buildStoreScreenshots() {
   console.log(`--- Generating Marketing Banner ---`);
   const mainBuffer = getScreenshotByPath("/");
   const extraBuffers = [getScreenshotByPath("/chat"), getScreenshotByPath("/reports")];
+  const logoPath = path.join("frontend", "assets", "logo", "color-transparent.png");
+  const playBadgePath = path.join("docs", "assets", "google-play.png");
 
   fs.writeFileSync(
     path.join("docs", "images", "store", "horizontal.png"),
+    new Uint8Array(await createHorizontalBanner(mainBuffer, extraBuffers, logoPath, playBadgePath)),
+  );
+  fs.writeFileSync(
+    path.join("docs", "images", "store", "horizontal-1280x640.png"),
     new Uint8Array(
-      await createHorizontalBanner(
-        mainBuffer,
-        extraBuffers,
-        path.join("frontend", "assets", "logo", "color-transparent.png"),
-        path.join("docs", "assets", "google-play.png"),
-      ),
+      await createHorizontalBanner(mainBuffer, extraBuffers, logoPath, playBadgePath, {
+        corner: 20,
+        width: 1280,
+        height: 640,
+      }),
     ),
   );
 

@@ -1,12 +1,16 @@
 import { Account } from "@backend/account/model/account.model";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { MajorIndexTimelineDto, MajorIndexTimelinePoint } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto, MarketQuoteType } from "@backend/holding/model/api/mark.index.dto";
+import { PortfolioSummaryDto } from "@backend/holding/model/api/portfolio.summary.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory } from "@backend/net-worth/model/api/entity.history.dto";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
+import { User } from "@backend/user/model/user.model";
 import { CACHE_MANAGER } from "@nestjs/cache-manager";
 import { HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { type Cache } from "cache-manager";
+import { Not } from "typeorm";
 import YahooFinance from "yahoo-finance2";
 
 const MAJOR_INDICES: Record<string, { name: string; color: string }> = {
@@ -142,6 +146,44 @@ export class HoldingService {
     return (await this.getLiveHoldingPrices(Object.keys(MAJOR_INDICES), ttlMs)).map((x) => {
       x.name = MAJOR_INDICES[x.symbol]?.name ?? x.symbol;
       return x;
+    });
+  }
+
+  /** Calculates a user's total portfolio value and today's movement. */
+  async getPortfolioSummary(user: User): Promise<PortfolioSummaryDto> {
+    const holdings = await Holding.find({
+      where: { account: { user: { id: user.id } }, shares: Not(0) },
+    });
+    const symbols = [...new Set(holdings.map((holding) => holding.symbol))];
+    const quotes = await this.getLiveHoldingPrices(symbols);
+    const quoteBySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
+    const targetCurrency = user.config?.currency ?? "USD";
+
+    let totalValue = 0;
+    let dayChange = 0;
+    for (const holding of holdings) {
+      const quote = quoteBySymbol.get(holding.symbol);
+      if (quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0) {
+        const sourceCurrency = quote.currency ?? holding.currency;
+        totalValue += CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
+        dayChange += CurrencyHelper.convert((quote.change ?? 0) * holding.shares, sourceCurrency, targetCurrency);
+        continue;
+      }
+
+      totalValue += CurrencyHelper.convert(holding.marketValue, holding.currency, targetCurrency);
+      const closePrice = Number(holding.extra?.["closePrice"]);
+      if (closePrice > 0 && holding.shares !== 0) {
+        const estimatedChange = holding.marketValue - closePrice * holding.shares;
+        dayChange += CurrencyHelper.convert(estimatedChange, holding.currency, targetCurrency);
+      }
+    }
+
+    const previousValue = totalValue - dayChange;
+    const dayChangePercent = previousValue !== 0 ? (dayChange / Math.abs(previousValue)) * 100 : 0;
+    return new PortfolioSummaryDto({
+      totalValue,
+      dayChange,
+      dayChangePercent: Number.isFinite(dayChangePercent) ? dayChangePercent : 0,
     });
   }
 

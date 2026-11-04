@@ -52,7 +52,7 @@ Set monthly spending limits by category and compare each target with actual spen
 Sprout integrates an AI-powered assistant that allows you to interact with your financial data using natural language.
 
 - **Ask Questions:** Instead of manually filtering reports, simply ask, _"How much did I spend on groceries last month?"_ or _"What is my current net worth?"_
-- **Data Summaries:** Get quick, automated insights into your financial habits.
+- **Data Summaries:** Get quick, automated insights into your financial habits, including current-month budget limits and spending when budgeting is enabled.
 - _Note: For details on capabilities and data usage, please review the [LLM documentation](../getting-started/llm.md)._
 
 ## Rules Engine

@@ -1,6 +1,7 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
+import 'package:sprout/shared/widgets/icon.dart';
 
 extension SproutAsyncValueX<T> on AsyncValue<T> {
   /// A standardized `.when` that automatically handles Sprout's default loading, error, and empty UIs.
@@ -37,15 +38,64 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
           ),
         );
 
-    Widget buildError(Object err) {
-      final cleanMessage = err.toString().split('\n').first;
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Text(customErrorMessage ?? cleanMessage),
-        ),
-      );
-    }
+    Widget buildError() => Builder(
+          builder: (context) {
+            final theme = Theme.of(context);
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 8.0,
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14.0),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primaryContainer
+                                .withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const SproutIcon(56.0),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(3.5),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.error,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: theme.scaffoldBackgroundColor,
+                              width: 1.75,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.error_outline_rounded,
+                            size: 12.0,
+                            color: theme.colorScheme.onError,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      customErrorMessage ?? "We hit a snag",
+                      style: theme.textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      "Please try again in a moment.",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
 
     Widget buildEmpty() => Center(
           child: Padding(
@@ -84,7 +134,7 @@ extension SproutAsyncValueX<T> on AsyncValue<T> {
           error: err,
           stackTrace: stack,
         );
-        return expanded ? Expanded(child: buildError(err)) : buildError(err);
+        return expanded ? Expanded(child: buildError()) : buildError();
       },
     );
   }

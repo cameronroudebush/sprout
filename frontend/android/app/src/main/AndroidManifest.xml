@@ -57,6 +57,13 @@
 
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/transactions" />
         </receiver>
+        <receiver android:name=".widget.Portfolio" android:exported="false" android:label="@string/widget_label_portfolio">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/portfolio" />
+        </receiver>
 
         <!-- Services -->
         <service android:name=".widget.TransactionsWidgetService" android:permission="android.permission.BIND_REMOTEVIEWS" android:exported="false" />

@@ -147,13 +147,14 @@ describe("ChatProvider", () => {
 
   it("should transform text and inject chart colors", () => {
     const transformed = provider.runTransform(
-      "Hello Acc_0 and T_0",
+      "Hello Acc_0, T_0 and Cat_0",
       new Map([
         ["User Checking", "Acc_0"],
         ["Transaction", "T_0"],
+        ["Groceries", "Cat_0"],
       ]),
     );
-    expect(transformed).toBe("Hello User Checking and Transaction");
+    expect(transformed).toBe("Hello User Checking, Transaction and Groceries");
 
     const lineChart = '```chart\n{"type":"line","series":[{"label":"Checking"}]}\n```';
     const coloredLineChart = provider.runInject(lineChart);

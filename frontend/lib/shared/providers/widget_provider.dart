@@ -2,14 +2,15 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' hide Category;
-import 'package:material_ui/material_ui.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/category/category_provider.dart';
-import 'package:sprout/category/widgets/category_icon.dart';
+import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/net-worth/models/extensions/entity_history_extensions.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/shared/models/extensions/color_extensions.dart';
@@ -24,6 +25,7 @@ import 'package:sprout/shared/widgets/charts/models/chart_range.dart';
 import 'package:sprout/transaction/models/extensions/transaction_extensions.dart';
 import 'package:sprout/transaction/models/transaction_state.dart';
 import 'package:sprout/transaction/transaction_provider.dart';
+import 'package:sprout/transaction/widgets/effective_transaction_icon.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -52,6 +54,8 @@ class WidgetSync extends _$WidgetSync {
       (_, __) => updateData(),
     );
     ref.listen(totalNetWorthProvider, (_, __) => updateData());
+    ref.listen(portfolioSummaryProvider, (_, __) => updateData());
+    ref.listen(majorIndicesProvider, (_, __) => updateData());
     ref.listen(userConfigProvider, (_, __) => updateData());
     ref.listen(accountsProvider, (_, __) => updateData());
 
@@ -72,7 +76,7 @@ class WidgetSync extends _$WidgetSync {
 
   /// Initializes the [Workmanager] and registers a periodic background task.
   ///
-  /// This task runs hourly to ensure the Home Screen widget stays up to date
+  /// This task runs every 30 minutes to keep the Home Screen widget up to date
   /// even when the app is not in the foreground.
   Future<void> initializeBackground() async {
     if (!kIsWeb) {
@@ -80,7 +84,7 @@ class WidgetSync extends _$WidgetSync {
       Workmanager().registerPeriodicTask(
         "widget-update-background",
         "widget-update-task",
-        frequency: const Duration(hours: 1),
+        frequency: const Duration(minutes: 30),
         constraints: Constraints(networkType: NetworkType.connected),
       );
     }
@@ -101,13 +105,16 @@ class WidgetSync extends _$WidgetSync {
     final categories = ref.read(categoriesProvider).value ?? [];
     final accounts = ref.read(accountsProvider).value?.accounts ?? [];
     Map<String, Object>? data;
-    String failureMessage = "No data available. Check settings.";
+    String failureMessage = "No data available";
     num? pastNetWorthChange;
+    num? portfolioDayChange;
 
     // Safety check: If widgets aren't allowed, clear existing data
     if (userConfig != null && userConfig.allowWidgets) {
       try {
         final netWorth = ref.read(totalNetWorthProvider).value;
+        final portfolio = ref.read(portfolioSummaryProvider).value;
+        portfolioDayChange = portfolio?.dayChange ?? 0;
         final transactions = ref
                 .read(transactionsProvider(TransactionFilter.defaultFilter))
                 .value
@@ -135,27 +142,45 @@ class WidgetSync extends _$WidgetSync {
               (a) => a.id == t.accountId,
             );
             final accountName = account?.name ?? "Unknown";
-            final websiteUrl = t.extra?.website;
+            final effectiveIcon = getTransactionIconSource(
+              t,
+              account: account,
+              category: category,
+            );
             String? resolvedIconUrl;
-            // Resolve the network URL if available
-            if (websiteUrl != null && websiteUrl.isNotEmpty) {
+            if (effectiveIcon.account != null) {
               try {
-                // Use ref.read instead of ref.watch in asynchronous loops
                 final icon = await ref.read(
-                  websiteIconProvider(websiteUrl, 48, type: "png").future,
+                  institutionIconProvider(
+                    effectiveIcon.account!.institution,
+                    48,
+                  ).future,
                 );
                 if (icon.isNotEmpty) resolvedIconUrl = icon.first;
               } catch (e) {
                 LoggerProvider.warning(
-                  "Failed to fetch website icon for $websiteUrl: $e",
+                  "Failed to fetch institution icon for ${effectiveIcon.account!.institution.name}: $e",
+                );
+              }
+            } else if (effectiveIcon.websiteUrl != null) {
+              try {
+                final icon = await ref.read(
+                  websiteIconProvider(
+                    effectiveIcon.websiteUrl!,
+                    48,
+                    type: "png",
+                  ).future,
+                );
+                if (icon.isNotEmpty) resolvedIconUrl = icon.first;
+              } catch (e) {
+                LoggerProvider.warning(
+                  "Failed to fetch website icon for ${effectiveIcon.websiteUrl}: $e",
                 );
               }
             }
-            final fallbackIconData = CategoryIcon.iconLibrary[category?.icon] ??
-                Icons.question_mark_rounded;
             final iconBase64 = await WidgetImageUtility.getSquircleBase64(
               imageUrl: resolvedIconUrl,
-              fallbackIcon: fallbackIconData,
+              fallbackIcon: effectiveIcon.fallbackIcon,
               fallbackBgColor: theme.colorScheme.primaryContainer,
               iconColor: theme.colorScheme.onPrimaryContainer,
             );
@@ -173,6 +198,21 @@ class WidgetSync extends _$WidgetSync {
           }).toList();
 
           final recent = await Future.wait(recentFutures);
+          final portfolioChangeAmount = portfolioDayChange;
+          List<MarketIndexDto> majorIndices = [];
+          try {
+            majorIndices =
+                (await ref.read(majorIndicesProvider.future)).toList();
+          } catch (e) {
+            LoggerProvider.warning(
+                "Failed to fetch major indices for widget: $e");
+          }
+          const indexOrder = {"^GSPC": 0, "^DJI": 1, "^IXIC": 2};
+          majorIndices.sort(
+            (a, b) => (indexOrder[a.symbol] ?? 3).compareTo(
+              indexOrder[b.symbol] ?? 3,
+            ),
+          );
 
           data = {
             "updateTime": DateTime.now().toShortMonthWithTime,
@@ -192,16 +232,40 @@ class WidgetSync extends _$WidgetSync {
               useExtendedPeriodString: true,
             ),
             "recentTransactions": recent,
+            "portfolioChange":
+                "${portfolioChangeAmount >= 0 ? "+" : "-"}${formatter.format(portfolioChangeAmount.abs(), handlePrivateMode: false)}",
+            "portfolioChangePercent":
+                "${(portfolio?.dayChangePercent ?? 0) >= 0 ? "+" : ""}${(portfolio?.dayChangePercent ?? 0).toStringAsFixed(2)}%",
+            "majorIndices": majorIndices.take(3).map((index) {
+              final isValid = index.type != MarketIndexDtoTypeEnum.INVALID;
+              final isPositive = index.change >= 0;
+              return {
+                "name": index.name,
+                "change": isValid
+                    ? "${isPositive ? "+" : "-"}${NumberFormat("#,##0.0").format(index.change.abs())} pts"
+                    : "—",
+                "changePercent": isValid
+                    ? "${index.changePercent >= 0 ? "+" : ""}${(index.changePercent * 100).toStringAsFixed(2)}%"
+                    : "—",
+                "statusColor": (isValid
+                        ? (isPositive
+                            ? Colors.greenAccent
+                            : theme.colorScheme.error)
+                        : (theme.textTheme.bodySmall?.color ?? Colors.grey))
+                    .toHex(),
+              };
+            }).toList(),
           };
         }
       } catch (e) {
         // If there is an error, just log it and set a failure message
         LoggerProvider.error("Failed to update widgets: $e");
-        failureMessage = "Failed to update widgets, check logs";
       }
     } else if (userConfig == null) {
       // User must be logged in
-      failureMessage = "Session expired";
+      failureMessage = "Session Expired";
+    } else {
+      failureMessage = "Widget Setting Disabled";
     }
 
     return {
@@ -219,6 +283,11 @@ class WidgetSync extends _$WidgetSync {
                 ? Colors.greenAccent
                 : theme.colorScheme.error)
             .toHex(),
+        "portfolioStatusColor":
+            (portfolioDayChange == null || portfolioDayChange >= 0
+                    ? Colors.greenAccent
+                    : theme.colorScheme.error)
+                .toHex(),
         "dividerColor": theme.dividerColor.toHex(),
       },
     };
@@ -231,6 +300,7 @@ class WidgetSync extends _$WidgetSync {
     await HomeWidget.saveWidgetData('widget_data', jsonString);
     await HomeWidget.updateWidget(androidName: 'widget.Overview');
     await HomeWidget.updateWidget(androidName: 'widget.Transactions');
+    await HomeWidget.updateWidget(androidName: 'widget.Portfolio');
   }
 }
 
@@ -254,6 +324,7 @@ void callbackDispatcher() {
       // Force-refresh the futures to ensure the widget doesn't show stale data
       await container.read(userConfigProvider.future);
       await container.read(totalNetWorthProvider.future);
+      await container.read(portfolioSummaryProvider.future);
       await container.read(
         transactionsProvider(TransactionFilter.defaultFilter).future,
       );

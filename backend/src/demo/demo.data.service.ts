@@ -124,10 +124,17 @@ export class DemoDataService {
     logger.log("Creating demo user.");
     let demoUser = await User.findOne({ where: { username: "demo" } });
     if (!demoUser) {
-      await User.createUser({ username: DemoDataService.credentials.username, password: DemoDataService.credentials.password, admin: true });
+      await User.createUser({
+        username: DemoDataService.credentials.username,
+        password: DemoDataService.credentials.password,
+        firstName: "John",
+        lastName: "Demo",
+        admin: true,
+      });
       // Update the user config
       const userConfig = (await UserConfig.findOne({ where: { user: { username: "demo" } } }))!;
       userConfig.netWorthRange = ChartRange.sevenDays;
+      userConfig.allowWidgets = true;
       await userConfig.update();
       demoUser = await User.findOne({ where: { username: "demo" } });
       logger.log("Created demo user and default categories.");

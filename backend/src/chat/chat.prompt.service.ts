@@ -2,6 +2,7 @@ import { AccountHistory } from "@backend/account/model/account.history.model";
 import { Account } from "@backend/account/model/account.model";
 import { AccountType } from "@backend/account/model/account.type";
 import { BudgetService } from "@backend/budget/budget.service";
+import { Category } from "@backend/category/model/category.model";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatPromptResult } from "@backend/chat/provider/chat.provider";
@@ -54,7 +55,7 @@ export class ChatPromptService {
       `5. If there is no notable activity across any accounts, provide a simple 1-2 sentence summary stating that accounts are steady and OMIT the bulleted list entirely.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions, false);
   }
 
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
@@ -75,19 +76,21 @@ export class ChatPromptService {
       `5. Only cover materially relevant accounts that drove aggregate movement. Omit accounts with flat or unremarkable performance to save space.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto]);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto], true, false);
   }
 
   /** Builds a concise AI overview from the requested month's budget performance. */
   async buildBudgetOverviewPrompt(user: User, year = new Date().getFullYear(), monthNumber = new Date().getMonth() + 1): Promise<ChatPromptResult> {
     const overview = await this.budgetService.getBudgetOverview(user, year, monthNumber);
     const month = formatDate(new Date(overview.year, overview.month - 1), "MMMM yyyy");
+    const idMap = new Map<string, string>();
+    const getCategoryId = this.createCategoryIdMapper(idMap);
     const data = {
       month,
       totalBudgeted: overview.totalBudgeted,
       totalSpent: overview.totalSpent,
       categories: overview.items.map((item) => ({
-        category: item.category.name,
+        category: getCategoryId(item.category.name),
         hasLimit: item.budgetId != null,
         limit: item.budgetedAmount,
         spent: item.actualSpent,
@@ -104,7 +107,7 @@ export class ChatPromptService {
       `Keep the response to a short paragraph followed by up to three brief bullets. Use supplied currency values where they make the insight clearer, and avoid generic financial advice.`,
     ];
 
-    return this.createStandalonePrompt(instructions, data);
+    return this.createStandalonePrompt(instructions, data, idMap);
   }
 
   /**
@@ -144,8 +147,10 @@ export class ChatPromptService {
       `Refer to accounts strictly by the provided IDs (e.g., Acc_0).`,
       `Context Data Key Mapping:
          - Accounts: i=ID, t=Type, s=SubType, b=Balance, r=InterestRate, hol=Holdings (CSV Symbol:CurrentValue:History[Date:MarketValue]), his=History (CSV Date:Balance)
-         - Transactions are pipe-delimited: Date|DescriptionID|Amount|Category|AccountID
-         - Subscriptions are pipe-delimited: DescriptionID|AvgAmount|Period|LastPaidDate|AccountID`,
+          - Transactions are pipe-delimited: Date|DescriptionID|Amount|CategoryID|AccountID
+          - Subscriptions are pipe-delimited: DescriptionID|AvgAmount|Period|LastPaidDate|AccountID`,
+      `If present, budget context contains monthly total budgeted and spent amounts plus each category's limit, spending, remaining amount, and limit status. Category names are replaced with generic IDs and restored in responses.`,
+      `When referring to a category, use its provided Cat_n token without an @ prefix; Sprout restores the category name in the response.`,
       `MANDATORY ENTITY FORMATTING:
         - User references will be in the format '@ID'.
         - You MUST respond using that exact '@ID' format.
@@ -181,11 +186,11 @@ export class ChatPromptService {
   }
 
   /** Builds a one-message prompt for an overview that doesn't need account or chat history context. */
-  private createStandalonePrompt(instructions: string[], data: unknown): ChatPromptResult {
+  private createStandalonePrompt(instructions: string[], data: unknown, idMap = new Map<string, string>()): ChatPromptResult {
     const formattedInstructions = instructions.map((inst, index) => `${index + 1}. ${inst}`).join("\n              ");
 
     return {
-      idMap: new Map(),
+      idMap,
       contents: [
         {
           role: "user",
@@ -207,11 +212,12 @@ export class ChatPromptService {
     includeChatHistory = true,
     validAccountTypes?: AccountType[],
     includePendingTransactions = true,
+    includeBudgetContext = true,
   ): Promise<ChatPromptResult> {
     await this.cleanupUserMax(user);
 
     const idMap = new Map<string, string>();
-    const data = await this.buildUserAccountDetails(user, timeframe, idMap, validAccountTypes, includePendingTransactions);
+    const data = await this.buildUserAccountDetails(user, timeframe, idMap, validAccountTypes, includePendingTransactions, includeBudgetContext);
 
     let sanitizedHistory: { role: string; parts: Array<{ text: string }> }[] = [];
     if (includeChatHistory) {
@@ -248,6 +254,7 @@ export class ChatPromptService {
     idMap: Map<string, string>,
     validAccountTypes?: AccountType[],
     includePendingTransactions = true,
+    includeBudgetContext = true,
   ) {
     const historicalTimeFrame = this.getTimeframeDate(timeframe);
     const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
@@ -369,13 +376,16 @@ export class ChatPromptService {
       }),
     );
 
+    const getCategoryId = this.createCategoryIdMapper(idMap);
+    const categories = await Category.find({ where: { user: { id: user.id } } });
+    categories.forEach((category) => getCategoryId(category.name));
     let txIndex = 0;
     const compactTransactions = transactions.map((t) => {
       const genericDescriptionId = `T_${txIndex++}`;
       idMap.set(t.id, genericDescriptionId);
 
       const accId = idMap.get(t.account.id) || idMap.get(t.account.name) || "?";
-      const cat = t.category?.name || "Uncategorized";
+      const cat = getCategoryId(t.category?.name);
       const amt = Number(t.amount).toFixed(2);
       const txDateFormat = isOneDayTimeframe ? "MM/dd/yy HH:mm" : "MM/dd/yy";
       const date = formatDate(t.posted, txDateFormat);
@@ -393,10 +403,50 @@ export class ChatPromptService {
       return `${genericDescriptionId}|${amt}|${s.period}|${lastDate}|${accId}`;
     });
 
+    const budget =
+      includeBudgetContext && user.config?.enableBudgeting !== false
+        ? this.formatBudgetOverview(await this.budgetService.getBudgetOverview(user), getCategoryId)
+        : undefined;
+
     return {
       accounts: accountData,
       transactions: compactTransactions,
       subscriptions: compactSubscriptions,
+      ...(budget ? { budget } : {}),
+    };
+  }
+
+  /** Replaces user-defined category names with stable generic IDs for the prompt. */
+  private createCategoryIdMapper(idMap: Map<string, string>) {
+    const categoryIds = new Map<string, string>();
+    return (categoryName?: string) => {
+      const name = categoryName || "Uncategorized";
+      let genericId = categoryIds.get(name);
+      if (!genericId) {
+        genericId = `Cat_${categoryIds.size}`;
+        categoryIds.set(name, genericId);
+        idMap.set(name, genericId);
+      }
+      return genericId;
+    };
+  }
+
+  /** Formats budget values without exposing internal budget/category database IDs. */
+  private formatBudgetOverview(overview: Awaited<ReturnType<BudgetService["getBudgetOverview"]>>, getCategoryId: (categoryName?: string) => string) {
+    return {
+      month: formatDate(new Date(overview.year, overview.month - 1), "MMMM yyyy"),
+      totalBudgeted: overview.totalBudgeted,
+      totalSpent: overview.totalSpent,
+      totalRemaining: overview.totalRemaining,
+      totalOverBudgetAmount: overview.totalOverBudgetAmount,
+      categories: overview.items.map((item) => ({
+        category: getCategoryId(item.category?.name),
+        hasLimit: item.budgetId != null,
+        limit: item.budgetedAmount,
+        spent: item.actualSpent,
+        remaining: item.remaining,
+        overLimit: item.budgetId != null && item.isOverBudget,
+      })),
     };
   }
 

@@ -181,7 +181,7 @@ class TransactionApi {
   ///   If true, excludes transactions whose category is hidden from cash flow.
   ///
   /// * [String] includeAccountTypes:
-  ///   Comma-separated account types to include, or "cash-flow" for account types included in cash flow.
+  ///   Comma-separated account types to include, or \"cash-flow\" for account types included in cash flow. Omit to include all account types.
   Future<Response> transactionControllerGetByQueryWithHttpInfo({
     String? id,
     num? startIndex,
@@ -295,7 +295,7 @@ class TransactionApi {
   ///   If true, excludes transactions whose category is hidden from cash flow.
   ///
   /// * [String] includeAccountTypes:
-  ///   Comma-separated account types to include, or "cash-flow" for account types included in cash flow.
+  ///   Comma-separated account types to include, or \"cash-flow\" for account types included in cash flow. Omit to include all account types.
   Future<List<Transaction>?> transactionControllerGetByQuery({
     String? id,
     num? startIndex,

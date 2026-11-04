@@ -1,12 +1,14 @@
 import { setupTests } from "@backend/test/helpers";
 setupTests();
 
+import { Account } from "@backend/account/model/account.model";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { ProviderSyncJob } from "@backend/providers/jobs/sync";
 import { Sync } from "@backend/providers/model/sync.model";
 import { SyncTriggerType } from "@backend/providers/model/sync.type";
+import { TestEntities } from "@backend/test/entities";
 import { User } from "@backend/user/model/user.model";
 
 describe("ProviderSyncJob", () => {
@@ -49,15 +51,31 @@ describe("ProviderSyncJob", () => {
   });
 
   describe("generateTasks", () => {
-    it("should execute cleanup and return mapped user task payloads", async () => {
+    it("should queue one task per user with accounts for this provider", async () => {
       const cleanupSpy = vi.spyOn(job as any, "cleanupOldSyncs").mockResolvedValue(undefined);
-      const findSpy = vi.spyOn(User, "find").mockResolvedValue([User.fromPlain({ id: "u1" }) as User, User.fromPlain({ id: "u2" }) as User]);
+      const accountWithUser = (userId: string) => {
+        const account = TestEntities.account;
+        account.user = User.fromPlain({ id: userId }) as User;
+        return account;
+      };
+      const findSpy = vi.spyOn(Account, "find").mockResolvedValue([accountWithUser("u1"), accountWithUser("u1"), accountWithUser("u2")]);
 
       const result = await (job as any).generateTasks();
 
       expect(cleanupSpy).toHaveBeenCalled();
-      expect(findSpy).toHaveBeenCalledWith({ select: { id: true } });
+      expect(findSpy).toHaveBeenCalledWith({
+        where: { provider: ProviderType.plaid },
+        select: { user: { id: true } },
+      });
       expect(result).toEqual([{ userId: "u1" }, { userId: "u2" }]);
+    });
+
+    it("should not queue tasks when no accounts exist for this provider", async () => {
+      vi.spyOn(job as any, "cleanupOldSyncs").mockResolvedValue(undefined);
+      vi.spyOn(Account, "find").mockResolvedValue([]);
+
+      await expect((job as any).generateTasks()).resolves.toEqual([]);
+      expect((job as any).logger.log).toHaveBeenCalledWith("No accounts found for provider plaid; skipping sync task generation.");
     });
   });
 

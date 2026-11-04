@@ -170,6 +170,62 @@ class ProviderApi {
     return null;
   }
 
+  /// Remove an untracked Plaid item.
+  ///
+  /// Remove an untracked Plaid item given the access token. Intended to clean up lost tokens. Only works in dev mode.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidProviderControllerCleanupUntrackedItemRequest] plaidProviderControllerCleanupUntrackedItemRequest (required):
+  Future<Response> plaidProviderControllerCleanupUntrackedItemWithHttpInfo(
+    PlaidProviderControllerCleanupUntrackedItemRequest
+        plaidProviderControllerCleanupUntrackedItemRequest,
+  ) async {
+    // ignore: prefer_const_declarations
+    final path = r'/provider/plaid/cleanup';
+
+    // ignore: prefer_final_locals
+    Object? postBody = plaidProviderControllerCleanupUntrackedItemRequest;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>['application/json'];
+
+    return apiClient.invokeAPI(
+      path,
+      'POST',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Remove an untracked Plaid item.
+  ///
+  /// Remove an untracked Plaid item given the access token. Intended to clean up lost tokens. Only works in dev mode.
+  ///
+  /// Parameters:
+  ///
+  /// * [PlaidProviderControllerCleanupUntrackedItemRequest] plaidProviderControllerCleanupUntrackedItemRequest (required):
+  Future<void> plaidProviderControllerCleanupUntrackedItem(
+    PlaidProviderControllerCleanupUntrackedItemRequest
+        plaidProviderControllerCleanupUntrackedItemRequest,
+  ) async {
+    final response =
+        await plaidProviderControllerCleanupUntrackedItemWithHttpInfo(
+      plaidProviderControllerCleanupUntrackedItemRequest,
+    );
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// Create a Plaid link token
   ///
   /// Note: This method returns the HTTP [Response].

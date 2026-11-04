@@ -2,7 +2,9 @@
 <resources>
     <string name="widget_label_overview">Net Worth</string>
     <string name="widget_label_transactions">Transactions</string>
+    <string name="widget_label_portfolio">Portfolio</string>
     <string name="widget_overview_description">See your current net worth and recent changes.</string>
     <string name="widget_transactions_description">A quick glance at your latest transactions.</string>
-    <string name="widget_no_data">No data available. Check settings.</string>
+    <string name="widget_portfolio_description">Track daily portfolio performance and the S&amp;P 500, DJIA, and NASDAQ.</string>
+    <string name="widget_no_data">No data available</string>
 </resources>

@@ -4,6 +4,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { HoldingService } from "@backend/holding/holding.service";
 import { MajorIndexTimelineDto } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto } from "@backend/holding/model/api/mark.index.dto";
+import { PortfolioSummaryDto } from "@backend/holding/model/api/portfolio.summary.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory, HistoricalDataPoint } from "@backend/net-worth/model/api/entity.history.dto";
 import { NetWorthService } from "@backend/net-worth/net-worth.service";
@@ -85,6 +86,16 @@ export class HoldingController {
   @ApiOkResponse({ description: "Successfully acquired major ticker prices.", type: [MarketIndexDto] })
   async getLiveMajor(@CurrentUser() _user: User) {
     return await this.holdingService.getMajorIndices();
+  }
+
+  @Get("portfolio/summary")
+  @ApiOperation({
+    summary: "Get overall portfolio value and daily market performance.",
+    description: "Returns the authenticated user's current holding value and estimated daily change.",
+  })
+  @ApiOkResponse({ description: "Successfully calculated the portfolio summary.", type: PortfolioSummaryDto })
+  async getPortfolioSummary(@CurrentUser() user: User) {
+    return await this.holdingService.getPortfolioSummary(user);
   }
 
   @Get("timeline/major")

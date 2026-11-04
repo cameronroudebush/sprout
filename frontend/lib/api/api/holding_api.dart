@@ -393,6 +393,56 @@ class HoldingApi {
     return null;
   }
 
+  /// Get overall portfolio value and daily market performance.
+  ///
+  /// Returns the authenticated user's current holding value, estimated daily change, and current S&P 500 performance.
+  ///
+  /// Note: This method returns the HTTP [Response].
+  Future<Response> holdingControllerGetPortfolioSummaryWithHttpInfo() async {
+    // ignore: prefer_const_declarations
+    final path = r'/holding/portfolio/summary';
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get overall portfolio value and daily market performance.
+  ///
+  /// Returns the authenticated user's current holding value, estimated daily change, and current S&P 500 performance.
+  Future<PortfolioSummaryDto?> holdingControllerGetPortfolioSummary() async {
+    final response = await holdingControllerGetPortfolioSummaryWithHttpInfo();
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty &&
+        response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(
+        await _decodeBodyBytes(response),
+        'PortfolioSummaryDto',
+      ) as PortfolioSummaryDto;
+    }
+    return null;
+  }
+
   /// Get history for a specific holding.
   ///
   /// Retrieves the value and performance history for a single holding given by its ID.

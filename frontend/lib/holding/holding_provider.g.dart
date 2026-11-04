@@ -399,6 +399,54 @@ abstract class _$MajorIndices extends $AsyncNotifier<List<MarketIndexDto>> {
   }
 }
 
+/// Provides the current portfolio total, daily change, and S&P 500 quote.
+
+@ProviderFor(PortfolioSummary)
+final portfolioSummaryProvider = PortfolioSummaryProvider._();
+
+/// Provides the current portfolio total, daily change, and S&P 500 quote.
+final class PortfolioSummaryProvider
+    extends $AsyncNotifierProvider<PortfolioSummary, PortfolioSummaryDto> {
+  /// Provides the current portfolio total, daily change, and S&P 500 quote.
+  PortfolioSummaryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'portfolioSummaryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$portfolioSummaryHash();
+
+  @$internal
+  @override
+  PortfolioSummary create() => PortfolioSummary();
+}
+
+String _$portfolioSummaryHash() => r'07aedce7f3f6af9b5ba14fb2d63ee98468a6e885';
+
+/// Provides the current portfolio total, daily change, and S&P 500 quote.
+
+abstract class _$PortfolioSummary extends $AsyncNotifier<PortfolioSummaryDto> {
+  FutureOr<PortfolioSummaryDto> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<PortfolioSummaryDto>, PortfolioSummaryDto>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<PortfolioSummaryDto>, PortfolioSummaryDto>,
+        AsyncValue<PortfolioSummaryDto>,
+        Object?,
+        Object?>;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// A DataLoader style provider that batches requests from the UI
 
 @ProviderFor(BatchedLivePrices)

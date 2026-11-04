@@ -84,3 +84,4 @@ hooks:
   - docs/hooks/copyright_hook.py
 exclude_docs: |
   *.xcf
+  agents/**

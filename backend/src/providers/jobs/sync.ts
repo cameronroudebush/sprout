@@ -1,3 +1,4 @@
+import { Account } from "@backend/account/model/account.model";
 import { DistributedQueueJob } from "@backend/core/jobs/model/job-distributed-base";
 import { ProviderBase } from "@backend/providers/base/core";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
@@ -29,8 +30,17 @@ export class ProviderSyncJob extends DistributedQueueJob<SyncTaskPayload> {
     // Run DB cleanup for old sync records while the lock is held
     await this.cleanupOldSyncs();
 
-    const users = await User.find({ select: { id: true } });
-    return users.map((u) => ({ userId: u.id }));
+    const accounts = await Account.find({
+      where: { provider: this.provider.config.dbType },
+      select: { user: { id: true } },
+    });
+    if (accounts.length === 0) {
+      this.logger.log(`No accounts found for provider ${this.provider.config.dbType}; skipping sync task generation.`);
+      return [];
+    }
+
+    const userIds = new Set(accounts.map((account) => account.user.id));
+    return Array.from(userIds, (userId) => ({ userId }));
   }
 
   // Orchestrates the sync lifecycle, error handling, and sync history for a single user

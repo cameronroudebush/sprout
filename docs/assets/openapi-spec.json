@@ -2763,6 +2763,38 @@
         "tags": ["Holding"]
       }
     },
+    "/holding/portfolio/summary": {
+      "get": {
+        "description": "Returns the authenticated user's current holding value and estimated daily change.",
+        "operationId": "HoldingController_getPortfolioSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully calculated the portfolio summary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioSummaryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is required."
+          },
+          "429": {
+            "description": "Too Many Requests. The user has sent too many requests in a given amount of time."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get overall portfolio value and daily market performance.",
+        "tags": ["Holding"]
+      }
+    },
     "/holding/timeline/major": {
       "get": {
         "description": "Retrieves daily data points over the last 7 days for the major market indicies to support multi-line comparative charting templates.",
@@ -5425,6 +5457,27 @@
           }
         },
         "required": ["type", "price", "symbol", "name", "change", "changePercent", "lastUpdated"]
+      },
+      "PortfolioSummaryDto": {
+        "type": "object",
+        "properties": {
+          "totalValue": {
+            "type": "number",
+            "description": "Total current market value of the user's portfolio in their configured currency.",
+            "example": 125000.5
+          },
+          "dayChange": {
+            "type": "number",
+            "description": "Estimated portfolio value change since the previous market close.",
+            "example": 1250.5
+          },
+          "dayChangePercent": {
+            "type": "number",
+            "description": "Estimated portfolio percentage change since the previous market close.",
+            "example": 1.01
+          }
+        },
+        "required": ["totalValue", "dayChange", "dayChangePercent"]
       },
       "MajorIndexTimelinePoint": {
         "type": "object",

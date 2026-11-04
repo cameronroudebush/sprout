@@ -331,9 +331,14 @@ class ApiClient {
           return PlaidLinkTokenDTO.fromJson(value);
         case 'PlaidMetadataDTO':
           return PlaidMetadataDTO.fromJson(value);
+        case 'PlaidProviderControllerCleanupUntrackedItemRequest':
+          return PlaidProviderControllerCleanupUntrackedItemRequest.fromJson(
+              value);
         case 'PlaidWebhookControllerMigrateWebhookUrlsRequest':
           return PlaidWebhookControllerMigrateWebhookUrlsRequest.fromJson(
               value);
+        case 'PortfolioSummaryDto':
+          return PortfolioSummaryDto.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
         case 'ProviderSubTypeEnum':

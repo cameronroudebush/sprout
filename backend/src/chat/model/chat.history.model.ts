@@ -58,10 +58,11 @@ export class ChatHistory extends DatabaseBase {
   /** Helper to swap real identifiers with generic IDs based on the current content of the text */
   deIdentifyText(idMap: Map<string, string>): string {
     let processed = this.text;
-    idMap.forEach((genericId, realIdentifier) => {
+    const mappings = Array.from(idMap.entries()).sort((a, b) => b[0].length - a[0].length);
+    mappings.forEach(([realIdentifier, genericId]) => {
       const escaped = realIdentifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(`@?${escaped}`, "g");
-      processed = processed.replace(regex, genericId);
+      const regex = new RegExp(`(^|[^\\p{L}\\p{N}_])@?${escaped}(?=$|[^\\p{L}\\p{N}_])`, "giu");
+      processed = processed.replace(regex, (_match, prefix: string) => `${prefix}${genericId}`);
     });
     return processed;
   }

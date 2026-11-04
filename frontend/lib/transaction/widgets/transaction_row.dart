@@ -2,14 +2,11 @@ import 'package:collection/collection.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
-import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
-import 'package:sprout/category/category_provider.dart';
-import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
-import 'package:sprout/transaction/widgets/website_icon.dart';
+import 'package:sprout/transaction/widgets/effective_transaction_icon.dart';
 
 // Renders a singular transaction with all necessary information in a single row
 class TransactionRow extends ConsumerWidget {
@@ -35,14 +32,6 @@ class TransactionRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
 
-    final cat = ref.watch(
-      categoriesProvider.select((asyncState) {
-        return asyncState.value?.firstWhereOrNull(
-          (a) => a.id == transaction.categoryId,
-        );
-      }),
-    );
-
     final account = ref.watch(
       accountsProvider.select((asyncState) {
         return asyncState.value?.accounts.firstWhereOrNull(
@@ -50,15 +39,6 @@ class TransactionRow extends ConsumerWidget {
         );
       }),
     );
-
-    final websiteUrl = transaction.extra?.website;
-    final Widget effectiveIcon = account != null &&
-            (account.type == AccountTypeEnum.crypto ||
-                account.type == AccountTypeEnum.investment)
-        ? AccountIcon(account, size: 32)
-        : (websiteUrl != null && websiteUrl.isNotEmpty)
-            ? WebsiteIconWidget(websiteUrl, size: 32)
-            : (icon ?? CategoryIcon(cat, avatarSize: 16));
 
     return InkWell(
       onTap: onTap ??
@@ -77,7 +57,7 @@ class TransactionRow extends ConsumerWidget {
             spacing: 16,
             children: [
               // Icon (Account -> Website -> Override -> Category)
-              effectiveIcon,
+              EffectiveTransactionIcon(transaction, iconOverride: icon),
               // Description
               Expanded(
                 child: Column(

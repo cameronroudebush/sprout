@@ -5,7 +5,7 @@ description: Learn how AI can be used with Sprout.
 
 # AI Integration
 
-Sprout allows you to interact with your financial data using Large Language Models (LLMs). Once configured, the AI can analyze your account balances, transaction history, and investment holdings to provide insights and trends.
+Sprout allows you to interact with your financial data using Large Language Models (LLMs). Once configured, the AI can analyze account balances, transaction activity, investment holdings, subscriptions, and—when budgeting is enabled—current-month budget performance.
 
 !!! warning "Financial Disclaimer"
 
@@ -13,10 +13,13 @@ Sprout allows you to interact with your financial data using Large Language Mode
 
 ## Data Privacy & Security
 
-We take your financial privacy seriously:
+Review what context Sprout sends to your configured LLM provider before enabling this feature. Financial values and chat content leave your Sprout server and are subject to that provider's privacy and retention policies.
 
-- **Minimal Exposure:** Sprout only sends the last 90 days of transaction history to minimize data exposure.
-- **Masked Data:** Sprout replaces numerous identifiers with generic IDs when passed to the LLM to prevent data leakage. This is then mapped back to the real text when we receive the response. This data includes: account IDs, transaction descriptions.
+- **Financial context:** Chat requests include account types and subtypes, balances and balance history, interest rates, investment symbols and holding values/history, transaction dates and amounts, categories, and subscription amounts/frequency/last-paid dates. Transaction history and account/holding history follow the selected timeframe: one day (up to two days to avoid missing activity), three months, six months, or one year. Subscription summaries are derived from transaction history.
+- **Budget context:** When budgeting is enabled, regular chat includes current calendar-month budget totals and per-category limits, spending, remaining amounts, and whether configured limits were exceeded. The separate budget overview uses the month selected by the user. Budget context is omitted from regular chat when budgeting is disabled.
+- **Chat history:** Recent saved messages are included, up to the configured chat-history limit.
+- **De-identification:** Sprout replaces account, transaction, and subscription identifiers plus category labels with generic tokens in financial context. Category labels are also pseudonymized in saved chat history before inclusion. Sprout maps tokens back in generated responses. Raw account and category database IDs, account names, usernames, and email addresses are not included in financial context.
+- **Your input:** De-identification cannot remove personal information that you type directly into a message. Do not include passwords, access tokens, full account numbers, or other secrets in chat.
 
 ## Supported Models
 

@@ -25,6 +25,40 @@ feat: SUMMARY_OF_CHANGES
 
 Choose the type that matches the work, such as `feat`, `fix`, `chore`, `docs`, or `ci`.
 
+## Release Notes
+
+Write release notes in Markdown using this structure and order:
+
+1. Start with a GitHub note alert containing a concise, user-facing summary of the release:
+   `> [!NOTE]` followed by the summary on the next quoted line.
+2. Group changes under these level-4 headings: `New Features`, `Fixes`, `Versioning Updates`, and `Chores and Housekeeping`.
+3. Write each change as a concise bullet. Add a parenthesized scope when useful (for example, `(budget)` or `(backend)`) and describe the outcome, not just the implementation.
+4. Link each associated commit using its short SHA as the link text and the full commit SHA in the GitHub URL: ``[`3e1b41d`](https://github.com/cameronroudebush/sprout/commit/FULL_SHA)``. Include multiple links when a bullet combines related commits. Do not invent or truncate the URL's commit SHA.
+5. Summarize dependency/version updates under `Versioning Updates`; group related dependency bumps into one bullet when appropriate. Leave out sections with no relevant changes.
+
+Use this template:
+
+```markdown
+> [!NOTE]
+> Concise summary of the most important release changes.
+
+#### New Features
+
+- (scope): Describe feature [`SHORT_SHA`](https://github.com/cameronroudebush/sprout/commit/FULL_SHA)
+
+#### Fixes
+
+- (scope): Describe fix [`SHORT_SHA`](https://github.com/cameronroudebush/sprout/commit/FULL_SHA)
+
+#### Versioning Updates
+
+- (deps): Summarize dependency updates.
+
+#### Chores and Housekeeping
+
+- (scope): Describe maintenance change [`SHORT_SHA`](https://github.com/cameronroudebush/sprout/commit/FULL_SHA)
+```
+
 ## Backend Data Access
 
 - **User scoping in database queries**: Always scope queries for user-owned data to the associated user wherever possible. In `find`, `findOne`, and QueryBuilder queries, specify `user: { id: user.id }` or `userId: user.id` as supported by the query API.
