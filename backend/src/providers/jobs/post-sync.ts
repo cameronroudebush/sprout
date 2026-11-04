@@ -131,20 +131,22 @@ export class PostSyncProcessingJob extends DistributedQueueJob {
 
     // Handle Notifications, only if enabled and triggered by a scheduled batch
     if (Configuration.providers.syncNotifications.enabled && hasScheduledSync) {
-      // Check if the user has already received a scheduled notification today
-      const today = startOfDay(new Date());
-      const scheduledNotifiesToday = await Sync.count({
-        where: {
-          user: { id: user.id },
-          processed: true,
-          triggerType: SyncTriggerType.SCHEDULED,
-          time: MoreThan(today),
-        },
-      });
+      // Success notifications are deduplicated daily, but new sync errors should always be surfaced.
+      if (failures.length === 0) {
+        const today = startOfDay(new Date());
+        const scheduledNotifiesToday = await Sync.count({
+          where: {
+            user: { id: user.id },
+            processed: true,
+            triggerType: SyncTriggerType.SCHEDULED,
+            time: MoreThan(today),
+          },
+        });
 
-      if (scheduledNotifiesToday > 0) {
-        this.logger.debug(`Silent sync for ${user.username}. Notification already sent today.`);
-        return;
+        if (scheduledNotifiesToday > 0) {
+          this.logger.debug(`Silent sync for ${user.username}. Notification already sent today.`);
+          return;
+        }
       }
 
       if (failures.length > 0) {

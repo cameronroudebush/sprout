@@ -225,6 +225,31 @@ describe("PostSyncProcessingJob", () => {
       expect(notificationService.notifyUser).not.toHaveBeenCalled();
     });
 
+    it("should notify about sync failures even if a notification was already sent today", async () => {
+      const user = TestEntities.user;
+      const syncFailed = Sync.fromPlain({
+        id: "failed-sync",
+        status: "failed",
+        failureReason: "Provider unavailable",
+        provider: ProviderType.plaid,
+        triggerType: SyncTriggerType.SCHEDULED,
+        user,
+      });
+
+      const countSpy = vi.spyOn(Sync, "count").mockResolvedValue(1);
+      Configuration.providers.syncNotifications.enabled = true;
+
+      await job.sendDigest(user, [syncFailed]);
+
+      expect(countSpy).not.toHaveBeenCalled();
+      expect(notificationService.notifyUser).toHaveBeenCalledWith(
+        user,
+        expect.stringContaining("Provider unavailable"),
+        "Connection Error",
+        expect.any(String),
+      );
+    });
+
     it("should skip notification logic if sync notifications are disabled in configuration", async () => {
       const user = TestEntities.user;
       const syncSuccess = Sync.fromPlain({ id: "s1", status: "complete", provider: ProviderType.plaid, triggerType: SyncTriggerType.SCHEDULED, user });
