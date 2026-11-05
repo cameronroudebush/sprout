@@ -175,10 +175,7 @@ export class HoldingService {
         totalValue += currentValue;
         const mutualFundIsUnpriced =
           quote.type === MarketQuoteType.MUTUALFUND &&
-          (marketIsOpen ||
-            !marketSessionDate ||
-            !quote.hasMarketTimestamp ||
-            getMarketDate(quote.lastUpdated) !== marketSessionDate);
+          (marketIsOpen || !marketSessionDate || !quote.hasMarketTimestamp || getMarketDate(quote.lastUpdated) !== marketSessionDate);
         if (mutualFundIsUnpriced) {
           hasUnpricedHoldings = true;
           continue;
