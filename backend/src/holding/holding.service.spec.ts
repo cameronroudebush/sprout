@@ -198,8 +198,16 @@ describe("HoldingService", () => {
       const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
-        { symbol: "VFIAX", price: 500, change: 5, currency: "USD", type: MarketQuoteType.MUTUALFUND } as any,
-        { symbol: "^GSPC", marketState: "CLOSED" } as any,
+        {
+          symbol: "VFIAX",
+          price: 500,
+          change: 5,
+          currency: "USD",
+          type: MarketQuoteType.MUTUALFUND,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+          hasMarketTimestamp: true,
+        } as any,
+        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
       ]);
 
       const result = await service.getPortfolioSummary(TestEntities.user);
@@ -210,6 +218,54 @@ describe("HoldingService", () => {
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
       });
+    });
+
+    it("should exclude mutual fund movement after close until its NAV updates", async () => {
+      const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        {
+          symbol: "VFIAX",
+          price: 500,
+          change: 5,
+          currency: "USD",
+          type: MarketQuoteType.MUTUALFUND,
+          lastUpdated: "2026-11-04T21:00:00.000Z",
+          hasMarketTimestamp: true,
+        } as any,
+        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 1000,
+        dayChange: 0,
+        dayChangePercent: 0,
+        hasUnpricedHoldings: true,
+      });
+    });
+
+    it("should not treat a synthesized quote timestamp as a posted NAV", async () => {
+      const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        {
+          symbol: "VFIAX",
+          price: 500,
+          change: 5,
+          currency: "USD",
+          type: MarketQuoteType.MUTUALFUND,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+          hasMarketTimestamp: false,
+        } as any,
+        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result.dayChange).toBe(0);
+      expect(result.hasUnpricedHoldings).toBe(true);
     });
 
     it("should fall back to stored values and close price when live quote is invalid", async () => {

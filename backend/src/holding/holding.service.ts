@@ -159,7 +159,9 @@ export class HoldingService {
     const quoteBySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
     const targetCurrency = user.config?.currency ?? "USD";
     // Mutual-fund quotes can say CLOSED while the exchange is trading; use an index for session state.
-    const marketIsOpen = quoteBySymbol.get("^GSPC")?.marketState === MarketState.REGULAR;
+    const marketIndexQuote = quoteBySymbol.get("^GSPC");
+    const marketIsOpen = marketIndexQuote?.marketState === MarketState.REGULAR;
+    const marketSessionDate = marketIndexQuote?.hasMarketTimestamp ? getMarketDate(marketIndexQuote.lastUpdated) : undefined;
 
     let totalValue = 0;
     let pricedValue = 0;
@@ -171,7 +173,13 @@ export class HoldingService {
         const sourceCurrency = quote.currency ?? holding.currency;
         const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
         totalValue += currentValue;
-        if (marketIsOpen && quote.type === MarketQuoteType.MUTUALFUND) {
+        const mutualFundIsUnpriced =
+          quote.type === MarketQuoteType.MUTUALFUND &&
+          (marketIsOpen ||
+            !marketSessionDate ||
+            !quote.hasMarketTimestamp ||
+            getMarketDate(quote.lastUpdated) !== marketSessionDate);
+        if (mutualFundIsUnpriced) {
           hasUnpricedHoldings = true;
           continue;
         }
@@ -261,4 +269,9 @@ export class HoldingService {
       throw new HttpException("Failed to retrieve market history timeline", HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
+}
+
+function getMarketDate(timestamp: string): string | undefined {
+  const parsedTimestamp = Date.parse(timestamp);
+  return Number.isNaN(parsedTimestamp) ? undefined : new Date(parsedTimestamp).toISOString().slice(0, 10);
 }
