@@ -69,7 +69,7 @@ Connecting Sprout to Coinbase is performed by entering your API Key credentials 
 - Log in to your [Coinbase Account Settings](https://www.coinbase.com/settings/api). Note that you need a standard user account API key, not a CDP (Coinbase Developer Platform) project key.
 - Click **Create API Key**.
 - Ensure the key signature algorithm is set to **ECDSA**.
-- Assign read-only permissions to your accounts (e.g. `wallet:accounts:read`).
+- Assign read-only permissions for accounts and transactions (e.g. `wallet:accounts:read` and `wallet:transactions:read`). Sprout uses transaction history to estimate crypto cost basis.
 - Copy both your **API Key Name** (Key ID) and your **API Key Secret** (Private Key).
 
 #### **Paste into Sprout:**

@@ -1,7 +1,7 @@
 import { Account } from "@backend/account/model/account.model";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { MajorIndexTimelineDto, MajorIndexTimelinePoint } from "@backend/holding/model/api/major.index.timeline.dto";
-import { MarketIndexDto, MarketQuoteType } from "@backend/holding/model/api/mark.index.dto";
+import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
 import { PortfolioSummaryDto } from "@backend/holding/model/api/portfolio.summary.dto";
 import { Holding } from "@backend/holding/model/holding.model";
 import { EntityHistory } from "@backend/net-worth/model/api/entity.history.dto";
@@ -154,23 +154,36 @@ export class HoldingService {
     const holdings = await Holding.find({
       where: { account: { user: { id: user.id } }, shares: Not(0) },
     });
-    const symbols = [...new Set(holdings.map((holding) => holding.symbol))];
+    const symbols = [...new Set([...holdings.map((holding) => holding.symbol), "^GSPC"])];
     const quotes = await this.getLiveHoldingPrices(symbols);
     const quoteBySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
     const targetCurrency = user.config?.currency ?? "USD";
+    // Mutual-fund quotes can say CLOSED while the exchange is trading; use an index for session state.
+    const marketIsOpen = quoteBySymbol.get("^GSPC")?.marketState === MarketState.REGULAR;
 
     let totalValue = 0;
+    let pricedValue = 0;
     let dayChange = 0;
+    let hasUnpricedHoldings = false;
     for (const holding of holdings) {
       const quote = quoteBySymbol.get(holding.symbol);
       if (quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0) {
         const sourceCurrency = quote.currency ?? holding.currency;
-        totalValue += CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
+        const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
+        totalValue += currentValue;
+        if (marketIsOpen && quote.type === MarketQuoteType.MUTUALFUND) {
+          hasUnpricedHoldings = true;
+          continue;
+        }
+
+        pricedValue += currentValue;
         dayChange += CurrencyHelper.convert((quote.change ?? 0) * holding.shares, sourceCurrency, targetCurrency);
         continue;
       }
 
-      totalValue += CurrencyHelper.convert(holding.marketValue, holding.currency, targetCurrency);
+      const storedValue = CurrencyHelper.convert(holding.marketValue, holding.currency, targetCurrency);
+      totalValue += storedValue;
+      pricedValue += storedValue;
       const closePrice = Number(holding.extra?.["closePrice"]);
       if (closePrice > 0 && holding.shares !== 0) {
         const estimatedChange = holding.marketValue - closePrice * holding.shares;
@@ -178,12 +191,13 @@ export class HoldingService {
       }
     }
 
-    const previousValue = totalValue - dayChange;
+    const previousValue = pricedValue - dayChange;
     const dayChangePercent = previousValue !== 0 ? (dayChange / Math.abs(previousValue)) * 100 : 0;
     return new PortfolioSummaryDto({
       totalValue,
       dayChange,
       dayChangePercent: Number.isFinite(dayChangePercent) ? dayChangePercent : 0,
+      hasUnpricedHoldings,
     });
   }
 

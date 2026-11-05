@@ -3,7 +3,7 @@ import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// The original dark theme of Sprout that utilizes it's primary colors as necessary
-final ThemeData coloredDarkTheme = FlexThemeData.dark(
+final ThemeData _coloredDarkBaseTheme = FlexThemeData.dark(
   fontFamily: 'RobotoCrisp',
   colors: const FlexSchemeColor(
     primary: Color(0xff6b9ac4),
@@ -34,7 +34,12 @@ final ThemeData coloredDarkTheme = FlexThemeData.dark(
   useMaterial3: true,
   platform: TargetPlatform.windows,
   cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
-).copyWith(
+);
+
+final ThemeData coloredDarkTheme = _coloredDarkBaseTheme.copyWith(
+  colorScheme: _coloredDarkBaseTheme.colorScheme.copyWith(
+    surfaceContainerHigh: const Color(0xff29485a),
+  ),
   popupMenuTheme: const PopupMenuThemeData(
     color: Color(0xff191c20),
     surfaceTintColor: Colors.transparent,

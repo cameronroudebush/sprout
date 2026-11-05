@@ -70,6 +70,11 @@ class Portfolio : AppWidgetProvider() {
                     R.id.widget_portfolio_change,
                     data.optString("portfolioChange", "+$0.00")
                 )
+                val hasUnpricedHoldings = data.optBoolean("hasUnpricedHoldings", false)
+                views.setViewVisibility(
+                    R.id.widget_unpriced_indicator,
+                    if (hasUnpricedHoldings) View.VISIBLE else View.GONE
+                )
 
                 val indices = data.optJSONArray("majorIndices")
                 val indexViews = listOf(

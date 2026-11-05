@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
@@ -170,9 +170,11 @@ class _MoreGridTile extends StatelessWidget {
                   : colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(icon,
-                color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
-                size: 28),
+            child: Icon(
+              icon,
+              color: isSelected ? colorScheme.onPrimary : colorScheme.primary,
+              size: 28,
+            ),
           ),
           const SizedBox(height: 10),
           Text(

@@ -89,6 +89,7 @@ class PortfolioSummary extends _$PortfolioSummary {
           totalValue: 0,
           dayChange: 0,
           dayChangePercent: 0,
+          hasUnpricedHoldings: false,
         );
   }
 }

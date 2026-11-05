@@ -166,11 +166,49 @@ describe("HoldingService", () => {
       const result = await service.getPortfolioSummary(TestEntities.user);
 
       expect(Holding.find).toHaveBeenCalledWith({ where: { account: { user: { id: TestEntities.user.id } }, shares: expect.anything() } });
-      expect(service.getLiveHoldingPrices).toHaveBeenCalledWith(["AAPL"]);
+      expect(service.getLiveHoldingPrices).toHaveBeenCalledWith(["AAPL", "^GSPC"]);
       expect(result).toEqual({
         totalValue: 2000,
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
+        hasUnpricedHoldings: false,
+      });
+    });
+
+    it("should exclude mutual funds from weighted movement while market is open", async () => {
+      const fundHolding = { ...mockHolding, id: "fund-holding", symbol: "VFIAX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([mockHolding, fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "AAPL", price: 200, change: 2, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+        { symbol: "VFIAX", price: 500, change: 5, currency: "USD", type: MarketQuoteType.MUTUALFUND } as any,
+        { symbol: "^GSPC", marketState: "REGULAR" } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 3000,
+        dayChange: 20,
+        dayChangePercent: expect.closeTo(1.0101, 3),
+        hasUnpricedHoldings: true,
+      });
+    });
+
+    it("should include mutual fund movement when market is closed", async () => {
+      const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "VFIAX", price: 500, change: 5, currency: "USD", type: MarketQuoteType.MUTUALFUND } as any,
+        { symbol: "^GSPC", marketState: "CLOSED" } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 1000,
+        dayChange: 10,
+        dayChangePercent: expect.closeTo(1.0101, 3),
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -185,6 +223,7 @@ describe("HoldingService", () => {
         totalValue: 1800,
         dayChange: 50,
         dayChangePercent: expect.closeTo(2.8571, 3),
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -199,6 +238,7 @@ describe("HoldingService", () => {
         totalValue: 500,
         dayChange: 0,
         dayChangePercent: 0,
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -213,6 +253,7 @@ describe("HoldingService", () => {
         totalValue: 200,
         dayChange: 0,
         dayChangePercent: 0,
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -229,6 +270,7 @@ describe("HoldingService", () => {
         totalValue: 200,
         dayChange: 200,
         dayChangePercent: 0,
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -253,6 +295,7 @@ describe("HoldingService", () => {
         totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
+        hasUnpricedHoldings: false,
       });
     });
   });

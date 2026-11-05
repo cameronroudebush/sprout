@@ -169,10 +169,12 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
     rawAccount: CoinbaseWalletPayload,
     account: Account,
     _authContext: CoinbaseAuthContext,
-    _user: User,
+    user: User,
   ): Promise<Omit<ProviderSyncResult, "account">> {
     const holdings: Holding[] = [];
     const rates = await this.getUsdExchangeRates();
+    const existingHoldings = await Holding.getForAccount(account);
+    const existingHoldingsBySymbol = new Map(existingHoldings.map((holding) => [holding.symbol, holding]));
 
     for (const acc of rawAccount.accounts) {
       const cryptoAmount = parseFloat(acc.balance?.amount || "0");
@@ -181,15 +183,23 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
       const assetCode = (acc.balance?.currency || acc.currency?.code || "USD").toUpperCase();
       const unitPriceUsd = assetCode === "USD" ? 1 : (rates[assetCode] ?? 0);
       const totalMarketValueUsd = cryptoAmount * unitPriceUsd;
+      let costBasis = existingHoldingsBySymbol.get(assetCode)?.costBasis ?? 0;
+      try {
+        const transactions = await this.fetchCoinbaseData(user, "transactions", acc.id);
+        costBasis = this.calculateCostBasis(transactions, assetCode, cryptoAmount, rates) ?? costBasis;
+      } catch (error) {
+        this.logger.warn(`Failed to fetch Coinbase transactions for ${assetCode}; preserving previously tracked cost basis.`, error);
+      }
+      const averagePurchasePrice = costBasis > 0 ? costBasis / cryptoAmount : unitPriceUsd;
 
       const holding = new Holding(
         "USD",
-        0, // costBasis
+        costBasis,
         `${acc.name || assetCode} Asset`,
-        totalMarketValueUsd, // institutionValue (in USD)
-        unitPriceUsd, // institutionPrice (price per crypto unit in USD)
-        cryptoAmount, // quantity (crypto units)
-        assetCode, // ticker symbol
+        totalMarketValueUsd,
+        averagePurchasePrice,
+        cryptoAmount,
+        assetCode,
         account,
       );
       holdings.push(holding);
@@ -202,21 +212,64 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
     return [undefined]; // Force the sync loop to fire
   }
 
+  /** Calculates current average cost basis from completed Coinbase account transactions. */
+  private calculateCostBasis(transactions: CoinbaseTransaction[], assetCode: string, currentAmount: number, rates: Record<string, number>): number | null {
+    let amountHeld = 0;
+    let costBasis = 0;
+    let foundAssetTransactions = false;
+
+    const orderedTransactions = [...transactions].sort((a, b) => {
+      if (!a.created_at || !b.created_at) return 0;
+      return Date.parse(a.created_at) - Date.parse(b.created_at);
+    });
+
+    for (const transaction of orderedTransactions) {
+      if (transaction.status && transaction.status !== "completed") continue;
+      if (transaction.amount?.currency.toUpperCase() !== assetCode) continue;
+
+      const transactionAmount = Number(transaction.amount.amount);
+      if (!Number.isFinite(transactionAmount) || transactionAmount === 0) continue;
+      foundAssetTransactions = true;
+
+      if (transactionAmount > 0) {
+        const nativeAmount = Number(transaction.native_amount?.amount);
+        const nativeCurrency = transaction.native_amount?.currency.toUpperCase();
+        const usdRate = nativeCurrency === "USD" ? 1 : rates[nativeCurrency ?? ""];
+        const acquisitionCost = Number.isFinite(nativeAmount) && usdRate && usdRate > 0 ? Math.abs(nativeAmount) * usdRate : 0;
+
+        amountHeld += transactionAmount;
+        costBasis += acquisitionCost;
+        continue;
+      }
+
+      const amountRemoved = Math.min(Math.abs(transactionAmount), amountHeld);
+      if (amountRemoved > 0) {
+        costBasis *= (amountHeld - amountRemoved) / amountHeld;
+        amountHeld -= amountRemoved;
+      }
+    }
+
+    if (!foundAssetTransactions || amountHeld <= 0 || currentAmount <= 0) return null;
+    return costBasis * (currentAmount / amountHeld);
+  }
+
   /**
    * Generic function that requests data from coinbase given the API path. Utilizes
    * the V2 API for user wallet interactions.
    */
   private async fetchCoinbaseData(user: User, resource: "accounts"): Promise<CoinbaseAccount[]>;
-  private async fetchCoinbaseData(user: User, resource: "transactions"): Promise<CoinbaseTransaction[]>;
-  private async fetchCoinbaseData<T>(user: User, resource: "accounts" | "transactions"): Promise<T[]> {
+  private fetchCoinbaseData(user: User, resource: "transactions", accountId: string): Promise<CoinbaseTransaction[]>;
+  private async fetchCoinbaseData<T>(user: User, resource: "accounts" | "transactions", accountId?: string): Promise<T[]> {
     await this.rateLimit(user).incrementOrError();
     if (!(await this.isAvailable(user))) throw new BadRequestException("Coinbase API credentials missing for user.");
+    if (resource === "transactions" && !accountId) throw new BadRequestException("Coinbase account ID is required to fetch transactions.");
+
     const results: T[] = [];
     let startingAfter: string | undefined;
+    const path = resource === "accounts" ? "/v2/accounts" : `/v2/accounts/${encodeURIComponent(accountId!)}/transactions`;
     try {
       do {
-        const query = startingAfter ? `?limit=100&starting_after=${startingAfter}` : `?limit=100`;
-        const path = `/v2/${resource}`;
+        const query = startingAfter ? `?limit=100&starting_after=${encodeURIComponent(startingAfter)}` : `?limit=100`;
         const url = `https://api.coinbase.com${path}${query}`;
 
         // Generate the JWT to give ask authentication
@@ -232,7 +285,9 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
         const response = await axios.get<any>(url, { headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" } });
         const items = response.data[resource] || response.data.data || [];
         results.push(...items);
-        startingAfter = response.data.pagination?.next_starting_after || null;
+        const nextUri = response.data.pagination?.next_uri;
+        const nextStartingAfter = nextUri?.match(/[?&]starting_after=([^&]+)/)?.[1];
+        startingAfter = response.data.pagination?.next_starting_after || (nextStartingAfter ? decodeURIComponent(nextStartingAfter) : null);
       } while (startingAfter);
 
       return results;

@@ -3,6 +3,7 @@ setupTests();
 
 import { Account } from "@backend/account/model/account.model.js";
 import { Configuration } from "@backend/config/core.js";
+import { Holding } from "@backend/holding/model/holding.model.js";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit.js";
 import { CoinbaseProviderService } from "@backend/providers/coinbase/coinbase.provider.service.js";
 import { TestEntities } from "@backend/test/entities.js";
@@ -24,6 +25,7 @@ describe("CoinbaseProviderService", () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.clearAllMocks();
     cacheManager = {
       get: vi.fn(),
       set: vi.fn().mockResolvedValue(undefined),
@@ -33,6 +35,7 @@ describe("CoinbaseProviderService", () => {
     user.config.coinbaseApiKeyName = "test-key-name";
 
     vi.spyOn(ProviderRateLimit.prototype, "incrementOrError").mockResolvedValue(undefined);
+    vi.spyOn(Holding, "getForAccount").mockResolvedValue([]);
 
     service = new CoinbaseProviderService(cacheManager);
   });
@@ -249,21 +252,31 @@ describe("CoinbaseProviderService", () => {
           },
         } as any);
 
-      const data = await (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts");
+      const data = await (service as any).fetchCoinbaseData(user, "accounts");
       expect(data.length).toBe(2);
 
       vi.spyOn(axios, "get").mockRejectedValue(new Error("API error"));
-      await expect(
-        (service as unknown as { fetchCoinbaseData: (u: User, r: string) => Promise<unknown[]> }).fetchCoinbaseData(user, "accounts"),
-      ).rejects.toThrow("API error");
+      await expect((service as any).fetchCoinbaseData(user, "accounts")).rejects.toThrow("API error");
 
-      vi.spyOn(axios, "get").mockResolvedValueOnce({ data: { data: [{ id: "from-data" }] } } as any);
-      const dataFallback = await (service as any).fetchCoinbaseData(user, "transactions");
-      expect(dataFallback).toEqual([{ id: "from-data" }]);
+      vi.mocked(axios.get).mockClear();
+      vi.spyOn(axios, "get")
+        .mockResolvedValueOnce({
+          data: {
+            data: [{ id: "from-data" }],
+            pagination: { next_uri: "/v2/accounts/asset-1/transactions?starting_after=after%2F1" },
+          },
+        } as any)
+        .mockResolvedValueOnce({ data: { transactions: [{ id: "second-page" }] } } as any);
+      const transactionData = await (service as any).fetchCoinbaseData(user, "transactions", "asset-1");
+      expect(transactionData).toEqual([{ id: "from-data" }, { id: "second-page" }]);
+      expect(vi.mocked(axios.get).mock.calls[0]?.[0]).toBe("https://api.coinbase.com/v2/accounts/asset-1/transactions?limit=100");
+      expect(vi.mocked(axios.get).mock.calls[1]?.[0]).toBe("https://api.coinbase.com/v2/accounts/asset-1/transactions?limit=100&starting_after=after%2F1");
 
       vi.spyOn(axios, "get").mockResolvedValueOnce({ data: {} } as any);
-      const emptyData = await (service as any).fetchCoinbaseData(user, "transactions");
+      const emptyData = await (service as any).fetchCoinbaseData(user, "transactions", "asset-1");
       expect(emptyData).toEqual([]);
+
+      await expect((service as any).fetchCoinbaseData(user, "transactions")).rejects.toThrow("Coinbase account ID is required");
 
       user.config.coinbaseApiKey = "";
       await expect((service as any).fetchCoinbaseData(user, "accounts")).rejects.toThrow(BadRequestException);
@@ -316,6 +329,122 @@ describe("CoinbaseProviderService", () => {
       );
       expect(initial.holdings).toHaveLength(3);
       expect(initial.holdings.map((holding: { symbol: string }) => holding.symbol)).toContain("DOGE");
+    });
+
+    it("should calculate crypto cost basis from completed account transactions", () => {
+      const transactions = [
+        {
+          id: "buy-later",
+          status: "completed",
+          created_at: "2025-02-01T00:00:00Z",
+          amount: { amount: "1", currency: "BTC" },
+          native_amount: { amount: "30000", currency: "USD" },
+        },
+        {
+          id: "sell",
+          status: "completed",
+          created_at: "2025-03-01T00:00:00Z",
+          amount: { amount: "-0.5", currency: "BTC" },
+          native_amount: { amount: "-12000", currency: "USD" },
+        },
+        {
+          id: "buy-first",
+          status: "completed",
+          created_at: "2025-01-01T00:00:00Z",
+          amount: { amount: "1", currency: "BTC" },
+          native_amount: { amount: "10000", currency: "USD" },
+        },
+      ];
+
+      expect((service as any).calculateCostBasis(transactions, "BTC", 1.2, { USD: 1 })).toBeCloseTo(24000);
+    });
+
+    it("should convert non-USD acquisition amounts and ignore pending or unrelated transactions", () => {
+      const transactions = [
+        {
+          id: "pending",
+          status: "pending",
+          amount: { amount: "3", currency: "BTC" },
+          native_amount: { amount: "300", currency: "EUR" },
+        },
+        {
+          id: "other-asset",
+          status: "completed",
+          amount: { amount: "2", currency: "ETH" },
+          native_amount: { amount: "200", currency: "EUR" },
+        },
+        {
+          id: "buy",
+          status: "completed",
+          amount: { amount: "1", currency: "BTC" },
+          native_amount: { amount: "100", currency: "EUR" },
+        },
+      ];
+
+      expect((service as any).calculateCostBasis(transactions, "BTC", 1, { EUR: 1.1 })).toBeCloseTo(110);
+      expect((service as any).calculateCostBasis(transactions, "BTC", 0, { EUR: 1.1 })).toBeNull();
+      expect((service as any).calculateCostBasis([], "BTC", 1, {})).toBeNull();
+    });
+
+    it("should handle incomplete transaction values without inventing a cost basis", () => {
+      const transactions = [
+        { id: "orphan-sell", amount: { amount: "-1", currency: "BTC" } },
+        { id: "empty", status: "completed", amount: { amount: "0", currency: "BTC" } },
+        { id: "invalid", status: "completed", amount: { amount: "unknown", currency: "BTC" } },
+        { id: "missing-value", status: "completed", amount: { amount: "0.5", currency: "BTC" } },
+        { id: "unpriced", status: "completed", amount: { amount: "1", currency: "BTC" }, native_amount: { amount: "10", currency: "EUR" } },
+        { id: "sell", status: "completed", amount: { amount: "-2", currency: "BTC" } },
+      ];
+
+      expect((service as any).calculateCostBasis(transactions, "BTC", 1, {})).toBeNull();
+    });
+
+    it("should set total and average purchase cost from Coinbase history", async () => {
+      vi.spyOn(service as any, "getUsdExchangeRates").mockResolvedValue({ BTC: 50000 });
+      vi.spyOn(service as any, "fetchCoinbaseData").mockResolvedValue([
+        {
+          id: "buy",
+          status: "completed",
+          amount: { amount: "1", currency: "BTC" },
+          native_amount: { amount: "25000", currency: "USD" },
+        },
+      ]);
+
+      const initial = await (service as any).fetchInitialSyncData(
+        {
+          id: "wallet",
+          name: "Wallet",
+          accounts: [{ id: "btc-account", name: "Bitcoin", balance: { amount: "1", currency: "BTC" } }],
+        },
+        TestEntities.account,
+        service.getAuthContext(user),
+        user,
+      );
+
+      expect(initial.holdings[0].costBasis).toBe(25000);
+      expect(initial.holdings[0].purchasePrice).toBe(25000);
+      expect(initial.holdings[0].marketValue).toBe(50000);
+    });
+
+    it("should preserve prior cost basis if Coinbase transaction history is unavailable", async () => {
+      const existingHolding = { ...TestEntities.holding, symbol: "BTC", costBasis: 25000 } as Holding;
+      vi.spyOn(Holding, "getForAccount").mockResolvedValue([existingHolding]);
+      vi.spyOn(service as any, "getUsdExchangeRates").mockResolvedValue({ BTC: 50000 });
+      vi.spyOn(service as any, "fetchCoinbaseData").mockRejectedValue(new Error("Missing transaction scope"));
+
+      const initial = await (service as any).fetchInitialSyncData(
+        {
+          id: "wallet",
+          name: "Wallet",
+          accounts: [{ id: "btc-account", name: "Bitcoin", balance: { amount: "1", currency: "BTC" } }],
+        },
+        TestEntities.account,
+        service.getAuthContext(user),
+        user,
+      );
+
+      expect(initial.holdings[0].costBasis).toBe(25000);
+      expect(initial.holdings[0].purchasePrice).toBe(25000);
     });
   });
 });

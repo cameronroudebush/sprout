@@ -1,37 +1,46 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/shared/widgets/card.dart';
 
-/// Displays the major market indexes and their current status
-class MajorIndicesBarWidget extends ConsumerWidget {
+/// Displays portfolio and market performance.
+class MarketSnapshotBarWidget extends ConsumerWidget {
   /// If we should show the price
   final bool showPrice;
 
-  const MajorIndicesBarWidget({super.key, this.showPrice = false});
+  const MarketSnapshotBarWidget({super.key, this.showPrice = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final indicesAsync = ref.watch(majorIndicesProvider);
+    final portfolioAsync = ref.watch(portfolioSummaryProvider);
 
     return indicesAsync.when(
-      data: (indices) =>
-          _buildContent(context, indices, indicesAsync.isRefreshing),
+      data: (indices) => _buildContent(
+        context,
+        indices,
+        portfolioAsync.value,
+        indicesAsync.isRefreshing || portfolioAsync.isRefreshing,
+      ),
       loading: () => const SproutCard(
         child: SizedBox(
-            height: 80,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+          height: 80,
+          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
       ),
       error: (err, _) => const SizedBox.shrink(),
     );
   }
 
-  /// Build the content of the indices to show
   Widget _buildContent(
-      BuildContext context, List<MarketIndexDto> indices, bool isRefreshing) {
+    BuildContext context,
+    List<MarketIndexDto> indices,
+    PortfolioSummaryDto? portfolio,
+    bool isRefreshing,
+  ) {
     if (indices.isEmpty) return const SizedBox.shrink();
 
     return SproutCard(
@@ -39,46 +48,107 @@ class MajorIndicesBarWidget extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: IntrinsicHeight(
               child: Row(
                 children: [
-                  // Take the status only from the first index as a global indicator
-                  _StatusBadge(state: indices.first.marketState),
-                  const VerticalDivider(width: 32, indent: 8, endIndent: 8),
                   Expanded(
-                      child: Row(children: _buildTilesWithSeparators(indices))),
+                    flex: 3,
+                    child: _PortfolioChangeTile(summary: portfolio),
+                  ),
+                  const VerticalDivider(width: 24, indent: 8, endIndent: 8),
+                  ..._buildTilesWithSeparators(indices),
                 ],
               ),
             ),
           ),
           if (isRefreshing)
             const LinearProgressIndicator(
-                minHeight: 2, backgroundColor: Colors.transparent),
+              minHeight: 2,
+              backgroundColor: Colors.transparent,
+            ),
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 12, right: 12, top: 4, bottom: 6),
+            child: (portfolio?.hasUnpricedHoldings ?? false)
+                ? Row(
+                    children: [
+                      _StatusBadge(state: indices.first.marketState),
+                      const Spacer(),
+                      Text(
+                        "Some prices pending",
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.amber.shade700,
+                            ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: 16,
+                        color: Colors.amber.shade700,
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: _StatusBadge(state: indices.first.marketState),
+                  ),
+          ),
         ],
       ),
     );
   }
 
-  /// Builds the tile content to be displayed with separators after it
   List<Widget> _buildTilesWithSeparators(List<MarketIndexDto> indices) {
-    List<Widget> items = [];
+    final items = <Widget>[];
     for (int i = 0; i < indices.length; i++) {
       items.add(
         Expanded(
+          flex: 2,
           child: _IndexTile(data: indices[i], showPrice: showPrice),
         ),
       );
 
       if (i < indices.length - 1) {
-        items.add(const VerticalDivider(width: 32, indent: 8, endIndent: 8));
+        items.add(const VerticalDivider(width: 16, indent: 8, endIndent: 8));
       }
     }
     return items;
   }
 }
 
-/// Renders a widget of a specific index tile
+/// Displays overall portfolio daily change.
+class _PortfolioChangeTile extends ConsumerWidget {
+  final PortfolioSummaryDto? summary;
+
+  const _PortfolioChangeTile({required this.summary});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final dayChange = summary?.dayChange ?? 0;
+    final changeColor = dayChange >= 0 ? Colors.green : theme.colorScheme.error;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: 2,
+      children: [
+        Text("Portfolio", style: theme.textTheme.labelLarge),
+        Text(
+          summary == null
+              ? "—"
+              : "${dayChange >= 0 ? "+" : ""}${summary!.dayChangePercent.toStringAsFixed(2)}%",
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: changeColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Renders a widget of a specific index tile.
 class _IndexTile extends ConsumerWidget {
   final bool showPrice;
   final MarketIndexDto data;
@@ -118,7 +188,7 @@ class _IndexTile extends ConsumerWidget {
   }
 }
 
-/// The market status badge
+/// The market status badge.
 class _StatusBadge extends StatelessWidget {
   final MarketIndexDtoMarketStateEnum? state;
   const _StatusBadge({this.state});
@@ -128,38 +198,35 @@ class _StatusBadge extends StatelessWidget {
     final theme = Theme.of(context);
     final isLive = state == MarketIndexDtoMarketStateEnum.REGULAR;
     final color = isLive ? Colors.green : Colors.red;
+    final label = isLive ? "LIVE" : "CLOSED";
 
-    String label = "CLOSED";
-    if (isLive) label = "LIVE";
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
       children: [
-        Text("MARKET", style: theme.textTheme.labelSmall),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 4,
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  if (isLive)
-                    BoxShadow(
-                        color: color.withOpacity(0.5),
-                        blurRadius: 4,
-                        spreadRadius: 1)
-                ],
-              ),
+        Text("Market", style: theme.textTheme.labelSmall),
+        Padding(
+          padding: EdgeInsets.only(left: 4),
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                if (isLive)
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.5),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+              ],
             ),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(color: color),
-            ),
-          ],
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(color: color),
         ),
       ],
     );

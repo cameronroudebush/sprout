@@ -54,13 +54,27 @@
             android:layout_weight="1.5"
             android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Portfolio"
-                android:textColor="@color/sprout_text_secondary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Portfolio"
+                    android:textColor="@color/sprout_text_secondary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginStart="3dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/widget_warning" />
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -77,6 +91,7 @@
                 android:text="+$125.50"
                 android:textColor="@color/sprout_accent_green"
                 android:textSize="11sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -174,4 +189,5 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>

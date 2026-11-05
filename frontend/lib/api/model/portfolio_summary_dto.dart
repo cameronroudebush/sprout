@@ -16,16 +16,20 @@ class PortfolioSummaryDto {
     required this.totalValue,
     required this.dayChange,
     required this.dayChangePercent,
+    required this.hasUnpricedHoldings,
   });
 
   /// Total current market value of the user's portfolio in their configured currency.
   num totalValue;
 
-  /// Estimated portfolio value change since the previous market close.
+  /// Estimated value change for holdings priced during the current market session.
   num dayChange;
 
-  /// Estimated portfolio percentage change since the previous market close.
+  /// Estimated weighted percentage change for holdings priced during the current market session.
   num dayChangePercent;
+
+  /// Whether any holdings lack current-session prices.
+  bool hasUnpricedHoldings;
 
   @override
   bool operator ==(Object other) =>
@@ -33,24 +37,27 @@ class PortfolioSummaryDto {
       other is PortfolioSummaryDto &&
           other.totalValue == totalValue &&
           other.dayChange == dayChange &&
-          other.dayChangePercent == dayChangePercent;
+          other.dayChangePercent == dayChangePercent &&
+          other.hasUnpricedHoldings == hasUnpricedHoldings;
 
   @override
   int get hashCode =>
       // ignore: unnecessary_parenthesis
       (totalValue.hashCode) +
       (dayChange.hashCode) +
-      (dayChangePercent.hashCode);
+      (dayChangePercent.hashCode) +
+      (hasUnpricedHoldings.hashCode);
 
   @override
   String toString() =>
-      'PortfolioSummaryDto[totalValue=$totalValue, dayChange=$dayChange, dayChangePercent=$dayChangePercent]';
+      'PortfolioSummaryDto[totalValue=$totalValue, dayChange=$dayChange, dayChangePercent=$dayChangePercent, hasUnpricedHoldings=$hasUnpricedHoldings]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'totalValue'] = this.totalValue;
     json[r'dayChange'] = this.dayChange;
     json[r'dayChangePercent'] = this.dayChangePercent;
+    json[r'hasUnpricedHoldings'] = this.hasUnpricedHoldings;
     return json;
   }
 
@@ -77,6 +84,10 @@ class PortfolioSummaryDto {
             'Required key "PortfolioSummaryDto[dayChangePercent]" is missing from JSON.');
         assert(json[r'dayChangePercent'] != null,
             'Required key "PortfolioSummaryDto[dayChangePercent]" has a null value in JSON.');
+        assert(json.containsKey(r'hasUnpricedHoldings'),
+            'Required key "PortfolioSummaryDto[hasUnpricedHoldings]" is missing from JSON.');
+        assert(json[r'hasUnpricedHoldings'] != null,
+            'Required key "PortfolioSummaryDto[hasUnpricedHoldings]" has a null value in JSON.');
         return true;
       }());
 
@@ -84,6 +95,8 @@ class PortfolioSummaryDto {
         totalValue: num.parse('${json[r'totalValue']}'),
         dayChange: num.parse('${json[r'dayChange']}'),
         dayChangePercent: num.parse('${json[r'dayChangePercent']}'),
+        hasUnpricedHoldings:
+            mapValueOfType<bool>(json, r'hasUnpricedHoldings')!,
       );
     }
     return null;
@@ -143,5 +156,6 @@ class PortfolioSummaryDto {
     'totalValue',
     'dayChange',
     'dayChangePercent',
+    'hasUnpricedHoldings',
   };
 }

@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
@@ -147,160 +147,134 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
           ];
 
           if (isDesktop) {
-            return SproutRouteWrapper(
-              size: SproutRouteSize.large,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: currentTab == HoldingsTab.overview
-                        ? SingleChildScrollView(
-                            controller: _desktopScrollController,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const MajorIndicesBarWidget(),
-                                SizedBox(
-                                  height: 300,
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      const Expanded(
-                                        flex: 6,
-                                        child: SproutCard(
-                                            child:
-                                                MajorIndicesTimelineWidget()),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: SproutCard(
-                                          child: HoldingPieChart(
-                                            investmentAccounts:
-                                                accountsWithHoldings,
-                                            topN: 5,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+            return SingleChildScrollView(
+              controller: _desktopScrollController,
+              child: SproutRouteWrapper(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (currentTab == HoldingsTab.overview) ...[
+                      const MarketSnapshotBarWidget(),
+                      SizedBox(
+                        height: 300,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Expanded(
+                              flex: 6,
+                              child: SproutCard(
+                                child: MajorIndicesTimelineWidget(),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: SproutCard(
+                                child: HoldingPieChart(
+                                  investmentAccounts: accountsWithHoldings,
+                                  topN: 5,
                                 ),
-                                if (isChatEnabled)
-                                  SizedBox(
-                                    height: 400,
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      spacing: 0,
-                                      children: [
-                                        const Expanded(
-                                          child: HoldingsChatCard(),
-                                        ),
-                                        Expanded(
-                                          child: SproutCard(
-                                            child: SingleChildScrollView(
-                                              child: HoldingMoverWidget(
-                                                investmentAccounts:
-                                                    accountsWithHoldings,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  SproutCard(
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isChatEnabled)
+                        SizedBox(
+                          height: 400,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: 0,
+                            children: [
+                              const Expanded(child: HoldingsChatCard()),
+                              Expanded(
+                                child: SproutCard(
+                                  child: SingleChildScrollView(
                                     child: HoldingMoverWidget(
                                       investmentAccounts: accountsWithHoldings,
                                     ),
                                   ),
-                                SproutCard(
-                                  child: HoldingDividendsWidget(
-                                    investmentAccounts: accountsWithHoldings,
-                                    isDesktop: isDesktop,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Column(
-                            children: [
-                              _buildPerformanceChart(theme, isDesktop),
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  controller: _desktopScrollController,
-                                  child: _buildHoldingsPanel(
-                                      theme, accountsWithHoldings),
                                 ),
                               ),
                             ],
                           ),
-                  ),
-                ],
+                        )
+                      else
+                        SproutCard(
+                          child: HoldingMoverWidget(
+                            investmentAccounts: accountsWithHoldings,
+                          ),
+                        ),
+                      SproutCard(
+                        child: HoldingDividendsWidget(
+                          investmentAccounts: accountsWithHoldings,
+                          isDesktop: isDesktop,
+                        ),
+                      ),
+                    ] else ...[
+                      _buildPerformanceChart(theme, isDesktop),
+                      _buildHoldingsPanel(theme, accountsWithHoldings),
+                    ],
+                  ],
+                ),
               ),
             );
           }
 
-          return SproutRouteWrapper(
-            child: SproutTabbedLayout(
-              tabs: tabs,
-              selected: currentTab,
-              onSelected: (tab) {
-                NavigationProvider.updateQueryParameters(
-                    context, {'tab': tab.name});
-                _resetScroll();
-              },
-              child: Column(
-                children: [
-                  const MajorIndicesBarWidget(),
-                  if (currentTab == HoldingsTab.holdings)
-                    _buildPerformanceChart(theme, isDesktop),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: _mobileScrollController,
-                      key: ValueKey(currentTab),
-                      padding: const EdgeInsets.only(
-                        bottom: SproutTabbedLayout.mobileNavigationScrollInset,
+          return SproutTabbedLayout(
+            tabs: tabs,
+            selected: currentTab,
+            onSelected: (tab) {
+              NavigationProvider.updateQueryParameters(
+                  context, {'tab': tab.name});
+              _resetScroll();
+            },
+            child: SingleChildScrollView(
+              controller: _mobileScrollController,
+              key: ValueKey(currentTab),
+              padding: const EdgeInsets.only(
+                bottom: SproutTabbedLayout.mobileNavigationScrollInset,
+              ),
+              child: SproutRouteWrapper(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const MarketSnapshotBarWidget(),
+                    if (currentTab == HoldingsTab.holdings)
+                      _buildPerformanceChart(theme, isDesktop),
+                    if (currentTab == HoldingsTab.holdings) ...[
+                      _buildHoldingsPanel(theme, accountsWithHoldings),
+                    ] else ...[
+                      if (isChatEnabled) const HoldingsChatCard(mobile: true),
+                      SproutCard(
+                        child: HoldingMoverWidget(
+                          investmentAccounts: accountsWithHoldings,
+                        ),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (currentTab == HoldingsTab.holdings) ...[
-                            _buildHoldingsPanel(theme, accountsWithHoldings),
-                          ] else ...[
-                            if (isChatEnabled)
-                              const HoldingsChatCard(mobile: true),
-                            SproutCard(
-                                child: HoldingMoverWidget(
-                                    investmentAccounts: accountsWithHoldings)),
-                            const SproutCard(
-                              child: SizedBox(
-                                height: 250,
-                                child: MajorIndicesTimelineWidget(),
-                              ),
-                            ),
-                            if (accountsWithHoldings.isNotEmpty)
-                              SproutCard(
-                                child: SizedBox(
-                                  height: 250,
-                                  child: HoldingPieChart(
-                                    investmentAccounts: accountsWithHoldings,
-                                    topN: 5,
-                                  ),
-                                ),
-                              ),
-                            SproutCard(
-                              child: HoldingDividendsWidget(
-                                investmentAccounts: accountsWithHoldings,
-                                isDesktop: isDesktop,
-                              ),
-                            ),
-                          ],
-                        ],
+                      const SproutCard(
+                        child: SizedBox(
+                          height: 250,
+                          child: MajorIndicesTimelineWidget(),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                      if (accountsWithHoldings.isNotEmpty)
+                        SproutCard(
+                          child: SizedBox(
+                            height: 250,
+                            child: HoldingPieChart(
+                              investmentAccounts: accountsWithHoldings,
+                              topN: 5,
+                            ),
+                          ),
+                        ),
+                      SproutCard(
+                        child: HoldingDividendsWidget(
+                          investmentAccounts: accountsWithHoldings,
+                          isDesktop: isDesktop,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           );
@@ -312,48 +286,46 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   /// Displays a list of holdings the current user has across their accounts
   Widget _buildHoldingsPanel(
       ThemeData theme, List<Account> accountsWithHoldings) {
-    return SproutRouteWrapper(
-      child: Column(
-        spacing: 8,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ...accountsWithHoldings.map((account) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
-                  child: Row(
-                    spacing: 12,
-                    children: [
-                      AccountIcon(account),
-                      Expanded(
-                        child: Text(
-                          account.name,
-                          style: theme.textTheme.titleMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+    return Column(
+      spacing: 8,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...accountsWithHoldings.map((account) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 4,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
+                child: Row(
+                  spacing: 12,
+                  children: [
+                    AccountIcon(account),
+                    Expanded(
+                      child: Text(
+                        account.name,
+                        style: theme.textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                AccountHoldingsList(
-                  accountId: account.id,
-                  selectedId: _selectedHolding?.id,
-                  onSelect: (holding) {
-                    setState(() {
-                      _selectedHolding = holding;
-                    });
-                  },
-                ),
-              ],
-            );
-          }),
-        ],
-      ),
+              ),
+              AccountHoldingsList(
+                accountId: account.id,
+                selectedId: _selectedHolding?.id,
+                onSelect: (holding) {
+                  setState(() {
+                    _selectedHolding = holding;
+                  });
+                },
+              ),
+            ],
+          );
+        }),
+      ],
     );
   }
 
@@ -419,8 +391,9 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
               ),
             ];
 
-            if (data.spots.isNotEmpty)
+            if (data.spots.isNotEmpty) {
               seriesList.add(LineChartDataProcessor.computeAverageData(data));
+            }
 
             return SproutLineChart(
               series: seriesList,

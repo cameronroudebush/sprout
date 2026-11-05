@@ -56,13 +56,29 @@
             android:layout_weight="1.5"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/widget_portfolio_column_label"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Portfolio"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/widget_portfolio_column_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Portfolio"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/widget_unpriced_indicator"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginStart="3dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/widget_warning"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/widget_portfolio_percent"
@@ -79,6 +95,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
                 tools:text="+$125.50" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -190,4 +207,5 @@
         android:text="@string/widget_no_data"
         android:textSize="13sp"
         tools:visibility="gone" />
+
 </RelativeLayout>
