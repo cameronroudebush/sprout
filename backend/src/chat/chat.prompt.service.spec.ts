@@ -9,8 +9,10 @@ import { ChatPromptService } from "@backend/chat/chat.prompt.service.js";
 import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { Configuration } from "@backend/config/core.js";
+import { MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto.js";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
+import { HoldingService } from "@backend/holding/holding.service.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionService } from "@backend/transaction/transaction.service.js";
@@ -21,6 +23,7 @@ describe("ChatPromptService", () => {
   let service: ChatPromptService;
   let transactionService: Mocked<TransactionService>;
   let budgetService: Mocked<BudgetService>;
+  let holdingService: Mocked<HoldingService>;
   const user = TestEntities.user;
 
   beforeEach(() => {
@@ -68,7 +71,11 @@ describe("ChatPromptService", () => {
       }),
     } as unknown as Mocked<BudgetService>;
 
-    service = new ChatPromptService(transactionService, budgetService);
+    holdingService = {
+      getLiveHoldingPrices: vi.fn().mockResolvedValue([]),
+    } as unknown as Mocked<HoldingService>;
+
+    service = new ChatPromptService(transactionService, budgetService, holdingService);
 
     vi.spyOn(Account, "find").mockResolvedValue([TestEntities.account]);
     vi.spyOn(Account, "convertListToTargetCurrency").mockImplementation((list: any) => list);
@@ -187,17 +194,293 @@ describe("ChatPromptService", () => {
     });
 
     it("should build daily overview prompt", async () => {
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "AAPL",
+          type: MarketQuoteType.EQUITY,
+          price: 200,
+          change: 2,
+          changePercent: 1,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
       const payload = await service.buildDailyOverviewPrompt(user);
       const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
       expect(contextData).not.toHaveProperty("budget");
       expect(budgetService.getBudgetOverview).not.toHaveBeenCalled();
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote.estimatedMarketValue).toBe(2000);
+      expect(contextData.accounts[0].b).toBe("1000.00");
+      expect(payload.contents[0]!.parts[0]!.text).toContain("never add holding values on top of the account balance");
     });
 
     it("should build holdings overview prompt", async () => {
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "AAPL",
+          type: MarketQuoteType.EQUITY,
+          price: 200,
+          change: 2,
+          changePercent: 1,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
       const payload = await service.buildHoldingsOverviewPrompt(user);
+      const promptText = payload.contents[0]!.parts[0]!.text;
       const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
       expect(contextData).not.toHaveProperty("budget");
       expect(budgetService.getBudgetOverview).not.toHaveBeenCalled();
+      expect(holdingService.getLiveHoldingPrices).toHaveBeenCalledWith(["AAPL", "^GSPC"]);
+      expect(contextData.liveMarketReference).toMatchObject({ source: "Yahoo Finance", marketState: MarketState.CLOSED });
+      expect(contextData.accounts[0].liveHoldings[0]).toMatchObject({
+        symbol: "AAPL",
+        shares: 10,
+        providerMarketValue: 1800,
+        providerValueAsOf: "unknown",
+        liveQuote: {
+          comparisonStatus: "comparable",
+          price: 200,
+          asOf: "2026-11-05T21:00:00.000Z",
+          estimatedMarketValue: 2000,
+          estimatedDailyChange: 20,
+        },
+      });
+      expect(promptText).toContain("Provider-reported market values and holding history may lag");
+      expect(promptText).toContain("its movement cannot yet be assessed");
+    });
+
+    it("should flag mutual-fund NAV as uncomparable when quote timestamp predates latest market close", async () => {
+      const fund = Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" });
+      vi.spyOn(Holding, "find").mockResolvedValue([fund]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: MarketState.POST,
+          price: 31.66,
+          change: -1.24,
+          changePercent: -3.7,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T20:59:00.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+      const liveHolding = contextData.accounts[0].liveHoldings[0];
+
+      expect(liveHolding.liveQuote).toMatchObject({
+        comparisonStatus: "uncomparable_nav_not_updated_since_close",
+        asOf: "2026-11-05T20:59:00.000Z",
+        estimatedDailyChange: null,
+      });
+    });
+
+    it("should compare mutual-fund movement when its source timestamp follows market close", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([
+        Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" }),
+      ]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: MarketState.POST,
+          price: 31.66,
+          change: -1.24,
+          changePercent: -3.7,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T23:49:05.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "comparable_after_close",
+        estimatedDailyChange: -2.48,
+        estimatedDailyChangePercent: -3.7,
+      });
+    });
+
+    it("should mark NAV uncomparable when source timestamp is missing", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, currency: "USD" })]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: MarketState.POST,
+          price: 31.66,
+          change: -1.24,
+          currency: "USD",
+          hasMarketTimestamp: false,
+          lastUpdated: "2026-11-05T23:49:05.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "uncomparable_missing_source_timestamp",
+        asOf: null,
+        estimatedDailyChange: null,
+      });
+    });
+
+    it("should mark NAV uncomparable while the broad market is open", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, currency: "USD" })]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: MarketState.POST,
+          price: 31.66,
+          change: -1.24,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T23:49:05.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.REGULAR,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T20:00:00.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "uncomparable_nav_pending",
+        estimatedDailyChange: null,
+      });
+    });
+
+    it("should mark NAV uncomparable without a market-close reference", async () => {
+      vi.spyOn(Holding, "find").mockResolvedValue([Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, currency: "USD" })]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: MarketState.POST,
+          price: 31.66,
+          change: -1.24,
+          currency: "USD",
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T23:49:05.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "uncomparable_missing_market_reference",
+        estimatedDailyChange: null,
+      });
+    });
+
+    it("should keep building prompt when live quote lookup fails", async () => {
+      holdingService.getLiveHoldingPrices.mockRejectedValue(new Error("Quote service unavailable"));
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "unavailable",
+        estimatedMarketValue: null,
+        estimatedDailyChange: null,
+      });
+    });
+
+    it("should skip quote lookup when there are no holdings", async () => {
+      vi.spyOn(Account, "find").mockResolvedValue([]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts).toEqual([]);
+      expect(contextData.liveMarketReference).toMatchObject({ marketState: null, asOf: null });
+      expect(holdingService.getLiveHoldingPrices).not.toHaveBeenCalled();
+    });
+
+    it("should use safe currency and change defaults when quote fields are missing", async () => {
+      const userWithoutCurrency = { ...user, config: { ...user.config, currency: undefined } } as User;
+      vi.spyOn(Holding, "find").mockResolvedValue([Holding.fromPlain({ ...TestEntities.holding, currency: "USD" })]);
+      holdingService.getLiveHoldingPrices.mockResolvedValue([
+        {
+          symbol: "AAPL",
+          type: MarketQuoteType.EQUITY,
+          price: 200,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+        {
+          symbol: "^GSPC",
+          type: MarketQuoteType.INDEX,
+          marketState: MarketState.CLOSED,
+          hasMarketTimestamp: true,
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+        } as any,
+      ]);
+
+      const payload = await service.buildHoldingsOverviewPrompt(userWithoutCurrency);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+        comparisonStatus: "comparable",
+        currency: "USD",
+        estimatedMarketValue: 2000,
+        estimatedDailyChange: 0,
+        estimatedDailyChangePercent: null,
+      });
     });
 
     it("should deidentify overlapping custom category names in saved chat history", async () => {

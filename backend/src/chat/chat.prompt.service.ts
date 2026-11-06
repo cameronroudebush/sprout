@@ -7,9 +7,12 @@ import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto";
 import { ChatHistory } from "@backend/chat/model/chat.history.model";
 import { ChatPromptResult } from "@backend/chat/provider/chat.provider";
 import { Configuration } from "@backend/config/core";
+import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
 import { Holding } from "@backend/holding/model/holding.model";
+import { HoldingService } from "@backend/holding/holding.service";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
@@ -23,6 +26,7 @@ export class ChatPromptService {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly budgetService: BudgetService,
+    private readonly holdingService: HoldingService,
   ) {}
 
   /** Generates the system instruction and prompt content to pass to the LLM for standard chatting. */
@@ -47,6 +51,11 @@ export class ChatPromptService {
        - If evidence is incomplete or conflicting, say that the cause cannot be determined.
        - Never infer market movement, interest, fees, transfers, deposits, or sync errors without supporting data.
        - Distinguish spending from balance movement, especially for credit accounts and transfers.`,
+      `INVESTMENT BALANCE CONTEXT:
+       - 'liveHoldings' adds holding-level provider values and current market quote estimates to each account when available.
+       - Use comparable live holding estimates to explain investment account balance movement, but never add holding values on top of the account balance; the account balance may already include those holdings.
+       - Treat uncomparable or stale mutual-fund values as last reported only. Do not use them as current account value or as evidence of a flat or changed balance.
+       - If NAV is pending or stale, state that investment account movement cannot be fully reconciled until NAV updates.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence quick takeaway (e.g., "Your checking account saw some downward movement today primarily driven by weekend spending.").`,
       `2. Follow with short key bullet points ONLY for accounts with notable activity. DO NOT list accounts with no changes or activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
@@ -55,7 +64,7 @@ export class ChatPromptService {
       `5. If there is no notable activity across any accounts, provide a simple 1-2 sentence summary stating that accounts are steady and OMIT the bulleted list entirely.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions, false);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions, false, true);
   }
 
   /** Builds prompt payload focused specifically on investment accounts & market holdings. */
@@ -65,8 +74,13 @@ export class ChatPromptService {
       `Write an ultra-concise, balanced daily investment performance summary covering the last 24 hours. STRICT MAXIMUM of 75 words total.`,
       `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
       `ACCOUNT MOVEMENT RECONCILIATION:
-       - Use 'hol' (CSV Symbol:CurrentValue:History[Date:MarketValue]) and 'his' balance history to evaluate historical market value movements.
-       - Identify holding or market drivers only when supported by supplied holding history.
+       - 'liveHoldings' contains current share counts, provider-reported values, Yahoo quote data, quote timestamps, and server-computed price movement estimates.
+       - For market-driven daily movement, use only live quote estimates with comparisonStatus 'comparable' or 'comparable_after_close'. These are estimates, not account-statement values.
+       - Provider-reported market values and holding history may lag. Do not treat them as today's market movement or use stale values to claim a holding was flat.
+       - For mutual funds, a quote is uncomparable when its NAV is pending, its source timestamp is missing, or its timestamp does not follow the latest market-close reference. Do not use its change or compare its value across periods; say that NAV is pending or stale and its movement cannot yet be assessed.
+       - POST means post-market session, not proof that a mutual-fund NAV is final. Only use mutual-fund movement when backend marks it 'comparable_after_close'.
+       - If quote data is unavailable or uncomparable, omit that holding from market-movement claims and disclose the uncertainty when material.
+       - Identify holding or market drivers only when supported by comparable live quotes.
        - Do not infer market causes from portfolio value changes alone.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence high-level takeaway summarizing overall portfolio direction today (e.g., "Your overall investments saw solid upward momentum today, lifted by strong broad-market gains.").`,
@@ -76,7 +90,7 @@ export class ChatPromptService {
       `5. Only cover materially relevant accounts that drove aggregate movement. Omit accounts with flat or unremarkable performance to save space.`,
     ];
 
-    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto], true, false);
+    return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto], true, false, true);
   }
 
   /** Builds a concise AI overview from the requested month's budget performance. */
@@ -213,11 +227,20 @@ export class ChatPromptService {
     validAccountTypes?: AccountType[],
     includePendingTransactions = true,
     includeBudgetContext = true,
+    includeLiveHoldingQuotes = false,
   ): Promise<ChatPromptResult> {
     await this.cleanupUserMax(user);
 
     const idMap = new Map<string, string>();
-    const data = await this.buildUserAccountDetails(user, timeframe, idMap, validAccountTypes, includePendingTransactions, includeBudgetContext);
+    const data = await this.buildUserAccountDetails(
+      user,
+      timeframe,
+      idMap,
+      validAccountTypes,
+      includePendingTransactions,
+      includeBudgetContext,
+      includeLiveHoldingQuotes,
+    );
 
     let sanitizedHistory: { role: string; parts: Array<{ text: string }> }[] = [];
     if (includeChatHistory) {
@@ -255,11 +278,37 @@ export class ChatPromptService {
     validAccountTypes?: AccountType[],
     includePendingTransactions = true,
     includeBudgetContext = true,
+    includeLiveHoldingQuotes = false,
   ) {
     const historicalTimeFrame = this.getTimeframeDate(timeframe);
     const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
     if (validAccountTypes) accountWhere.type = In(validAccountTypes);
     const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: accountWhere })), user);
+    const holdingsByAccountId = new Map<string, Holding[]>();
+    let liveQuotesBySymbol = new Map<string, MarketIndexDto>();
+    let marketReferenceAsOf: string | undefined;
+    let marketIsOpen = false;
+    if (includeLiveHoldingQuotes) {
+      const accountHoldings = await Promise.all(
+        accounts.map(async (account) => {
+          const holdings = Holding.convertListToTargetCurrency(await Holding.find({ where: { account: { id: account.id } } }), user);
+          holdingsByAccountId.set(account.id, holdings);
+          return holdings;
+        }),
+      );
+      const symbols = [...new Set(accountHoldings.flatMap((holdings) => holdings.map((holding) => holding.symbol)))];
+      if (symbols.length > 0) {
+        try {
+          const liveQuotes = await this.holdingService.getLiveHoldingPrices([...symbols, "^GSPC"]);
+          liveQuotesBySymbol = new Map(liveQuotes.map((quote) => [quote.symbol, quote]));
+          const marketReference = liveQuotesBySymbol.get("^GSPC");
+          marketIsOpen = marketReference?.marketState === MarketState.REGULAR;
+          if (marketReference?.hasMarketTimestamp) marketReferenceAsOf = marketReference.lastUpdated;
+        } catch {
+          // A quote-provider outage should not prevent the overview from using stored account data.
+        }
+      }
+    }
     const txWhere: FindOptionsWhere<Transaction> = { account: accountWhere, posted: MoreThan(historicalTimeFrame) };
     if (!includePendingTransactions) txWhere.pending = false;
     const transactions = Transaction.convertListToTargetCurrency(
@@ -282,7 +331,9 @@ export class ChatPromptService {
         const genericId = `Acc_${accIndex++}`;
         idMap.set(acc.id, genericId);
 
-        const holdings = Holding.convertListToTargetCurrency(await Holding.find({ where: { account: { id: acc.id } } }), user);
+        const holdings = includeLiveHoldingQuotes
+          ? holdingsByAccountId.get(acc.id)!
+          : Holding.convertListToTargetCurrency(await Holding.find({ where: { account: { id: acc.id } } }), user);
 
         let history = AccountHistory.convertListToTargetCurrency(
           await AccountHistory.find({
@@ -360,7 +411,46 @@ export class ChatPromptService {
             }
 
             const val = Number(h.marketValue).toFixed(2);
-            return `${h.symbol}:${val}:[${formattedHoldingHistory.join(",")}]`;
+            if (!includeLiveHoldingQuotes) return `${h.symbol}:${val}:[${formattedHoldingHistory.join(",")}]`;
+
+            const quote = liveQuotesBySymbol.get(h.symbol);
+            const hasUsablePrice = !!quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0;
+            const hasSourceTimestamp = !!quote?.hasMarketTimestamp;
+            const quoteIsAfterClose =
+              quote?.marketState === MarketState.CLOSED || quote?.marketState === MarketState.POST || quote?.marketState === MarketState.POSTPOST;
+            let comparisonStatus = "comparable";
+            if (!hasUsablePrice) comparisonStatus = "unavailable";
+            else if (!hasSourceTimestamp) comparisonStatus = "uncomparable_missing_source_timestamp";
+            else if (quote?.type === MarketQuoteType.MUTUALFUND) {
+              if (marketIsOpen || !quoteIsAfterClose) comparisonStatus = "uncomparable_nav_pending";
+              else if (!marketReferenceAsOf) comparisonStatus = "uncomparable_missing_market_reference";
+              else if (Date.parse(quote.lastUpdated) <= Date.parse(marketReferenceAsOf)) comparisonStatus = "uncomparable_nav_not_updated_since_close";
+              else comparisonStatus = "comparable_after_close";
+            }
+
+            const isComparable = comparisonStatus === "comparable" || comparisonStatus === "comparable_after_close";
+            const quoteCurrency = quote?.currency ?? h.currency;
+            return {
+              symbol: h.symbol,
+              shares: h.shares,
+              providerMarketValue: h.marketValue,
+              providerValueAsOf: "unknown",
+              history: formattedHoldingHistory,
+              liveQuote: {
+                comparisonStatus,
+                quoteType: quote?.type ?? null,
+                marketState: quote?.marketState ?? null,
+                currency: quoteCurrency,
+                price: hasUsablePrice ? quote.price : null,
+                asOf: hasSourceTimestamp ? quote?.lastUpdated : null,
+                estimatedMarketValue: hasUsablePrice ? CurrencyHelper.convert(quote!.price * h.shares, quoteCurrency, user.config?.currency ?? "USD") : null,
+                estimatedDailyChange:
+                  hasUsablePrice && isComparable
+                    ? CurrencyHelper.convert((quote!.change ?? 0) * h.shares, quoteCurrency, user.config?.currency ?? "USD")
+                    : null,
+                estimatedDailyChangePercent: isComparable ? (quote?.changePercent ?? null) : null,
+              },
+            };
           }),
         );
 
@@ -370,7 +460,8 @@ export class ChatPromptService {
           s: acc.subType,
           b: Number(acc.balance).toFixed(2),
           r: acc.interestRate,
-          hol: formattedHoldings.join(","),
+          hol: includeLiveHoldingQuotes ? undefined : formattedHoldings.join(","),
+          ...(includeLiveHoldingQuotes ? { liveHoldings: formattedHoldings } : {}),
           his: historyFormatted.join(","),
         };
       }),
@@ -412,6 +503,15 @@ export class ChatPromptService {
       accounts: accountData,
       transactions: compactTransactions,
       subscriptions: compactSubscriptions,
+      ...(includeLiveHoldingQuotes
+        ? {
+            liveMarketReference: {
+              source: "Yahoo Finance",
+              marketState: liveQuotesBySymbol.get("^GSPC")?.marketState ?? null,
+              asOf: marketReferenceAsOf ?? null,
+            },
+          }
+        : {}),
       ...(budget ? { budget } : {}),
     };
   }
