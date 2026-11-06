@@ -24,7 +24,7 @@ const MAJOR_INDICES: Record<string, { name: string; color: string }> = {
  */
 @Injectable()
 export class HoldingService {
-  private readonly yf = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+  private readonly yf = new YahooFinance({ suppressNotices: ["yahooSurvey"], validation: { logErrors: false } });
   constructor(
     private readonly netWorthService: NetWorthService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -161,7 +161,6 @@ export class HoldingService {
     // Mutual-fund quotes can say CLOSED while the exchange is trading; use an index for session state.
     const marketIndexQuote = quoteBySymbol.get("^GSPC");
     const marketIsOpen = marketIndexQuote?.marketState === MarketState.REGULAR;
-    const marketSessionDate = marketIndexQuote?.hasMarketTimestamp ? getMarketDate(marketIndexQuote.lastUpdated) : undefined;
 
     let totalValue = 0;
     let pricedValue = 0;
@@ -173,9 +172,9 @@ export class HoldingService {
         const sourceCurrency = quote.currency ?? holding.currency;
         const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
         totalValue += currentValue;
-        const mutualFundIsUnpriced =
-          quote.type === MarketQuoteType.MUTUALFUND &&
-          (marketIsOpen || !marketSessionDate || !quote.hasMarketTimestamp || getMarketDate(quote.lastUpdated) !== marketSessionDate);
+        const mutualFundMarketIsClosed =
+          quote.marketState === MarketState.CLOSED || quote.marketState === MarketState.POST || quote.marketState === MarketState.POSTPOST;
+        const mutualFundIsUnpriced = quote.type === MarketQuoteType.MUTUALFUND && (marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp);
         if (mutualFundIsUnpriced) {
           hasUnpricedHoldings = true;
           continue;
@@ -266,9 +265,4 @@ export class HoldingService {
       throw new HttpException("Failed to retrieve market history timeline", HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
-}
-
-function getMarketDate(timestamp: string): string | undefined {
-  const parsedTimestamp = Date.parse(timestamp);
-  return Number.isNaN(parsedTimestamp) ? undefined : new Date(parsedTimestamp).toISOString().slice(0, 10);
 }

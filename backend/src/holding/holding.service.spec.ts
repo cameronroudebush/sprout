@@ -194,7 +194,7 @@ describe("HoldingService", () => {
       });
     });
 
-    it("should include mutual fund movement when market is closed", async () => {
+    it.each(["CLOSED", "POST", "POSTPOST"])("should include mutual fund movement for %s fund market state", async (marketState) => {
       const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
@@ -204,6 +204,7 @@ describe("HoldingService", () => {
           change: 5,
           currency: "USD",
           type: MarketQuoteType.MUTUALFUND,
+          marketState,
           lastUpdated: "2026-11-05T21:00:00.000Z",
           hasMarketTimestamp: true,
         } as any,
@@ -220,7 +221,7 @@ describe("HoldingService", () => {
       });
     });
 
-    it("should exclude mutual fund movement after close until its NAV updates", async () => {
+    it("should trust POST state without requiring quote and index dates to match", async () => {
       const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
@@ -230,6 +231,7 @@ describe("HoldingService", () => {
           change: 5,
           currency: "USD",
           type: MarketQuoteType.MUTUALFUND,
+          marketState: "POST",
           lastUpdated: "2026-11-04T21:00:00.000Z",
           hasMarketTimestamp: true,
         } as any,
@@ -240,9 +242,9 @@ describe("HoldingService", () => {
 
       expect(result).toEqual({
         totalValue: 1000,
-        dayChange: 0,
-        dayChangePercent: 0,
-        hasUnpricedHoldings: true,
+        dayChange: 10,
+        dayChangePercent: expect.closeTo(1.0101, 3),
+        hasUnpricedHoldings: false,
       });
     });
 
@@ -256,6 +258,7 @@ describe("HoldingService", () => {
           change: 5,
           currency: "USD",
           type: MarketQuoteType.MUTUALFUND,
+          marketState: "POST",
           lastUpdated: "2026-11-05T21:00:00.000Z",
           hasMarketTimestamp: false,
         } as any,
@@ -281,6 +284,29 @@ describe("HoldingService", () => {
         dayChangePercent: expect.closeTo(2.8571, 3),
         hasUnpricedHoldings: false,
       });
+    });
+
+    it("should exclude a mutual fund still in REGULAR state after the index market closes", async () => {
+      const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        {
+          symbol: "VFIAX",
+          price: 500,
+          change: 5,
+          currency: "USD",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: "REGULAR",
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+          hasMarketTimestamp: true,
+        } as any,
+        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result.dayChange).toBe(0);
+      expect(result.hasUnpricedHoldings).toBe(true);
     });
 
     it("should use stored value without daily change when quote and close price are missing", async () => {
