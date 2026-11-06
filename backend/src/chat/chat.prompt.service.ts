@@ -78,7 +78,8 @@ export class ChatPromptService {
        - For market-driven daily movement, use only live quote estimates with comparisonStatus 'comparable' or 'comparable_after_close'. These are estimates, not account-statement values.
        - Provider-reported market values and holding history may lag. Do not treat them as today's market movement or use stale values to claim a holding was flat.
        - For mutual funds, a quote is uncomparable when its NAV is pending, its source timestamp is missing, or its timestamp does not follow the latest market-close reference. Do not use its change or compare its value across periods; say that NAV is pending or stale and its movement cannot yet be assessed.
-       - POST means post-market session, not proof that a mutual-fund NAV is final. Only use mutual-fund movement when backend marks it 'comparable_after_close'.
+       - Ignore pre-market price fields. PRE/PREPRE use the last regular-session price for display; pre-market movement is not part of this overview.
+       - POST means post-market session, not proof that a mutual-fund NAV is final. PRE/PREPRE also do not prove a NAV is final. Only use mutual-fund movement when backend marks it 'comparable_after_close'.
        - If quote data is unavailable or uncomparable, omit that holding from market-movement claims and disclose the uncertainty when material.
        - Identify holding or market drivers only when supported by comparable live quotes.
        - Do not infer market causes from portfolio value changes alone.`,
@@ -417,7 +418,11 @@ export class ChatPromptService {
             const hasUsablePrice = !!quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0;
             const hasSourceTimestamp = !!quote?.hasMarketTimestamp;
             const quoteIsAfterClose =
-              quote?.marketState === MarketState.CLOSED || quote?.marketState === MarketState.POST || quote?.marketState === MarketState.POSTPOST;
+              quote?.marketState === MarketState.CLOSED ||
+              quote?.marketState === MarketState.POST ||
+              quote?.marketState === MarketState.POSTPOST ||
+              quote?.marketState === MarketState.PRE ||
+              quote?.marketState === MarketState.PREPRE;
             let comparisonStatus = "comparable";
             if (!hasUsablePrice) comparisonStatus = "unavailable";
             else if (!hasSourceTimestamp) comparisonStatus = "uncomparable_missing_source_timestamp";

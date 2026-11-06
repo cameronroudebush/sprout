@@ -173,7 +173,11 @@ export class HoldingService {
         const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
         totalValue += currentValue;
         const mutualFundMarketIsClosed =
-          quote.marketState === MarketState.CLOSED || quote.marketState === MarketState.POST || quote.marketState === MarketState.POSTPOST;
+          quote.marketState === MarketState.CLOSED ||
+          quote.marketState === MarketState.POST ||
+          quote.marketState === MarketState.POSTPOST ||
+          quote.marketState === MarketState.PRE ||
+          quote.marketState === MarketState.PREPRE;
         const mutualFundIsUnpriced = quote.type === MarketQuoteType.MUTUALFUND && (marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp);
         if (mutualFundIsUnpriced) {
           hasUnpricedHoldings = true;

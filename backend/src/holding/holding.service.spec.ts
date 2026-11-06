@@ -194,7 +194,7 @@ describe("HoldingService", () => {
       });
     });
 
-    it.each(["CLOSED", "POST", "POSTPOST"])("should include mutual fund movement for %s fund market state", async (marketState) => {
+    it.each(["CLOSED", "POST", "POSTPOST", "PRE", "PREPRE"])("should include mutual fund movement for %s fund market state", async (marketState) => {
       const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
@@ -208,7 +208,12 @@ describe("HoldingService", () => {
           lastUpdated: "2026-11-05T21:00:00.000Z",
           hasMarketTimestamp: true,
         } as any,
-        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
+        {
+          symbol: "^GSPC",
+          marketState: marketState === "PRE" || marketState === "PREPRE" ? "PRE" : "CLOSED",
+          lastUpdated: "2026-11-05T21:00:00.000Z",
+          hasMarketTimestamp: true,
+        } as any,
       ]);
 
       const result = await service.getPortfolioSummary(TestEntities.user);

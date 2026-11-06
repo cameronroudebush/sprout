@@ -270,14 +270,14 @@ describe("ChatPromptService", () => {
       expect(promptText).toContain("its movement cannot yet be assessed");
     });
 
-    it("should flag mutual-fund NAV as uncomparable when quote timestamp predates latest market close", async () => {
+    it("should flag pre-market mutual-fund NAV as uncomparable when timestamp predates latest market close", async () => {
       const fund = Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" });
       vi.spyOn(Holding, "find").mockResolvedValue([fund]);
       holdingService.getLiveHoldingPrices.mockResolvedValue([
         {
           symbol: "RFKTX",
           type: MarketQuoteType.MUTUALFUND,
-          marketState: MarketState.POST,
+          marketState: MarketState.PRE,
           price: 31.66,
           change: -1.24,
           changePercent: -3.7,
@@ -305,40 +305,43 @@ describe("ChatPromptService", () => {
       });
     });
 
-    it("should compare mutual-fund movement when its source timestamp follows market close", async () => {
-      vi.spyOn(Holding, "find").mockResolvedValue([
-        Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" }),
-      ]);
-      holdingService.getLiveHoldingPrices.mockResolvedValue([
-        {
-          symbol: "RFKTX",
-          type: MarketQuoteType.MUTUALFUND,
-          marketState: MarketState.POST,
-          price: 31.66,
-          change: -1.24,
-          changePercent: -3.7,
-          currency: "USD",
-          hasMarketTimestamp: true,
-          lastUpdated: "2026-11-05T23:49:05.000Z",
-        } as any,
-        {
-          symbol: "^GSPC",
-          type: MarketQuoteType.INDEX,
-          marketState: MarketState.CLOSED,
-          hasMarketTimestamp: true,
-          lastUpdated: "2026-11-05T21:00:00.000Z",
-        } as any,
-      ]);
+    it.each([MarketState.POST, MarketState.PRE, MarketState.PREPRE])(
+      "should compare mutual-fund movement for %s when source timestamp follows market close",
+      async (marketState) => {
+        vi.spyOn(Holding, "find").mockResolvedValue([
+          Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" }),
+        ]);
+        holdingService.getLiveHoldingPrices.mockResolvedValue([
+          {
+            symbol: "RFKTX",
+            type: MarketQuoteType.MUTUALFUND,
+            marketState,
+            price: 31.66,
+            change: -1.24,
+            changePercent: -3.7,
+            currency: "USD",
+            hasMarketTimestamp: true,
+            lastUpdated: marketState === MarketState.POST ? "2026-11-05T23:49:05.000Z" : "2026-11-06T01:04:05.000Z",
+          } as any,
+          {
+            symbol: "^GSPC",
+            type: MarketQuoteType.INDEX,
+            marketState: MarketState.CLOSED,
+            hasMarketTimestamp: true,
+            lastUpdated: "2026-11-05T21:00:00.000Z",
+          } as any,
+        ]);
 
-      const payload = await service.buildHoldingsOverviewPrompt(user);
-      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+        const payload = await service.buildHoldingsOverviewPrompt(user);
+        const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
 
-      expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
-        comparisonStatus: "comparable_after_close",
-        estimatedDailyChange: -2.48,
-        estimatedDailyChangePercent: -3.7,
-      });
-    });
+        expect(contextData.accounts[0].liveHoldings[0].liveQuote).toMatchObject({
+          comparisonStatus: "comparable_after_close",
+          estimatedDailyChange: -2.48,
+          estimatedDailyChangePercent: -3.7,
+        });
+      },
+    );
 
     it("should mark NAV uncomparable when source timestamp is missing", async () => {
       vi.spyOn(Holding, "find").mockResolvedValue([Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, currency: "USD" })]);
