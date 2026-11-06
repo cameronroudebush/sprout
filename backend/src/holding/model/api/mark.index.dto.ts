@@ -1,7 +1,7 @@
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEnum, IsISO8601, IsNumber, IsOptional, IsString } from "class-validator";
 
 export enum MarketState {
   REGULAR = "REGULAR",
@@ -77,8 +77,8 @@ export class MarketIndexDto {
   @IsISO8601()
   lastUpdated: string;
 
-  @Exclude({ toPlainOnly: true })
-  @ApiHideProperty()
+  @IsBoolean()
+  @ApiProperty({ description: "Whether lastUpdated came from Yahoo's source quote timestamp." })
   hasMarketTimestamp: boolean;
 
   @IsNumber()

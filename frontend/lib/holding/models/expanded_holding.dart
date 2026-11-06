@@ -34,6 +34,7 @@ class ExpandedHolding extends MarketIndexDto {
       required num baseChange,
       required num baseChangePercent,
       required String baseLastUpdated,
+      required super.hasMarketTimestamp,
       required this.totalGain,
       required this.totalGainPercent,
       required super.type})

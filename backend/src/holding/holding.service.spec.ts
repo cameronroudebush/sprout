@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 setupTests();
 
+import { AccountType } from "@backend/account/model/account.type.js";
 import { MarketQuoteType } from "@backend/holding/model/api/mark.index.dto.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
 import { HttpException } from "@nestjs/common";
@@ -175,6 +176,45 @@ describe("HoldingService", () => {
       });
     });
 
+    it("should ignore crypto holdings", async () => {
+      const cryptoHolding = {
+        ...mockHolding,
+        symbol: "BTC",
+        account: { ...mockHolding.account, type: AccountType.crypto },
+      } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([cryptoHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "BTC", price: 100, change: 10, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 0,
+        dayChange: 0,
+        dayChangePercent: 0,
+        hasUnpricedHoldings: false,
+      });
+    });
+
+    it("should include money-market value but exclude it from daily movement weighting", async () => {
+      const moneyMarketHolding = { ...mockHolding, id: "money-market", symbol: "FDLXX", shares: 24000 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([mockHolding, moneyMarketHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        { symbol: "AAPL", price: 200, change: 2, currency: "USD", type: MarketQuoteType.EQUITY } as any,
+        { symbol: "FDLXX", price: 1, change: 0, currency: "USD", type: MarketQuoteType.MONEYMARKET } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result).toEqual({
+        totalValue: 26000,
+        dayChange: 20,
+        dayChangePercent: expect.closeTo(1.0101, 3),
+        hasUnpricedHoldings: false,
+      });
+    });
+
     it("should exclude mutual funds from weighted movement while market is open", async () => {
       const fundHolding = { ...mockHolding, id: "fund-holding", symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([mockHolding, fundHolding]);
@@ -187,7 +227,7 @@ describe("HoldingService", () => {
       const result = await service.getPortfolioSummary(TestEntities.user);
 
       expect(result).toEqual({
-        totalValue: 3000,
+        totalValue: 2000,
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: true,
@@ -205,13 +245,13 @@ describe("HoldingService", () => {
           currency: "USD",
           type: MarketQuoteType.MUTUALFUND,
           marketState,
-          lastUpdated: "2026-11-05T21:00:00.000Z",
+          lastUpdated: "2026-11-06T01:04:05.000Z",
           hasMarketTimestamp: true,
         } as any,
         {
           symbol: "^GSPC",
           marketState: marketState === "PRE" || marketState === "PREPRE" ? "PRE" : "CLOSED",
-          lastUpdated: "2026-11-05T21:00:00.000Z",
+          lastUpdated: "2026-11-05T21:34:08.000Z",
           hasMarketTimestamp: true,
         } as any,
       ]);
@@ -226,7 +266,7 @@ describe("HoldingService", () => {
       });
     });
 
-    it("should trust POST state without requiring quote and index dates to match", async () => {
+    it("should accept a pre-market NAV updated after the prior close across a UTC date boundary", async () => {
       const fundHolding = { ...mockHolding, symbol: "VFIAX", shares: 2 } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
@@ -236,11 +276,11 @@ describe("HoldingService", () => {
           change: 5,
           currency: "USD",
           type: MarketQuoteType.MUTUALFUND,
-          marketState: "POST",
-          lastUpdated: "2026-11-04T21:00:00.000Z",
+          marketState: "PRE",
+          lastUpdated: "2026-11-06T01:04:05.000Z",
           hasMarketTimestamp: true,
         } as any,
-        { symbol: "^GSPC", marketState: "CLOSED", lastUpdated: "2026-11-05T21:00:00.000Z", hasMarketTimestamp: true } as any,
+        { symbol: "^GSPC", marketState: "PRE", lastUpdated: "2026-11-05T21:34:08.000Z", hasMarketTimestamp: true } as any,
       ]);
 
       const result = await service.getPortfolioSummary(TestEntities.user);
@@ -251,6 +291,30 @@ describe("HoldingService", () => {
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
       });
+    });
+
+    it("should keep a mutual fund unpriced after close when source timestamp predates close", async () => {
+      const fundHolding = { ...mockHolding, symbol: "RFKTX", shares: 2 } as Holding;
+      vi.spyOn(Holding, "find").mockResolvedValue([fundHolding]);
+      vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([
+        {
+          symbol: "RFKTX",
+          price: 31.66,
+          change: -1.24,
+          currency: "USD",
+          type: MarketQuoteType.MUTUALFUND,
+          marketState: "POST",
+          lastUpdated: "2026-11-06T13:07:31.000Z",
+          hasMarketTimestamp: true,
+        } as any,
+        { symbol: "^GSPC", marketState: "POST", lastUpdated: "2026-11-06T21:18:34.000Z", hasMarketTimestamp: true } as any,
+      ]);
+
+      const result = await service.getPortfolioSummary(TestEntities.user);
+
+      expect(result.totalValue).toBe(0);
+      expect(result.dayChange).toBe(0);
+      expect(result.hasUnpricedHoldings).toBe(true);
     });
 
     it("should not treat a synthesized quote timestamp as a posted NAV", async () => {
@@ -272,11 +336,12 @@ describe("HoldingService", () => {
 
       const result = await service.getPortfolioSummary(TestEntities.user);
 
+      expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
       expect(result.hasUnpricedHoldings).toBe(true);
     });
 
-    it("should fall back to stored values and close price when live quote is invalid", async () => {
+    it("should exclude holdings when the live quote is invalid", async () => {
       const holding = { ...mockHolding, marketValue: 1800, shares: 10, currency: "USD", extra: { closePrice: 175 } } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([holding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([{ symbol: "AAPL", price: 0, type: MarketQuoteType.INVALID } as any]);
@@ -284,10 +349,10 @@ describe("HoldingService", () => {
       const result = await service.getPortfolioSummary(TestEntities.user);
 
       expect(result).toEqual({
-        totalValue: 1800,
-        dayChange: 50,
-        dayChangePercent: expect.closeTo(2.8571, 3),
-        hasUnpricedHoldings: false,
+        totalValue: 0,
+        dayChange: 0,
+        dayChangePercent: 0,
+        hasUnpricedHoldings: true,
       });
     });
 
@@ -310,11 +375,12 @@ describe("HoldingService", () => {
 
       const result = await service.getPortfolioSummary(TestEntities.user);
 
+      expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
       expect(result.hasUnpricedHoldings).toBe(true);
     });
 
-    it("should use stored value without daily change when quote and close price are missing", async () => {
+    it("should exclude holdings when the live quote is missing", async () => {
       const holding = { ...mockHolding, marketValue: 500, shares: 10, currency: "USD", extra: {} } as Holding;
       vi.spyOn(Holding, "find").mockResolvedValue([holding]);
       vi.spyOn(service, "getLiveHoldingPrices").mockResolvedValue([]);
@@ -322,10 +388,10 @@ describe("HoldingService", () => {
       const result = await service.getPortfolioSummary(TestEntities.user);
 
       expect(result).toEqual({
-        totalValue: 500,
+        totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: false,
+        hasUnpricedHoldings: true,
       });
     });
 

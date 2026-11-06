@@ -1,9 +1,12 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
+import 'package:sprout/holding/models/market_price_freshness.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
+import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// Helps tracking merged movers so we don't say the same symbol multiple times
 class _MergedMover {
@@ -34,10 +37,13 @@ class HoldingMoverWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
+    final marketIndices = ref.watch(majorIndicesProvider).value ?? [];
+    final marketReference =
+        marketIndices.firstWhereOrNull((index) => index.symbol == "^GSPC");
 
     final Map<String, _MergedMover> mergedHoldings = {};
+    final pendingNavSymbols = <String>{};
 
     for (final account in investmentAccounts) {
       final holdings =
@@ -46,12 +52,9 @@ class HoldingMoverWidget extends ConsumerWidget {
         final state = ref.watch(expandedHoldingProvider(holding));
         final symbol = holding.symbol;
 
-        final isMutualFund = state.type == MarketIndexDtoTypeEnum.MUTUALFUND;
-        final isMarketOpen =
-            state.marketState == MarketIndexDtoMarketStateEnum.REGULAR;
-
-        if (isMutualFund && isMarketOpen) {
-          continue; // Skip calculating daily moves for mutual funds until post-close updates land
+        if (isMutualFundNavPending(state, marketReference)) {
+          pendingNavSymbols.add(symbol);
+          continue;
         }
 
         if (mergedHoldings.containsKey(symbol)) {
@@ -93,7 +96,8 @@ class HoldingMoverWidget extends ConsumerWidget {
         .take(count)
         .toList();
 
-    if (gainers.isEmpty && losers.isEmpty) {
+    final pendingSymbols = pendingNavSymbols.toList()..sort();
+    if (gainers.isEmpty && losers.isEmpty && pendingSymbols.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -103,14 +107,19 @@ class HoldingMoverWidget extends ConsumerWidget {
         spacing: 16,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Center(
-            child: Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
+          SproutChartHeader(
+            title: title,
+            right: pendingSymbols.isNotEmpty
+                ? Tooltip(
+                    message:
+                        "Not all NAVs have funded so some prices are still pending.",
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      size: 24,
+                      color: Colors.amber.shade700,
+                    ),
+                  )
+                : SizedBox.shrink(),
           ),
           LayoutBuilder(
             builder: (context, constraints) {

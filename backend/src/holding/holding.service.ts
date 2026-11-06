@@ -1,4 +1,5 @@
 import { Account } from "@backend/account/model/account.model";
+import { AccountType } from "@backend/account/model/account.type";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { MajorIndexTimelineDto, MajorIndexTimelinePoint } from "@backend/holding/model/api/major.index.timeline.dto";
 import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
@@ -168,19 +169,31 @@ export class HoldingService {
     let hasUnpricedHoldings = false;
     for (const holding of holdings) {
       const quote = quoteBySymbol.get(holding.symbol);
+      // Ignore crypto from summary for now as our quoting doesn't support that
+      if (holding.account.type === AccountType.crypto) continue;
       if (quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0) {
         const sourceCurrency = quote.currency ?? holding.currency;
         const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
-        totalValue += currentValue;
         const mutualFundMarketIsClosed =
           quote.marketState === MarketState.CLOSED ||
           quote.marketState === MarketState.POST ||
           quote.marketState === MarketState.POSTPOST ||
           quote.marketState === MarketState.PRE ||
           quote.marketState === MarketState.PREPRE;
-        const mutualFundIsUnpriced = quote.type === MarketQuoteType.MUTUALFUND && (marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp);
+        const quoteTimestamp = Date.parse(quote.lastUpdated);
+        const marketCloseTimestamp = marketIndexQuote?.hasMarketTimestamp ? Date.parse(marketIndexQuote.lastUpdated) : Number.NaN;
+        const mutualFundNavUpdatedAfterClose =
+          Number.isFinite(quoteTimestamp) && Number.isFinite(marketCloseTimestamp) && quoteTimestamp > marketCloseTimestamp;
+        const mutualFundIsUnpriced =
+          quote.type === MarketQuoteType.MUTUALFUND &&
+          (marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp || !mutualFundNavUpdatedAfterClose);
         if (mutualFundIsUnpriced) {
           hasUnpricedHoldings = true;
+          continue;
+        }
+
+        totalValue += currentValue;
+        if (quote.type === MarketQuoteType.MONEYMARKET) {
           continue;
         }
 
@@ -189,14 +202,8 @@ export class HoldingService {
         continue;
       }
 
-      const storedValue = CurrencyHelper.convert(holding.marketValue, holding.currency, targetCurrency);
-      totalValue += storedValue;
-      pricedValue += storedValue;
-      const closePrice = Number(holding.extra?.["closePrice"]);
-      if (closePrice > 0 && holding.shares !== 0) {
-        const estimatedChange = holding.marketValue - closePrice * holding.shares;
-        dayChange += CurrencyHelper.convert(estimatedChange, holding.currency, targetCurrency);
-      }
+      // Without a valid quote, the holding may be an unpriced mutual fund; exclude it rather than counting stale values.
+      hasUnpricedHoldings = true;
     }
 
     const previousValue = pricedValue - dayChange;

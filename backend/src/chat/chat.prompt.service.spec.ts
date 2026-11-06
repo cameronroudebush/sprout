@@ -270,27 +270,27 @@ describe("ChatPromptService", () => {
       expect(promptText).toContain("its movement cannot yet be assessed");
     });
 
-    it("should flag pre-market mutual-fund NAV as uncomparable when timestamp predates latest market close", async () => {
+    it("should flag post-market mutual-fund NAV as uncomparable when timestamp predates latest market close", async () => {
       const fund = Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" });
       vi.spyOn(Holding, "find").mockResolvedValue([fund]);
       holdingService.getLiveHoldingPrices.mockResolvedValue([
         {
           symbol: "RFKTX",
           type: MarketQuoteType.MUTUALFUND,
-          marketState: MarketState.PRE,
+          marketState: MarketState.POST,
           price: 31.66,
           change: -1.24,
           changePercent: -3.7,
           currency: "USD",
           hasMarketTimestamp: true,
-          lastUpdated: "2026-11-05T20:59:00.000Z",
+          lastUpdated: "2026-11-06T13:07:31.000Z",
         } as any,
         {
           symbol: "^GSPC",
           type: MarketQuoteType.INDEX,
           marketState: MarketState.CLOSED,
           hasMarketTimestamp: true,
-          lastUpdated: "2026-11-05T21:00:00.000Z",
+          lastUpdated: "2026-11-06T21:18:34.000Z",
         } as any,
       ]);
 
@@ -300,7 +300,7 @@ describe("ChatPromptService", () => {
 
       expect(liveHolding.liveQuote).toMatchObject({
         comparisonStatus: "uncomparable_nav_not_updated_since_close",
-        asOf: "2026-11-05T20:59:00.000Z",
+        asOf: "2026-11-06T13:07:31.000Z",
         estimatedDailyChange: null,
       });
     });

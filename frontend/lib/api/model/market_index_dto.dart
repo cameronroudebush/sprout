@@ -25,6 +25,7 @@ class MarketIndexDto {
     required this.change,
     required this.changePercent,
     required this.lastUpdated,
+    required this.hasMarketTimestamp,
   });
 
   /// The type of financial instrument
@@ -54,6 +55,8 @@ class MarketIndexDto {
 
   String lastUpdated;
 
+  bool hasMarketTimestamp;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -69,7 +72,8 @@ class MarketIndexDto {
           other.name == name &&
           other.change == change &&
           other.changePercent == changePercent &&
-          other.lastUpdated == lastUpdated;
+          other.lastUpdated == lastUpdated &&
+          other.hasMarketTimestamp == hasMarketTimestamp;
 
   @override
   int get hashCode =>
@@ -85,11 +89,12 @@ class MarketIndexDto {
       (name.hashCode) +
       (change.hashCode) +
       (changePercent.hashCode) +
-      (lastUpdated.hashCode);
+      (lastUpdated.hashCode) +
+      (hasMarketTimestamp.hashCode);
 
   @override
   String toString() =>
-      'MarketIndexDto[type=$type, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated]';
+      'MarketIndexDto[type=$type, previousClose=$previousClose, dayLow=$dayLow, dayHigh=$dayHigh, marketState=$marketState, dividendYield=$dividendYield, price=$price, symbol=$symbol, name=$name, change=$change, changePercent=$changePercent, lastUpdated=$lastUpdated, hasMarketTimestamp=$hasMarketTimestamp]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -125,6 +130,7 @@ class MarketIndexDto {
     json[r'change'] = this.change;
     json[r'changePercent'] = this.changePercent;
     json[r'lastUpdated'] = this.lastUpdated;
+    json[r'hasMarketTimestamp'] = this.hasMarketTimestamp;
     return json;
   }
 
@@ -167,6 +173,10 @@ class MarketIndexDto {
             'Required key "MarketIndexDto[lastUpdated]" is missing from JSON.');
         assert(json[r'lastUpdated'] != null,
             'Required key "MarketIndexDto[lastUpdated]" has a null value in JSON.');
+        assert(json.containsKey(r'hasMarketTimestamp'),
+            'Required key "MarketIndexDto[hasMarketTimestamp]" is missing from JSON.');
+        assert(json[r'hasMarketTimestamp'] != null,
+            'Required key "MarketIndexDto[hasMarketTimestamp]" has a null value in JSON.');
         return true;
       }());
 
@@ -190,6 +200,7 @@ class MarketIndexDto {
         change: num.parse('${json[r'change']}'),
         changePercent: num.parse('${json[r'changePercent']}'),
         lastUpdated: mapValueOfType<String>(json, r'lastUpdated')!,
+        hasMarketTimestamp: mapValueOfType<bool>(json, r'hasMarketTimestamp')!,
       );
     }
     return null;
@@ -253,6 +264,7 @@ class MarketIndexDto {
     'change',
     'changePercent',
     'lastUpdated',
+    'hasMarketTimestamp',
   };
 }
 

@@ -76,7 +76,7 @@ class MarketSnapshotBarWidget extends ConsumerWidget {
                       _StatusBadge(state: indices.first.marketState),
                       const Spacer(),
                       Text(
-                        "Some prices pending",
+                        "Some NAVs are still pending",
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.amber.shade700,
                             ),

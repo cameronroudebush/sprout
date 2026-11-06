@@ -1,7 +1,9 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
+import 'package:sprout/holding/models/market_price_freshness.dart';
 import 'package:sprout/holding/widgets/holding_icon.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
@@ -24,6 +26,10 @@ class HoldingRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     final rowState = ref.watch(expandedHoldingProvider(holding));
+    final marketIndices = ref.watch(majorIndicesProvider).value ?? [];
+    final marketReference =
+        marketIndices.firstWhereOrNull((index) => index.symbol == "^GSPC");
+    final isNavPending = isMutualFundNavPending(rowState, marketReference);
     final int currentDay = DateTime.now().weekday;
     final bool isWeekend =
         currentDay == DateTime.saturday || currentDay == DateTime.sunday;
@@ -53,7 +59,23 @@ class HoldingRow extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(holding.symbol, style: theme.textTheme.titleMedium),
+                      Row(
+                        spacing: 6,
+                        children: [
+                          Text(holding.symbol,
+                              style: theme.textTheme.titleMedium),
+                          if (isNavPending)
+                            Tooltip(
+                              message:
+                                  "This fund's NAV hasn't updated since the latest market close. Its daily move is excluded until a fresh NAV arrives.",
+                              child: Icon(
+                                Icons.warning_amber_rounded,
+                                size: 18,
+                                color: Colors.amber.shade700,
+                              ),
+                            ),
+                        ],
+                      ),
                       Text(
                         formatter.format(rowState.liveMarketValue),
                         style: theme.textTheme.titleMedium,
@@ -62,7 +84,8 @@ class HoldingRow extends ConsumerWidget {
                   ),
 
                   // Intraday Realtime Live Data Changes
-                  if (!isWeekend &&
+                  if (!isNavPending &&
+                      !isWeekend &&
                       rowState.changePercent != 0 &&
                       (rowState.type != MarketIndexDtoTypeEnum.MUTUALFUND ||
                           !rowState.isLive))
@@ -99,7 +122,8 @@ class HoldingRow extends ConsumerWidget {
                     ),
 
                   // Historical Settled Brokerage Delta Values
-                  if (rowState.historicalFrame != null &&
+                  if (!isNavPending &&
+                      rowState.historicalFrame != null &&
                       rowState.historicalFrame!.valueChange != 0)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

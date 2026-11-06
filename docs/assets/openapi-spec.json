@@ -5430,6 +5430,10 @@
             "type": "string",
             "nullable": true
           },
+          "hasMarketTimestamp": {
+            "type": "boolean",
+            "description": "Whether lastUpdated came from Yahoo's source quote timestamp."
+          },
           "dividendYield": {
             "type": "number",
             "nullable": true,
@@ -5456,7 +5460,7 @@
             "type": "string"
           }
         },
-        "required": ["type", "price", "symbol", "name", "change", "changePercent", "lastUpdated"]
+        "required": ["type", "hasMarketTimestamp", "price", "symbol", "name", "change", "changePercent", "lastUpdated"]
       },
       "PortfolioSummaryDto": {
         "type": "object",

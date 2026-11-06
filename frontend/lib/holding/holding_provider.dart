@@ -283,6 +283,7 @@ ExpandedHolding expandedHolding(Ref ref, Holding holding) {
     baseChange: liveData?.change ?? dayChange,
     baseChangePercent: liveData?.changePercent ?? dayPercent,
     baseLastUpdated: liveData?.lastUpdated ?? DateTime.now().toIso8601String(),
+    hasMarketTimestamp: liveData?.hasMarketTimestamp ?? false,
     totalGain: totalGain,
     totalGainPercent: totalGainPercent,
     type: liveData?.type ?? MarketIndexDtoTypeEnum.INDEX,
