@@ -172,7 +172,7 @@ describe("HoldingService", () => {
         totalValue: 2000,
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -194,7 +194,7 @@ describe("HoldingService", () => {
         totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -213,7 +213,7 @@ describe("HoldingService", () => {
         totalValue: 26000,
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -233,7 +233,7 @@ describe("HoldingService", () => {
         totalValue: 2000,
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
-        hasUnpricedHoldings: true,
+        hasPendingNavs: true,
         pendingNavSymbols: ["VFIAX"],
       });
     });
@@ -266,7 +266,7 @@ describe("HoldingService", () => {
         totalValue: 1000,
         dayChange: 10,
         dayChangePercent: expect.closeTo(1.0101, 3),
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -294,7 +294,7 @@ describe("HoldingService", () => {
         totalValue: 1000,
         dayChange: 10,
         dayChangePercent: expect.closeTo(1.0101, 3),
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -320,7 +320,7 @@ describe("HoldingService", () => {
 
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
-      expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.hasPendingNavs).toBe(true);
       expect(result.pendingNavSymbols).toEqual(["RFKTX"]);
     });
 
@@ -345,7 +345,7 @@ describe("HoldingService", () => {
 
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
-      expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.hasPendingNavs).toBe(true);
       expect(result.pendingNavSymbols).toEqual(["VFIAX"]);
     });
 
@@ -360,7 +360,7 @@ describe("HoldingService", () => {
         totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: true,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -386,7 +386,7 @@ describe("HoldingService", () => {
 
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
-      expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.hasPendingNavs).toBe(true);
       expect(result.pendingNavSymbols).toEqual(["VFIAX"]);
     });
 
@@ -401,7 +401,7 @@ describe("HoldingService", () => {
         totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: true,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -417,7 +417,7 @@ describe("HoldingService", () => {
         totalValue: 200,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -435,7 +435,7 @@ describe("HoldingService", () => {
         totalValue: 200,
         dayChange: 200,
         dayChangePercent: 0,
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });
@@ -461,7 +461,7 @@ describe("HoldingService", () => {
         totalValue: 0,
         dayChange: 0,
         dayChangePercent: 0,
-        hasUnpricedHoldings: false,
+        hasPendingNavs: false,
         pendingNavSymbols: [],
       });
     });

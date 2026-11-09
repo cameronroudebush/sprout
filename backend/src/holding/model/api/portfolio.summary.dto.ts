@@ -10,8 +10,8 @@ export class PortfolioSummaryDto {
   @ApiProperty({ description: "Estimated weighted percentage change for holdings with prices available during the current market session.", example: 1.01 })
   dayChangePercent!: number;
 
-  @ApiProperty({ description: "Whether any holdings are excluded from current-session performance because their prices have not updated yet.", example: true })
-  hasUnpricedHoldings!: boolean;
+  @ApiProperty({ description: "Whether any mutual-fund NAVs are pending.", example: true })
+  hasPendingNavs!: boolean;
 
   @ApiProperty({ description: "Symbols of mutual funds whose NAVs have not updated since the latest market close.", type: [String], example: ["VFIAX"] })
   pendingNavSymbols!: string[];

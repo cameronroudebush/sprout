@@ -178,7 +178,6 @@ export class HoldingService {
     let totalValue = 0;
     let pricedValue = 0;
     let dayChange = 0;
-    let hasUnpricedHoldings = false;
     const pendingNavSymbols = new Set<string>();
     for (const holding of holdings) {
       const quote = quoteBySymbol.get(holding.symbol);
@@ -203,18 +202,19 @@ export class HoldingService {
         continue;
       }
 
-      // Without a valid quote, the holding may be an unpriced mutual fund; exclude it rather than counting stale values.
-      hasUnpricedHoldings = true;
+      // Without a valid quote, exclude the holding rather than counting stale values.
     }
 
     const previousValue = pricedValue - dayChange;
     const dayChangePercent = previousValue !== 0 ? (dayChange / Math.abs(previousValue)) * 100 : 0;
+    const pendingNavSymbolList = [...pendingNavSymbols].sort();
+    const hasPendingNavs = pendingNavSymbolList.length > 0;
     return new PortfolioSummaryDto({
       totalValue,
       dayChange,
       dayChangePercent: Number.isFinite(dayChangePercent) ? dayChangePercent : 0,
-      hasUnpricedHoldings: hasUnpricedHoldings || pendingNavSymbols.size > 0,
-      pendingNavSymbols: [...pendingNavSymbols].sort(),
+      hasPendingNavs,
+      pendingNavSymbols: pendingNavSymbolList,
     });
   }
 

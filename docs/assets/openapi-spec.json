@@ -5480,13 +5480,21 @@
             "description": "Estimated weighted percentage change for holdings with prices available during the current market session.",
             "example": 1.01
           },
-          "hasUnpricedHoldings": {
+          "hasPendingNavs": {
             "type": "boolean",
-            "description": "Whether any holdings are excluded from current-session performance because their prices have not updated yet.",
+            "description": "Whether any mutual-fund NAVs are pending.",
             "example": true
+          },
+          "pendingNavSymbols": {
+            "description": "Symbols of mutual funds whose NAVs have not updated since the latest market close.",
+            "example": ["VFIAX"],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": ["totalValue", "dayChange", "dayChangePercent", "hasUnpricedHoldings"]
+        "required": ["totalValue", "dayChange", "dayChangePercent", "hasPendingNavs", "pendingNavSymbols"]
       },
       "MajorIndexTimelinePoint": {
         "type": "object",

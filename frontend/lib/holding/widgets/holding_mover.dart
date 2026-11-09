@@ -36,9 +36,10 @@ class HoldingMoverWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formatter = ref.watch(currencyFormatterProvider);
+    final portfolioSummary = ref.watch(portfolioSummaryProvider).value;
+    final hasPendingNavs = portfolioSummary?.hasPendingNavs ?? false;
     final pendingNavSymbols =
-        ref.watch(portfolioSummaryProvider).value?.pendingNavSymbols.toSet() ??
-            <String>{};
+        portfolioSummary?.pendingNavSymbols.toSet() ?? <String>{};
 
     final Map<String, _MergedMover> mergedHoldings = {};
 
@@ -90,7 +91,7 @@ class HoldingMoverWidget extends ConsumerWidget {
         .take(count)
         .toList();
 
-    if (gainers.isEmpty && losers.isEmpty && pendingNavSymbols.isEmpty) {
+    if (gainers.isEmpty && losers.isEmpty && !hasPendingNavs) {
       return const SizedBox.shrink();
     }
 
@@ -103,7 +104,7 @@ class HoldingMoverWidget extends ConsumerWidget {
           SproutChartHeader(
             title: title,
             subheader: "Based on last close",
-            right: pendingNavSymbols.isNotEmpty
+            right: hasPendingNavs
                 ? Tooltip(
                     message: "Some mutual fund NAVs are still pending.",
                     child: Icon(

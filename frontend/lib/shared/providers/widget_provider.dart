@@ -236,7 +236,7 @@ class WidgetSync extends _$WidgetSync {
                 "${portfolioChangeAmount >= 0 ? "+" : "-"}${formatter.format(portfolioChangeAmount.abs(), handlePrivateMode: false)}",
             "portfolioChangePercent":
                 "${(portfolio?.dayChangePercent ?? 0) >= 0 ? "+" : ""}${(portfolio?.dayChangePercent ?? 0).toStringAsFixed(2)}%",
-            "hasUnpricedHoldings": portfolio?.hasUnpricedHoldings ?? false,
+            "hasPendingNavs": portfolio?.hasPendingNavs ?? false,
             "majorIndices": majorIndices.take(3).map((index) {
               final isValid = index.type != MarketIndexDtoTypeEnum.INVALID;
               final isPositive = index.change >= 0;

@@ -16,7 +16,7 @@ class PortfolioSummaryDto {
     required this.totalValue,
     required this.dayChange,
     required this.dayChangePercent,
-    required this.hasUnpricedHoldings,
+    required this.hasPendingNavs,
     required this.pendingNavSymbols,
   });
 
@@ -29,8 +29,8 @@ class PortfolioSummaryDto {
   /// Estimated weighted percentage change for holdings priced during the current market session.
   num dayChangePercent;
 
-  /// Whether any holdings lack current-session prices.
-  bool hasUnpricedHoldings;
+  /// Whether any mutual-fund NAVs are pending.
+  bool hasPendingNavs;
 
   /// Symbols of mutual funds whose NAVs have not updated since the latest market close.
   List<String> pendingNavSymbols;
@@ -42,7 +42,7 @@ class PortfolioSummaryDto {
           other.totalValue == totalValue &&
           other.dayChange == dayChange &&
           other.dayChangePercent == dayChangePercent &&
-          other.hasUnpricedHoldings == hasUnpricedHoldings &&
+          other.hasPendingNavs == hasPendingNavs &&
           _deepEquality.equals(other.pendingNavSymbols, pendingNavSymbols);
 
   @override
@@ -51,19 +51,19 @@ class PortfolioSummaryDto {
       (totalValue.hashCode) +
       (dayChange.hashCode) +
       (dayChangePercent.hashCode) +
-      (hasUnpricedHoldings.hashCode) +
+      (hasPendingNavs.hashCode) +
       (pendingNavSymbols.hashCode);
 
   @override
   String toString() =>
-      'PortfolioSummaryDto[totalValue=$totalValue, dayChange=$dayChange, dayChangePercent=$dayChangePercent, hasUnpricedHoldings=$hasUnpricedHoldings, pendingNavSymbols=$pendingNavSymbols]';
+      'PortfolioSummaryDto[totalValue=$totalValue, dayChange=$dayChange, dayChangePercent=$dayChangePercent, hasPendingNavs=$hasPendingNavs, pendingNavSymbols=$pendingNavSymbols]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'totalValue'] = this.totalValue;
     json[r'dayChange'] = this.dayChange;
     json[r'dayChangePercent'] = this.dayChangePercent;
-    json[r'hasUnpricedHoldings'] = this.hasUnpricedHoldings;
+    json[r'hasPendingNavs'] = this.hasPendingNavs;
     json[r'pendingNavSymbols'] = this.pendingNavSymbols;
     return json;
   }
@@ -91,10 +91,10 @@ class PortfolioSummaryDto {
             'Required key "PortfolioSummaryDto[dayChangePercent]" is missing from JSON.');
         assert(json[r'dayChangePercent'] != null,
             'Required key "PortfolioSummaryDto[dayChangePercent]" has a null value in JSON.');
-        assert(json.containsKey(r'hasUnpricedHoldings'),
-            'Required key "PortfolioSummaryDto[hasUnpricedHoldings]" is missing from JSON.');
-        assert(json[r'hasUnpricedHoldings'] != null,
-            'Required key "PortfolioSummaryDto[hasUnpricedHoldings]" has a null value in JSON.');
+        assert(json.containsKey(r'hasPendingNavs'),
+            'Required key "PortfolioSummaryDto[hasPendingNavs]" is missing from JSON.');
+        assert(json[r'hasPendingNavs'] != null,
+            'Required key "PortfolioSummaryDto[hasPendingNavs]" has a null value in JSON.');
         assert(json.containsKey(r'pendingNavSymbols'),
             'Required key "PortfolioSummaryDto[pendingNavSymbols]" is missing from JSON.');
         assert(json[r'pendingNavSymbols'] != null,
@@ -106,8 +106,7 @@ class PortfolioSummaryDto {
         totalValue: num.parse('${json[r'totalValue']}'),
         dayChange: num.parse('${json[r'dayChange']}'),
         dayChangePercent: num.parse('${json[r'dayChangePercent']}'),
-        hasUnpricedHoldings:
-            mapValueOfType<bool>(json, r'hasUnpricedHoldings')!,
+        hasPendingNavs: mapValueOfType<bool>(json, r'hasPendingNavs')!,
         pendingNavSymbols: json[r'pendingNavSymbols'] is Iterable
             ? (json[r'pendingNavSymbols'] as Iterable)
                 .cast<String>()
@@ -172,7 +171,7 @@ class PortfolioSummaryDto {
     'totalValue',
     'dayChange',
     'dayChangePercent',
-    'hasUnpricedHoldings',
+    'hasPendingNavs',
     'pendingNavSymbols',
   };
 }
