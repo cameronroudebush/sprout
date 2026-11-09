@@ -20,6 +20,20 @@ const MAJOR_INDICES: Record<string, { name: string; color: string }> = {
   "^IXIC": { name: "NASDAQ", color: "#9C27B0" }, // Purple
 };
 
+const MUTUAL_FUND_CLOSED_STATES = new Set([MarketState.CLOSED, MarketState.POST, MarketState.POSTPOST, MarketState.PRE, MarketState.PREPRE]);
+
+function isMutualFundNavPending(quote: MarketIndexDto, marketIndexQuote?: MarketIndexDto): boolean {
+  if (quote.type !== MarketQuoteType.MUTUALFUND) return false;
+
+  const marketIsOpen = marketIndexQuote?.marketState === MarketState.REGULAR;
+  const mutualFundMarketIsClosed = MUTUAL_FUND_CLOSED_STATES.has(quote.marketState!);
+  const quoteTimestamp = Date.parse(quote.lastUpdated);
+  const marketCloseTimestamp = marketIndexQuote?.hasMarketTimestamp ? Date.parse(marketIndexQuote.lastUpdated) : Number.NaN;
+  const mutualFundNavUpdatedAfterClose = Number.isFinite(quoteTimestamp) && Number.isFinite(marketCloseTimestamp) && quoteTimestamp > marketCloseTimestamp;
+
+  return marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp || !mutualFundNavUpdatedAfterClose;
+}
+
 /**
  * This service provides holdings common functions
  */
@@ -159,14 +173,13 @@ export class HoldingService {
     const quotes = await this.getLiveHoldingPrices(symbols);
     const quoteBySymbol = new Map(quotes.map((quote) => [quote.symbol, quote]));
     const targetCurrency = user.config?.currency ?? "USD";
-    // Mutual-fund quotes can say CLOSED while the exchange is trading; use an index for session state.
     const marketIndexQuote = quoteBySymbol.get("^GSPC");
-    const marketIsOpen = marketIndexQuote?.marketState === MarketState.REGULAR;
 
     let totalValue = 0;
     let pricedValue = 0;
     let dayChange = 0;
     let hasUnpricedHoldings = false;
+    const pendingNavSymbols = new Set<string>();
     for (const holding of holdings) {
       const quote = quoteBySymbol.get(holding.symbol);
       // Ignore crypto from summary for now as our quoting doesn't support that
@@ -174,21 +187,9 @@ export class HoldingService {
       if (quote && quote.type !== MarketQuoteType.INVALID && quote.price > 0) {
         const sourceCurrency = quote.currency ?? holding.currency;
         const currentValue = CurrencyHelper.convert(quote.price * holding.shares, sourceCurrency, targetCurrency);
-        const mutualFundMarketIsClosed =
-          quote.marketState === MarketState.CLOSED ||
-          quote.marketState === MarketState.POST ||
-          quote.marketState === MarketState.POSTPOST ||
-          quote.marketState === MarketState.PRE ||
-          quote.marketState === MarketState.PREPRE;
-        const quoteTimestamp = Date.parse(quote.lastUpdated);
-        const marketCloseTimestamp = marketIndexQuote?.hasMarketTimestamp ? Date.parse(marketIndexQuote.lastUpdated) : Number.NaN;
-        const mutualFundNavUpdatedAfterClose =
-          Number.isFinite(quoteTimestamp) && Number.isFinite(marketCloseTimestamp) && quoteTimestamp > marketCloseTimestamp;
-        const mutualFundIsUnpriced =
-          quote.type === MarketQuoteType.MUTUALFUND &&
-          (marketIsOpen || !mutualFundMarketIsClosed || !quote.hasMarketTimestamp || !mutualFundNavUpdatedAfterClose);
-        if (mutualFundIsUnpriced) {
-          hasUnpricedHoldings = true;
+        const mutualFundNavPending = isMutualFundNavPending(quote, marketIndexQuote);
+        if (mutualFundNavPending) {
+          pendingNavSymbols.add(holding.symbol);
           continue;
         }
 
@@ -212,7 +213,8 @@ export class HoldingService {
       totalValue,
       dayChange,
       dayChangePercent: Number.isFinite(dayChangePercent) ? dayChangePercent : 0,
-      hasUnpricedHoldings,
+      hasUnpricedHoldings: hasUnpricedHoldings || pendingNavSymbols.size > 0,
+      pendingNavSymbols: [...pendingNavSymbols].sort(),
     });
   }
 

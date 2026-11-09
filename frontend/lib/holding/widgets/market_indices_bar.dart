@@ -70,7 +70,7 @@ class MarketSnapshotBarWidget extends ConsumerWidget {
           Padding(
             padding:
                 const EdgeInsets.only(left: 12, right: 12, top: 4, bottom: 6),
-            child: (portfolio?.hasUnpricedHoldings ?? false)
+            child: (portfolio?.pendingNavSymbols.isNotEmpty ?? false)
                 ? Row(
                     children: [
                       _StatusBadge(state: indices.first.marketState),

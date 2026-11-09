@@ -90,6 +90,7 @@ class PortfolioSummary extends _$PortfolioSummary {
           dayChange: 0,
           dayChangePercent: 0,
           hasUnpricedHoldings: false,
+          pendingNavSymbols: [],
         );
   }
 }

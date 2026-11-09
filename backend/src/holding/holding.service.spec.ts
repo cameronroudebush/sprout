@@ -173,6 +173,7 @@ describe("HoldingService", () => {
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -194,6 +195,7 @@ describe("HoldingService", () => {
         dayChange: 0,
         dayChangePercent: 0,
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -212,6 +214,7 @@ describe("HoldingService", () => {
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -231,6 +234,7 @@ describe("HoldingService", () => {
         dayChange: 20,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: true,
+        pendingNavSymbols: ["VFIAX"],
       });
     });
 
@@ -263,6 +267,7 @@ describe("HoldingService", () => {
         dayChange: 10,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -290,6 +295,7 @@ describe("HoldingService", () => {
         dayChange: 10,
         dayChangePercent: expect.closeTo(1.0101, 3),
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -315,6 +321,7 @@ describe("HoldingService", () => {
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
       expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.pendingNavSymbols).toEqual(["RFKTX"]);
     });
 
     it("should not treat a synthesized quote timestamp as a posted NAV", async () => {
@@ -339,6 +346,7 @@ describe("HoldingService", () => {
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
       expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.pendingNavSymbols).toEqual(["VFIAX"]);
     });
 
     it("should exclude holdings when the live quote is invalid", async () => {
@@ -353,6 +361,7 @@ describe("HoldingService", () => {
         dayChange: 0,
         dayChangePercent: 0,
         hasUnpricedHoldings: true,
+        pendingNavSymbols: [],
       });
     });
 
@@ -378,6 +387,7 @@ describe("HoldingService", () => {
       expect(result.totalValue).toBe(0);
       expect(result.dayChange).toBe(0);
       expect(result.hasUnpricedHoldings).toBe(true);
+      expect(result.pendingNavSymbols).toEqual(["VFIAX"]);
     });
 
     it("should exclude holdings when the live quote is missing", async () => {
@@ -392,6 +402,7 @@ describe("HoldingService", () => {
         dayChange: 0,
         dayChangePercent: 0,
         hasUnpricedHoldings: true,
+        pendingNavSymbols: [],
       });
     });
 
@@ -407,6 +418,7 @@ describe("HoldingService", () => {
         dayChange: 0,
         dayChangePercent: 0,
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -424,6 +436,7 @@ describe("HoldingService", () => {
         dayChange: 200,
         dayChangePercent: 0,
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
 
@@ -449,6 +462,7 @@ describe("HoldingService", () => {
         dayChange: 0,
         dayChangePercent: 0,
         hasUnpricedHoldings: false,
+        pendingNavSymbols: [],
       });
     });
   });

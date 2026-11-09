@@ -1,9 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/holding/models/market_price_freshness.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
@@ -38,12 +36,11 @@ class HoldingMoverWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formatter = ref.watch(currencyFormatterProvider);
-    final marketIndices = ref.watch(majorIndicesProvider).value ?? [];
-    final marketReference =
-        marketIndices.firstWhereOrNull((index) => index.symbol == "^GSPC");
+    final pendingNavSymbols =
+        ref.watch(portfolioSummaryProvider).value?.pendingNavSymbols.toSet() ??
+            <String>{};
 
     final Map<String, _MergedMover> mergedHoldings = {};
-    final pendingNavSymbols = <String>{};
 
     for (final account in investmentAccounts) {
       final holdings =
@@ -52,10 +49,7 @@ class HoldingMoverWidget extends ConsumerWidget {
         final state = ref.watch(expandedHoldingProvider(holding));
         final symbol = holding.symbol;
 
-        if (isMutualFundNavPending(state, marketReference)) {
-          pendingNavSymbols.add(symbol);
-          continue;
-        }
+        if (pendingNavSymbols.contains(symbol)) continue;
 
         if (mergedHoldings.containsKey(symbol)) {
           final existing = mergedHoldings[symbol]!;
@@ -96,23 +90,22 @@ class HoldingMoverWidget extends ConsumerWidget {
         .take(count)
         .toList();
 
-    final pendingSymbols = pendingNavSymbols.toList()..sort();
-    if (gainers.isEmpty && losers.isEmpty && pendingSymbols.isEmpty) {
+    if (gainers.isEmpty && losers.isEmpty && pendingNavSymbols.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 0),
       child: Column(
         spacing: 16,
         mainAxisSize: MainAxisSize.min,
         children: [
           SproutChartHeader(
             title: title,
-            right: pendingSymbols.isNotEmpty
+            subheader: "Based on last close",
+            right: pendingNavSymbols.isNotEmpty
                 ? Tooltip(
-                    message:
-                        "Not all NAVs have funded so some prices are still pending.",
+                    message: "Some mutual fund NAVs are still pending.",
                     child: Icon(
                       Icons.warning_amber_rounded,
                       size: 24,

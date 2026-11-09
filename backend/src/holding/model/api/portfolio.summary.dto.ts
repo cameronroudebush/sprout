@@ -13,6 +13,9 @@ export class PortfolioSummaryDto {
   @ApiProperty({ description: "Whether any holdings are excluded from current-session performance because their prices have not updated yet.", example: true })
   hasUnpricedHoldings!: boolean;
 
+  @ApiProperty({ description: "Symbols of mutual funds whose NAVs have not updated since the latest market close.", type: [String], example: ["VFIAX"] })
+  pendingNavSymbols!: string[];
+
   constructor(partial: Partial<PortfolioSummaryDto>) {
     Object.assign(this, partial);
   }

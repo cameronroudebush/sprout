@@ -1,9 +1,7 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/holding/holding_provider.dart';
-import 'package:sprout/holding/models/market_price_freshness.dart';
 import 'package:sprout/holding/widgets/holding_icon.dart';
 import 'package:sprout/shared/providers/currency_provider.dart';
 import 'package:sprout/shared/widgets/amount_change.dart';
@@ -26,10 +24,9 @@ class HoldingRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final formatter = ref.watch(currencyFormatterProvider);
     final rowState = ref.watch(expandedHoldingProvider(holding));
-    final marketIndices = ref.watch(majorIndicesProvider).value ?? [];
-    final marketReference =
-        marketIndices.firstWhereOrNull((index) => index.symbol == "^GSPC");
-    final isNavPending = isMutualFundNavPending(rowState, marketReference);
+    final pendingNavSymbols =
+        ref.watch(portfolioSummaryProvider).value?.pendingNavSymbols ?? [];
+    final isNavPending = pendingNavSymbols.contains(holding.symbol);
     final int currentDay = DateTime.now().weekday;
     final bool isWeekend =
         currentDay == DateTime.saturday || currentDay == DateTime.sunday;
