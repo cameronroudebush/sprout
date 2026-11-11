@@ -89,7 +89,7 @@ export async function setupOpenApiHelp(app: INestApplication) {
           title: title,
         },
         showDeveloperTools: "never",
-        favicon: "https://sprout.croudebush.net/assets/favicon-bg.svg",
+        favicon: "https://docs.sprout.croudebush.net/assets/favicon-bg.svg",
         agent: {
           disabled: true,
         },

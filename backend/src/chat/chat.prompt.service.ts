@@ -9,10 +9,10 @@ import { ChatPromptResult } from "@backend/chat/provider/chat.provider";
 import { Configuration } from "@backend/config/core";
 import { CurrencyHelper } from "@backend/core/model/utility/currency.helper";
 import { Utility } from "@backend/core/model/utility/utility";
-import { HoldingHistory } from "@backend/holding/model/holding.history.model";
-import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
-import { Holding } from "@backend/holding/model/holding.model";
 import { HoldingService } from "@backend/holding/holding.service";
+import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
+import { HoldingHistory } from "@backend/holding/model/holding.history.model";
+import { Holding } from "@backend/holding/model/holding.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
@@ -135,7 +135,7 @@ export class ChatPromptService {
     const today = formatDate(new Date(), "MM/dd/yyyy HH:mm");
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     return [
-      `You are a financial assistant for Sprout (https://sprout.croudebush.net/).`,
+      `You are a financial assistant for Sprout (https://docs.sprout.croudebush.net/).`,
       `Today's date and current time is: ${today} (${timezone}). Use this exact timestamp and timezone to evaluate activity within the last 24 hours.`,
       `Be concise. Avoid conversational filler.`,
       `NEVER use Markdown tables. They render poorly in our interface. Present tabular or columnar data as bullet points or short labeled lines instead.`,

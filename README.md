@@ -11,7 +11,7 @@
 
 Sprout is a financial management app designed to give you a clear, simple view of your money. We specialize in providing a daily snapshot of your financial data by automatically tracking your accounts using financial APIs. View account balances and stock holdings, track net worth, and set monthly category budgets to keep spending visible.
 
-Want to to see more? Check out our **[overview site](https://sprout.croudebush.net)** or try our **[live demo site!](https://demo.sprout.croudebush.net)**
+Want to to see more? Check out our **[overview site](https://docs.sprout.croudebush.net)** or try our **[live demo site!](https://demo.sprout.croudebush.net)**
 
 <p align="center">
   <img width="75%" src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/docs/images/store/horizontal.png" alt="Transactions Page"/>
@@ -38,8 +38,8 @@ sprout:
 
 After launching the container, navigate to `http://localhost` in your browser to begin the setup process.
 
-You can review the [documentation](https://sprout.croudebush.net/getting-started) for more information on how to use sprout.
+You can review the [documentation](https://docs.sprout.croudebush.net/getting-started) for more information on how to use sprout.
 
 # Additional Information
 
-[🌐 Website](https://sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🚀 Demo](https://demo.sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [📸 Screenshots](https://sprout.croudebush.net/features/mobile) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)
+[🌐 Website](https://docs.sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [🚀 Demo](https://demo.sprout.croudebush.net/) &nbsp;&nbsp;•&nbsp;&nbsp; [📸 Screenshots](https://docs.sprout.croudebush.net/features/mobile) &nbsp;&nbsp;•&nbsp;&nbsp; [🔒 Privacy Policy](https://docs.sprout.croudebush.net/privacy-policy) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 Documentation](https://docs.sprout.croudebush.net/getting-started) &nbsp;&nbsp;•&nbsp;&nbsp; [🔖 Changelog](https://github.com/cameronroudebush/sprout/releases)

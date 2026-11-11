@@ -59,7 +59,7 @@ class SettingsPage extends ConsumerWidget {
 
   /// Opens a new webpage to the documentation
   static Future<void> openDocumentation() async {
-    await launchUrl(Uri.parse("https://sprout.croudebush.net"));
+    await launchUrl(Uri.parse("https://docs.sprout.croudebush.net"));
   }
 
   @override
