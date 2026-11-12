@@ -286,11 +286,18 @@ class _HoldingsPageState extends ConsumerState<HoldingsPage> {
   /// Displays a list of holdings the current user has across their accounts
   Widget _buildHoldingsPanel(
       ThemeData theme, List<Account> accountsWithHoldings) {
+    final orderedAccounts = [
+      ...accountsWithHoldings
+          .where((account) => account.type != AccountTypeEnum.crypto),
+      ...accountsWithHoldings
+          .where((account) => account.type == AccountTypeEnum.crypto),
+    ];
+
     return Column(
       spacing: 8,
       mainAxisSize: MainAxisSize.min,
       children: [
-        ...accountsWithHoldings.map((account) {
+        ...orderedAccounts.map((account) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 4,
