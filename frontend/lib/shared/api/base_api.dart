@@ -55,6 +55,7 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
   final basePath = await ref.watch(connectionUrlProvider.future);
   final rootClient = await ref.watch(rootHttpClientProvider.future);
   final platformClient = HeaderClient(innerClient: rootClient);
+  var isHandlingUnauthorized = false;
 
   // Create the AutoLogout wrapper
   final autoLogoutClient = AutoLogoutClient(
@@ -63,17 +64,25 @@ Future<ApiClient> baseAuthenticatedClient(Ref ref) async {
       // Don't do anything if we're a background job
       if (ref.read(isBackgroundJobProvider)) return;
 
+      // Multiple requests can fail with 401/403 before logout clears auth state.
+      if (isHandlingUnauthorized) return;
+
       final auth = ref.read(authProvider.notifier);
       final authState = ref.read(authProvider);
 
       if (authState.value != null) {
+        isHandlingUnauthorized = true;
         Future.microtask(() {
           ref.read(notificationsProvider.notifier).openFrontendOnly(
               "Session Expired",
               type: NotificationTypeEnum.warning,
               duration: 7);
         });
-        await auth.logout();
+        try {
+          await auth.logout();
+        } finally {
+          isHandlingUnauthorized = false;
+        }
       }
     },
   );
