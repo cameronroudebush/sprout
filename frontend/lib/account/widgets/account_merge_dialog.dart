@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
@@ -215,11 +216,36 @@ class _AccountMergeDialogState extends ConsumerState<AccountMergeDialog> {
                             color: theme.colorScheme.error, width: 2.0),
                       ),
                     ),
+                    isExpanded: true,
                     initialValue: _sourceAccountId,
                     items: validSourceAccounts.map((account) {
                       return DropdownMenuItem<String>(
                         value: account.id,
-                        child: Text(account.name),
+                        child: Row(
+                          spacing: 8,
+                          children: [
+                            AccountIcon(account, size: 24),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    account.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    account.institution.name,
+                                    style: theme.textTheme.bodySmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {

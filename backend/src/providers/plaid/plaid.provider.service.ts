@@ -10,6 +10,7 @@ import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
+import { formatPlaidError } from "@backend/providers/plaid/plaid.error.js";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { User } from "@backend/user/model/user.model";
 import { BadRequestException, HttpException, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
@@ -276,7 +277,7 @@ export class PlaidProviderService extends ProviderBase<
         return;
       }
     }
-    this.logger.error(`Failed to sync Plaid for institution ${asset.institution.name}:`, error);
+    this.logger.error(`Failed to sync Plaid for institution ${asset.institution.name}: ${formatPlaidError(error)}`);
   }
 
   protected override async setInstitutionError(asset: PlaidInstitutionAsset, hasError: boolean): Promise<void> {
@@ -488,7 +489,7 @@ export class PlaidProviderService extends ProviderBase<
         this.logger.debug(`Successfully updated webhook for Plaid Item ID: ${asset.itemId} (${asset.institution?.name})`);
         successCount++;
       } catch (error) {
-        this.logger.error(`Failed to update webhook for Plaid Item ID: ${asset.itemId}`, error);
+        this.logger.error(`Failed to update webhook for Plaid Item ID: ${asset.itemId}: ${formatPlaidError(error)}`);
         failureCount++;
       }
     }

@@ -6,6 +6,7 @@ import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
 import { PublicURL } from "@backend/core/decorator/public.url.decorator";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
 import { PlaidLinkTokenDTO } from "@backend/providers/plaid/model/api/link.token.dto";
+import { formatPlaidError } from "@backend/providers/plaid/plaid.error.js";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
@@ -34,7 +35,7 @@ export class PlaidProviderController {
     try {
       return await this.plaidProviderService.generateLinkToken(user, { publicUrl, institutionId });
     } catch (error) {
-      this.logger.error(error);
+      this.logger.error(`Failed to generate Plaid link token: ${formatPlaidError(error)}`);
       throw new InternalServerErrorException("Failed to generate Plaid link token.");
     }
   }
@@ -58,7 +59,7 @@ export class PlaidProviderController {
       this.sseService.sendToUser(user, SSEEventType.FORCE_UPDATE);
       return accounts.map((x) => x.account);
     } catch (error) {
-      this.logger.error(`Failed to link Plaid accounts for user ${user.id}:`, error);
+      this.logger.error(`Failed to link Plaid accounts for user ${user.id}: ${formatPlaidError(error)}`);
       throw new InternalServerErrorException("An error occurred while linking your accounts.");
     }
   }

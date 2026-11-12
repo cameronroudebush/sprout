@@ -6,6 +6,7 @@ import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
+import { formatPlaidError } from "@backend/providers/plaid/plaid.error.js";
 import { User } from "@backend/user/model/user.model";
 import {
   BadRequestException,
@@ -141,7 +142,7 @@ export class PlaidWebhookController {
           this.logger.log(`Ignoring webhook type ${webhookType} / ${webhookCode}`);
       }
     } catch (e) {
-      this.logger.error(`Failed to execute webhook handler`, e);
+      this.logger.error(`Failed to execute webhook handler: ${formatPlaidError(e)}`);
     }
   }
 
@@ -167,7 +168,7 @@ export class PlaidWebhookController {
           });
           this.cachedKey = response.data.key;
         } catch (error) {
-          this.logger.error("Failed to fetch verification key from API", error);
+          this.logger.error(`Failed to fetch verification key from API: ${formatPlaidError(error)}`);
           return false;
         }
       if (!this.cachedKey) return false;
@@ -182,7 +183,7 @@ export class PlaidWebhookController {
           algorithms: ["ES256"],
         }) as any;
       } catch (error) {
-        this.logger.warn(`JWT verification failed: ${error}`);
+        this.logger.warn(`JWT verification failed: ${formatPlaidError(error)}`);
         return false;
       }
       const computedHash = crypto.createHash("sha256").update(body).digest("hex");
@@ -190,7 +191,7 @@ export class PlaidWebhookController {
       if (!claimedBodyHash) return false;
       return crypto.timingSafeEqual(Buffer.from(computedHash, "utf8"), Buffer.from(claimedBodyHash, "utf8"));
     } catch (err) {
-      this.logger.error("Unexpected error occurred inside webhook verification pipeline", err);
+      this.logger.error(`Unexpected error occurred inside webhook verification pipeline: ${formatPlaidError(err)}`);
       return false;
     }
   }
