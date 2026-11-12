@@ -5,7 +5,6 @@ import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
-import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/account/widgets/account_net_worth.dart';
 import 'package:sprout/account/widgets/account_sub_selector.dart';
 import 'package:sprout/api/api.dart';
@@ -28,8 +27,6 @@ import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/shared/widgets/tab_selector.dart';
-import 'package:sprout/theme/helpers.dart';
-import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A simple record type to hold the combined data for our generic widget
@@ -307,9 +304,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
     final providers = ref.watch(providerConfigProvider).value;
     final provider =
         providers?.firstWhereOrNull((x) => x.dbType == account.provider);
-    final zpid = account.provider == ProviderTypeEnum.zillow
-        ? ref.watch(zillowInfoProvider(account.id)).value
-        : null;
 
     final allHistoryAsync = ref.watch(historicalAccountDataProvider);
     final timelineAsync = ref.watch(accountTimelineProvider(widget.account.id));
@@ -518,119 +512,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
                     ),
                   ),
                 ],
-
-                const Divider(),
-
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  runSpacing: 8,
-                  spacing: 8,
-                  children: [
-                    // Merge Button
-                    FilledButton(
-                      onPressed: () async {
-                        showSproutPopup(
-                          context: context,
-                          builder: (ctx) => AccountMergeDialog(account),
-                        );
-                      },
-                      style: ThemeHelpers.secondaryButton,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 8,
-                        children: [Icon(Icons.merge), Text("Merge Accounts")],
-                      ),
-                    ),
-                    // Duplicate transaction cleanup
-                    FilledButton(
-                      onPressed: () {
-                        showSproutPopup(
-                          context: context,
-                          builder: (ctx) => SproutBaseDialogWidget(
-                            'Clean Duplicates',
-                            showCloseDialogButton: true,
-                            closeButtonStyle: ThemeHelpers.primaryButton,
-                            showSubmitButton: true,
-                            submitButtonText: "Remove Duplicates",
-                            submitButtonStyle: ThemeHelpers.errorButton,
-                            onSubmitClick: () async {
-                              Navigator.of(ctx).pop();
-                              await ref
-                                  .read(transactionApiProvider)
-                                  .value
-                                  ?.transactionControllerRemoveDuplicates(
-                                      accountId: account.id);
-                            },
-                            child: Text(
-                              "This will scan ${account.name} for duplicate transactions (those sharing the exact same date and amount) and permanently delete the duplicates.\n\nThis action cannot be undone.",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      },
-                      style: ThemeHelpers.secondaryButton,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 8,
-                        children: [
-                          Icon(Icons
-                              .delete_sweep), // Better conveys removing/sweeping away unnecessary items
-                          Text("Clean Duplicate Transactions")
-                        ],
-                      ),
-                    ),
-                    if (account.provider == ProviderTypeEnum.zillow &&
-                        zpid != null)
-                      FilledButton(
-                        onPressed: () async {
-                          final Uri url = Uri.parse(
-                              'https://www.zillow.com/homes/${zpid}_zpid/');
-                          await launchUrl(url,
-                              mode: LaunchMode.externalApplication);
-                        },
-                        style: ThemeHelpers.primaryButton,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 8,
-                          children: [Icon(Icons.house), Text("View on Zillow")],
-                        ),
-                      ),
-
-                    // Delete Button
-                    FilledButton(
-                      onPressed: () {
-                        showSproutPopup(
-                          context: context,
-                          builder: (ctx) => SproutBaseDialogWidget(
-                            'Delete Account',
-                            showCloseDialogButton: true,
-                            closeButtonStyle: ThemeHelpers.primaryButton,
-                            showSubmitButton: true,
-                            submitButtonText: "Delete",
-                            submitButtonStyle: ThemeHelpers.errorButton,
-                            onSubmitClick: () async {
-                              Navigator.of(ctx).pop();
-                              NavigationProvider.back(context,
-                                  ref); // Force pop the last route to not get us stuck in redirect land
-                              await NavigationProvider.redirect("/accounts");
-                              await accountProvider.delete(account.id);
-                            },
-                            child: Text(
-                              "Removing ${account.name} will remove all transactions and history linked to this account. This cannot be undone!",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      },
-                      style: ThemeHelpers.errorButton,
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 8,
-                        children: [Icon(Icons.delete), Text("Delete")],
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),

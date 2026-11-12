@@ -8,12 +8,16 @@ class FABAction {
   final String label;
   final void Function(BuildContext context) onTap;
   final bool isLoading;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   FABAction(
       {required this.icon,
       required this.label,
       required this.onTap,
-      this.isLoading = false});
+      this.isLoading = false,
+      this.backgroundColor,
+      this.foregroundColor});
 }
 
 /// This widget is a reusable component that is injected within the shell to provide floating action buttons based on the current route context.
@@ -71,7 +75,7 @@ class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
                       elevation: 2,
                       child: Container(
                         decoration: BoxDecoration(
-                          color:
+                          color: action.backgroundColor ??
                               theme.floatingActionButtonTheme.backgroundColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
@@ -84,14 +88,17 @@ class _SproutSpeedDialState extends ConsumerState<SproutSpeedDial> {
                             action.label,
                             style: TextStyle(
                                 fontSize: 12,
-                                color: theme
-                                    .floatingActionButtonTheme.foregroundColor),
+                                color: action.foregroundColor ??
+                                    theme.floatingActionButtonTheme
+                                        .foregroundColor),
                           ),
                         ),
                       ),
                     ),
                   FloatingActionButton.small(
                     heroTag: 'sub_$index',
+                    backgroundColor: action.backgroundColor,
+                    foregroundColor: action.foregroundColor,
                     onPressed: action.isLoading
                         ? null
                         : () {

@@ -164,7 +164,7 @@ class SproutTabSelector<T extends Object> extends StatelessWidget {
 /// buttons, while larger tab sets use a dropdown.
 class SproutTabbedLayout<T extends Object> extends StatelessWidget {
   /// Extra scroll extent needed to bring content above the mobile tab overlay.
-  static const double mobileNavigationScrollInset = 64;
+  static const double mobileNavigationScrollInset = 32;
 
   final Widget child;
   final List<SproutTabOption<T>> tabs;

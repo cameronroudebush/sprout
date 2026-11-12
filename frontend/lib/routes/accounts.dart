@@ -6,12 +6,15 @@ import 'package:sprout/account/widgets/account_sync_dialog.dart';
 import 'package:sprout/account/widgets/account_total_summary_card.dart';
 import 'package:sprout/account/widgets/accounts_empty.dart';
 import 'package:sprout/account/widgets/accounts_summary.dart';
+import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/widgets/dialog/provider.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
+import 'package:sprout/theme/helpers.dart';
+import 'package:sprout/transaction/transaction_provider.dart';
 
 /// The primary entry point for the Accounts section of Sprout.
 class AccountsPage extends ConsumerWidget {
@@ -21,6 +24,34 @@ class AccountsPage extends ConsumerWidget {
     showSproutPopup(
       context: context,
       builder: (context) => const AccountSyncDialog(),
+    );
+  }
+
+  void _showCleanDuplicatesPopup(BuildContext context, WidgetRef ref) {
+    showSproutPopup(
+      context: context,
+      builder: (dialogContext) => SproutBaseDialogWidget(
+        'Clean Duplicates',
+        showCloseDialogButton: true,
+        closeButtonStyle: ThemeHelpers.primaryButton,
+        showSubmitButton: true,
+        submitButtonText: 'Remove Duplicates',
+        submitButtonStyle: ThemeHelpers.errorButton,
+        onSubmitClick: () async {
+          Navigator.of(dialogContext).pop();
+          final notifications = ref.read(notificationsProvider.notifier);
+          try {
+            final api = await ref.read(transactionApiProvider.future);
+            await api.transactionControllerRemoveDuplicates();
+          } catch (e) {
+            notifications.openWithAPIException(e);
+          }
+        },
+        child: const Text(
+          'This will scan all accounts for duplicate transactions (those sharing the exact same date and amount) and permanently delete the duplicates.\n\nThis action cannot be undone.',
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
@@ -73,6 +104,11 @@ class AccountsPage extends ConsumerWidget {
                   label: 'Manual Sync',
                   isLoading: isSyncing,
                   onTap: (context) => _showSyncPopup(context, ref)),
+              FABAction(
+                icon: Icons.delete_sweep,
+                label: 'Clean Duplicate Transactions',
+                onTap: (context) => _showCleanDuplicatesPopup(context, ref),
+              ),
             ],
           ),
         );
