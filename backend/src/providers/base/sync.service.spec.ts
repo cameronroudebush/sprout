@@ -383,5 +383,21 @@ describe("ProviderSyncService", () => {
       expect(mockProvider.commitSyncMetadata).toHaveBeenCalledWith({ cursor: "next" });
       expect(existingTransaction.update).toHaveBeenCalled();
     });
+
+    it("should commit distinct metadata from each successfully updated account", async () => {
+      const account = { ...TestEntities.account, isInvestment: false };
+      const firstMetadata = { cursor: "first" };
+      const secondMetadata = { cursor: "second" };
+      mockProvider.get.mockResolvedValue([
+        { account: account as any, providerAccountId: "p-test-1", syncMetadata: firstMetadata },
+        { account: account as any, providerAccountId: "p-test-2", syncMetadata: secondMetadata },
+      ]);
+
+      await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
+
+      expect(mockProvider.commitSyncMetadata).toHaveBeenCalledTimes(2);
+      expect(mockProvider.commitSyncMetadata).toHaveBeenNthCalledWith(1, firstMetadata);
+      expect(mockProvider.commitSyncMetadata).toHaveBeenNthCalledWith(2, secondMetadata);
+    });
   });
 });

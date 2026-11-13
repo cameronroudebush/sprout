@@ -1092,7 +1092,7 @@
       },
       "delete": {
         "description": "Deletes a transaction by the given ID.",
-        "operationId": "TransactionController__delete",
+        "operationId": "TransactionController_delete",
         "parameters": [
           {
             "name": "id",
@@ -1479,7 +1479,7 @@
     "/transaction-rule/{id}": {
       "delete": {
         "description": "Deletes a transaction rule by the given ID then runs a transaction update to re-categorize transactions.",
-        "operationId": "TransactionRuleController__delete",
+        "operationId": "TransactionRuleController_delete",
         "parameters": [
           {
             "name": "id",
@@ -1804,7 +1804,7 @@
     },
     "/chat/new": {
       "post": {
-        "operationId": "ChatController__new",
+        "operationId": "ChatController_new",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -3283,7 +3283,7 @@
       },
       "delete": {
         "description": "Deletes an account by the given ID.",
-        "operationId": "AccountController__delete",
+        "operationId": "AccountController_delete",
         "parameters": [
           {
             "name": "id",
@@ -3706,7 +3706,7 @@
     "/category/{id}": {
       "delete": {
         "description": "Deletes a category by the given ID and updates references to it to reset them.",
-        "operationId": "CategoryController__delete",
+        "operationId": "CategoryController_delete",
         "parameters": [
           {
             "name": "id",

@@ -23,7 +23,9 @@ export default defineConfig((options) => {
   }, {});
 
   return {
+    mode: isProduction ? "production" : "development",
     target: "node",
+    // Removed duplicate inline-source-map here
     node: {
       __dirname: false,
       __filename: false,
@@ -33,6 +35,7 @@ export default defineConfig((options) => {
     externalsPresets: {
       node: true,
     },
+    resolve: { ...options.resolve, alias: { ...options.resolve?.alias, "@node-rs/xxhash": false } },
     entry: {
       main: options.entry || "./src/main.ts",
       ...migrationFiles,
@@ -55,6 +58,11 @@ export default defineConfig((options) => {
     },
     devtool: "source-map",
     module: {
+      parser: {
+        javascript: {
+          dynamicImportMode: "eager",
+        },
+      },
       rules: [
         {
           test: /\.tsx?$/,
@@ -63,7 +71,9 @@ export default defineConfig((options) => {
             {
               loader: "builtin:swc-loader",
               options: {
+                sourceMaps: true,
                 jsc: {
+                  target: "esnext",
                   parser: {
                     syntax: "typescript",
                     decorators: true,
@@ -110,6 +120,8 @@ export default defineConfig((options) => {
       ],
     },
     optimization: {
+      minimize: isProduction,
+      splitChunks: false,
       minimizer: [
         new rspack.SwcJsMinimizerRspackPlugin({
           minimizerOptions: {

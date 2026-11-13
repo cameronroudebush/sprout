@@ -195,7 +195,7 @@ export class PlaidProviderService extends ProviderBase<
       added = syncData.added;
       modified = syncData.modified;
       removed = syncData.removed;
-      asset.syncCursor = syncData.nextCursor;
+      nextCursor = syncData.nextCursor;
     }
 
     const results: ProviderSyncResult[] = [];

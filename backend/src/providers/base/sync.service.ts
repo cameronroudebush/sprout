@@ -87,7 +87,7 @@ export class ProviderSyncService {
   private async handleAccountsUpdate(provider: ProviderBase, accounts: Awaited<ReturnType<ProviderBase["get"]>>, user: User, institutionId?: string) {
     const institutionErrors = new Set<string>();
     let userHadSuccessfulUpdate = false;
-    let syncMetadataToCommit: any = null;
+    const syncMetadataToCommit = new Set<unknown>();
 
     for (const data of accounts) {
       try {
@@ -153,14 +153,16 @@ export class ProviderSyncService {
         if (data.holdings) await this.updateHoldingData(accountInDB, data.holdings);
 
         userHadSuccessfulUpdate = true;
-        if (data.syncMetadata) syncMetadataToCommit = data.syncMetadata;
+        if (data.syncMetadata) syncMetadataToCommit.add(data.syncMetadata);
       } catch (e) {
         this.logger.error(`Account error for ${user.username}: ${(e as Error).message}`);
       }
     }
 
     // Commit metadata ONLY AFTER DB writes were successfully transacted
-    if (userHadSuccessfulUpdate && syncMetadataToCommit) await provider.commitSyncMetadata?.(syncMetadataToCommit);
+    if (userHadSuccessfulUpdate) {
+      for (const metadata of syncMetadataToCommit) await provider.commitSyncMetadata?.(metadata);
+    }
     // Apply rules to all new transactions if at least one account worked
     if (userHadSuccessfulUpdate) await this.transactionRuleService.applyRulesToTransactions(user, undefined, true);
 
