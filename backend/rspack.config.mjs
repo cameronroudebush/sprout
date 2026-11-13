@@ -31,7 +31,7 @@ export default defineConfig((options) => {
       __filename: false,
     },
     // Keep native modules external
-    externals: ["better-sqlite3", "bcrypt", "@fastify/static"],
+    externals: ["better-sqlite3", "bcrypt"],
     externalsPresets: {
       node: true,
     },
@@ -120,7 +120,7 @@ export default defineConfig((options) => {
       ],
     },
     optimization: {
-      minimize: isProduction,
+      minimize: false,
       splitChunks: false,
       minimizer: [
         new rspack.SwcJsMinimizerRspackPlugin({
@@ -140,7 +140,7 @@ export default defineConfig((options) => {
     plugins: [
       new rspack.IgnorePlugin({
         checkResource(resource) {
-          return /@nestjs\/(microservices|websockets)/.test(resource) || resource === "cache-manager/package.json";
+          return /@nestjs\/(microservices|websockets)|@fastify\/static/.test(resource) || resource === "cache-manager/package.json";
         },
       }),
       new rspack.CircularCheckRspackPlugin({
