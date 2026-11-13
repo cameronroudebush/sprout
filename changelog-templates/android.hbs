@@ -1,0 +1,26 @@
+{{! This template is designed to be used with the --latest-version flag of auto-changelog. }}
+{{#each releases}}
+
+
+Here's what's new in version <b>{{title}}</b>:
+
+{{! List Breaking Changes. These are the most important for users to see. }}
+{{#commit-list commits heading='⚠️ <b>Important Changes</b>' message='[bB]reaking [cC]hange:|[bB]reaking:'}}
+- {{subject}}
+{{/commit-list}}
+
+{{! List new features, excluding any that were also breaking changes. }}
+{{#commit-list commits heading='✨ <b>New Features</b>' message='^[fF]eat:|[fF]eat\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+- {{subject}}
+{{/commit-list}}
+
+{{! Group performance updates and refactoring into a general "Improvements" category. }}
+{{#commit-list commits heading='🚀 <b>Improvements</b>' message='^[pP]erf:|^[pP]erf\(|^[rR]efactor:|^[rR]efactor\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+- {{subject}}
+{{/commit-list}}
+
+{{! List bug fixes. }}
+{{#commit-list commits heading='🐞 <b>Bug Fixes</b>' message='^[fF]ix:|^[fF]ix\(' exclude='[bB]reaking [cC]hange:|[bB]reaking:'}}
+- {{subject}}
+{{/commit-list}}
+{{/each}}
