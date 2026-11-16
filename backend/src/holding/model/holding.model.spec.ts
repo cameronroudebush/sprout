@@ -34,6 +34,13 @@ describe("Holding Model", () => {
     });
   });
 
+  it("should include zero-share holdings when requested", async () => {
+    vi.spyOn(Holding, "find").mockResolvedValue([]);
+    const res = await Holding.getForAccount(account, true);
+    expect(res).toEqual([]);
+    expect(Holding.find).toHaveBeenCalledWith({ where: { account: { id: account.id } } });
+  });
+
   it("should convert list to target currency", () => {
     const spy = vi.spyOn(CurrencyHelper, "convertList").mockImplementation(() => []);
     const holding = new Holding("USD", 1000, "Apple", 1500, 100, 10, "AAPL", account);

@@ -204,7 +204,7 @@ export class ProviderSyncService {
 
   /** Syncs holdings and records holding history */
   private async updateHoldingData(accountInDb: Account, holdings: Holding[]) {
-    const holdingsInDb = await Holding.getForAccount(accountInDb);
+    const holdingsInDb = await Holding.getForAccount(accountInDb, true);
 
     for (const holding of holdings) {
       holding.account = accountInDb;

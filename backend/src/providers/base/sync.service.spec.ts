@@ -308,11 +308,12 @@ describe("ProviderSyncService", () => {
         },
       ]);
 
-      const mockHoldingInDb = { ...TestEntities.holding, symbol: TestEntities.holding.symbol, update: vi.fn() };
+      const mockHoldingInDb = { ...TestEntities.holding, shares: 0, symbol: TestEntities.holding.symbol, update: vi.fn() };
       vi.spyOn(Holding, "getForAccount").mockResolvedValue([mockHoldingInDb as any]);
 
       await service.syncForProvider(mockUser, mockProvider, SyncTriggerType.SCHEDULED);
 
+      expect(Holding.getForAccount).toHaveBeenCalledWith(mockAccountInDb, true);
       expect(mockHoldingHistoryToInsert.insert).toHaveBeenCalled();
       expect(mockHoldingInDb.shares).toBe(10);
       expect(mockHoldingInDb.update).toHaveBeenCalled();

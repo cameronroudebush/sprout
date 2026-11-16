@@ -79,9 +79,14 @@ export class Holding extends DatabaseBase {
     this.extra = extra;
   }
 
-  /** Given an account, returns all holdings in the database for that account. */
-  static getForAccount(account: Account) {
-    return Holding.find({ where: { account: { id: account.id }, shares: Not(0) } });
+  /** Given an account, returns its non-zero holdings unless includeZeroShares is true. */
+  static getForAccount(account: Account, includeZeroShares = false) {
+    return Holding.find({
+      where: {
+        account: { id: account.id },
+        ...(includeZeroShares ? {} : { shares: Not(0) }),
+      },
+    });
   }
 
   /** Given a list of these holdings, updates them to the target currency of the user config. This will edit in place. */
