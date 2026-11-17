@@ -25,6 +25,8 @@ export class TransactionRuleService {
    * @param resetCategories If true, transactions that match no rules will have their categories set to null.
    */
   async applyRulesToTransactions(user: User, account?: Account, onlyApplyToEmpty = false, force = false, resetCategories = false) {
+    // Full user-wide runs can recalculate counts. Partial sync/account runs must retain prior counts.
+    const recalculateMatches = account == null && !onlyApplyToEmpty;
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
       order: { order: "DESC" },
@@ -43,9 +45,14 @@ export class TransactionRuleService {
     const matchedTransactionIds = new Set<string>();
 
     for (const rule of rules) {
-      if (!rule.enabled) continue; // Skip disabled rules.
-
-      let currentRuleMatches = rule.matches;
+      let currentRuleMatches = recalculateMatches ? 0 : rule.matches;
+      if (!rule.enabled) {
+        if (recalculateMatches && rule.matches !== 0) {
+          rule.matches = 0;
+          await rule.update();
+        }
+        continue; // Skip disabled rules.
+      }
 
       for (const transaction of transactions) {
         if (matchedTransactionIds.has(transaction.id)) continue;
@@ -86,6 +93,19 @@ export class TransactionRuleService {
           transaction.category = undefined;
           await transaction.update();
         }
+  }
+
+  /** Makes room at the requested priority by moving existing rules down. */
+  async makeRoomForRule(user: User, order: number) {
+    const rulesToMove = await TransactionRule.find({
+      where: { order: MoreThanOrEqual(order), user: { id: user.id } },
+      order: { order: "DESC" },
+    });
+
+    for (const rule of rulesToMove) {
+      rule.order += 1;
+      await rule.update();
+    }
   }
 
   /** Reorders the transaction rules for a given user.

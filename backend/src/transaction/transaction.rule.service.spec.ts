@@ -5,7 +5,7 @@ import { TestEntities } from "@backend/test/entities";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionRule } from "@backend/transaction/model/transaction.rule.model";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service";
-import { IsNull } from "typeorm";
+import { IsNull, MoreThanOrEqual } from "typeorm";
 
 describe("TransactionRuleService", () => {
   let service: TransactionRuleService;
@@ -149,6 +149,81 @@ describe("TransactionRuleService", () => {
       expect(txMatch.update).toHaveBeenCalled();
       expect(txNonMatch.update).not.toHaveBeenCalled();
       expect(amountRule.matches).toBe(1);
+    });
+
+    it("should recalculate rule matches on repeated full runs", async () => {
+      const rule = TransactionRule.fromPlain({
+        id: "r-recalculate",
+        user,
+        enabled: true,
+        type: "description",
+        strict: true,
+        value: "Target",
+        matches: 12,
+        category: TestEntities.category,
+      });
+      rule.update = vi.fn().mockResolvedValue(rule);
+
+      const tx = TestEntities.transaction;
+      tx.id = "tx-recalculate";
+      tx.description = "Target";
+      tx.manuallyEdited = false;
+      tx.update = vi.fn().mockResolvedValue(tx);
+
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([rule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx]);
+
+      await service.applyRulesToTransactions(user);
+      expect(rule.matches).toBe(1);
+
+      await service.applyRulesToTransactions(user);
+      expect(rule.matches).toBe(1);
+      expect(rule.update).toHaveBeenCalledTimes(2);
+    });
+
+    it("should increment existing matches during an only-empty sync run", async () => {
+      const rule = TransactionRule.fromPlain({
+        id: "r-incremental",
+        user,
+        enabled: true,
+        type: "description",
+        strict: true,
+        value: "Target",
+        matches: 4,
+        category: TestEntities.category,
+      });
+      rule.update = vi.fn().mockResolvedValue(rule);
+
+      const tx = TestEntities.transaction;
+      tx.id = "tx-incremental";
+      tx.description = "Target";
+      tx.manuallyEdited = false;
+      tx.update = vi.fn().mockResolvedValue(tx);
+
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([rule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([tx]);
+
+      await service.applyRulesToTransactions(user, undefined, true);
+
+      expect(rule.matches).toBe(5);
+    });
+
+    it("should clear stale matches for disabled rules on a full run", async () => {
+      const disabledRule = TransactionRule.fromPlain({
+        id: "r-disabled-stale",
+        user,
+        enabled: false,
+        matches: 7,
+      });
+      disabledRule.update = vi.fn().mockResolvedValue(disabledRule);
+
+      vi.spyOn(TransactionRule, "find").mockResolvedValue([disabledRule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([]);
+
+      await service.applyRulesToTransactions(user);
+
+      expect(disabledRule.matches).toBe(0);
+      expect(disabledRule.update).toHaveBeenCalledOnce();
     });
 
     it("should handle non-matching rule conditions and manually edited transactions without force flag", async () => {
@@ -365,6 +440,35 @@ describe("TransactionRuleService", () => {
 
       expect(rule1.update).not.toHaveBeenCalled();
       expect(result).toBeDefined();
+    });
+  });
+
+  describe("makeRoomForRule", () => {
+    it("should shift rules at and after requested priority down", async () => {
+      const ruleAtPriority = TransactionRule.fromPlain({
+        id: "rule-at-priority",
+        order: 2,
+        user,
+      });
+      const ruleAfterPriority = TransactionRule.fromPlain({
+        id: "rule-after-priority",
+        order: 3,
+        user,
+      });
+      ruleAtPriority.update = vi.fn().mockResolvedValue(ruleAtPriority);
+      ruleAfterPriority.update = vi.fn().mockResolvedValue(ruleAfterPriority);
+      const findSpy = vi.spyOn(TransactionRule, "find").mockResolvedValue([ruleAtPriority, ruleAfterPriority]);
+
+      await service.makeRoomForRule(user, 2);
+
+      expect(findSpy).toHaveBeenCalledWith({
+        where: { order: MoreThanOrEqual(2), user: { id: user.id } },
+        order: { order: "DESC" },
+      });
+      expect(ruleAtPriority.order).toBe(3);
+      expect(ruleAfterPriority.order).toBe(4);
+      expect(ruleAtPriority.update).toHaveBeenCalled();
+      expect(ruleAfterPriority.update).toHaveBeenCalled();
     });
   });
 });

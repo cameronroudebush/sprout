@@ -10,6 +10,7 @@ import { TransactionRuleType } from "@backend/transaction/model/transaction.rule
 import { TransactionRuleController } from "@backend/transaction/transaction.rule.controller.js";
 import { TransactionRuleService } from "@backend/transaction/transaction.rule.service.js";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Request } from "express";
 import { Mocked } from "vitest";
 
 describe("TransactionRuleController", () => {
@@ -27,6 +28,7 @@ describe("TransactionRuleController", () => {
 
     transactionRuleService = {
       applyRulesToTransactions: vi.fn().mockResolvedValue(undefined),
+      makeRoomForRule: vi.fn().mockResolvedValue(undefined),
       reorderRules: vi.fn().mockResolvedValue(undefined),
     } as any;
 
@@ -153,21 +155,20 @@ describe("TransactionRuleController", () => {
 
       const rule = TransactionRule.fromPlain({ value: "Test", categoryId: "cat-invalid" });
 
-      await expect(controller.create(rule, user)).rejects.toThrow(NotFoundException);
+      await expect(controller.create(rule, user, { body: rule } as Request)).rejects.toThrow(NotFoundException);
     });
 
     it("should create rule without categoryId, set order, insert rule, apply rules, and force update", async () => {
       const categorySpy = vi.spyOn(Category, "findOne").mockResolvedValue(null);
       vi.spyOn(TransactionRule, "findOne").mockResolvedValue(null);
 
-      const rule = TransactionRule.fromPlain({ value: "Grocery", categoryId: undefined });
-      rule.insert = vi.fn().mockResolvedValue(rule);
+      const rule = { value: "Grocery", categoryId: undefined } as unknown as TransactionRule;
 
-      await controller.create(rule, user);
+      const createdRule = await controller.create(rule, user, { body: rule } as Request);
 
       expect(categorySpy).not.toHaveBeenCalled();
-      expect(rule.order).toBe(0);
-      expect(rule.value).toBe("Grocery");
+      expect(createdRule.order).toBe(0);
+      expect(createdRule.value).toBe("Grocery");
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
     });
@@ -191,12 +192,31 @@ describe("TransactionRuleController", () => {
 
       vi.spyOn(TransactionRule, "fromPlain").mockReturnValue(ruleMockInstance as any);
 
-      await controller.create(inputData, user);
+      await controller.create(inputData, user, { body: inputData } as Request);
 
       expect(ruleMockInstance.order).toBe(6);
       expect(ruleMockInstance.value).toBe("Grocery");
       expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.FORCE_UPDATE);
+    });
+
+    it("should preserve a requested priority and make room at that order", async () => {
+      const category = TestEntities.category;
+      vi.spyOn(Category, "findOne").mockResolvedValue(category);
+      const rule = TransactionRule.fromPlain({
+        value: "Grocery",
+        categoryId: category.id,
+        order: 2,
+      });
+      rule.insert = vi.fn().mockResolvedValue(rule);
+      vi.spyOn(TransactionRule, "fromPlain").mockReturnValue(rule);
+
+      await controller.create(rule, user, { body: rule } as Request);
+
+      expect(rule.order).toBe(2);
+      expect(transactionRuleService.makeRoomForRule).toHaveBeenCalledWith(user, 2);
+      expect(rule.insert).toHaveBeenCalled();
+      expect(transactionRuleService.applyRulesToTransactions).toHaveBeenCalledWith(user);
     });
   });
 

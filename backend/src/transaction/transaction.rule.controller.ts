@@ -20,8 +20,10 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from "@nestjs/common";
 import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { Request } from "express";
 
 /** This controller provides the endpoint for all Transaction rules content */
 @Controller("transaction-rule")
@@ -107,7 +109,8 @@ export class TransactionRuleController {
   @ApiNotFoundResponse({ description: "Failed to locate a matching category for this transaction rule based on given content." })
   @ApiBody({ type: TransactionRule })
   @EnabledGuard.attachDemoMode()
-  async create(@Body() data: TransactionRule, @CurrentUser() user: User) {
+  async create(@Body() data: TransactionRule, @CurrentUser() user: User, @Req() request: Request) {
+    const requestedOrder = Object.prototype.hasOwnProperty.call(request.body, "order") ? data.order : undefined;
     const rule = TransactionRule.fromPlain(data);
     rule.value = rule.value.trim();
     rule.user = user;
@@ -117,10 +120,14 @@ export class TransactionRuleController {
       if (category == null) throw new NotFoundException("Failed to locate a matching category for this rule");
     }
 
-    // Find the last order and add this to the end
-    const lastRule = await TransactionRule.findOne({ where: { user: { id: user.id } }, order: { order: "DESC" } });
-    if (lastRule != null) rule.order = lastRule.order + 1;
-    else rule.order = 0;
+    if (requestedOrder != null) {
+      rule.order = requestedOrder;
+      await this.transactionRuleService.makeRoomForRule(user, requestedOrder);
+    } else {
+      // If no priority was supplied, append the rule after the current last rule.
+      const lastRule = await TransactionRule.findOne({ where: { user: { id: user.id } }, order: { order: "DESC" } });
+      rule.order = lastRule == null ? 0 : lastRule.order + 1;
+    }
 
     // Insert the rule
     await rule.insert();
