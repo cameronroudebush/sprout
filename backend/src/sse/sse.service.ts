@@ -1,12 +1,13 @@
 import { Base } from "@backend/core/model/base";
 import { SSEEvent } from "@backend/sse/model/event.model";
 import { User } from "@backend/user/model/user.model";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Observable, Subject, filter, map } from "rxjs";
 
 /** This service allows control of the Server Sent Events so we can send notifications to connected clients. */
 @Injectable()
 export class SSEService {
+  private readonly logger = new Logger("service:sse");
   /** This event source is how we tell SSE listeners of upcoming events. */
   private readonly eventSource = new Subject<SSEEvent>();
 
@@ -18,6 +19,7 @@ export class SSEService {
    */
   sendToUser(user: User, event: SSEEvent["data"]["event"], payload?: Base) {
     setImmediate(() => {
+      this.logger.debug(`Sending event to ${user.username} on '${event}'`);
       this.eventSource.next({ user, data: { event, payload } });
     });
   }

@@ -17,6 +17,8 @@ extension UserConfigExtensions on UserConfig {
     String? simpleFinToken,
     String? coinbaseApiKey,
     String? coinbaseApiKeyName,
+    String? plaidClientId,
+    String? plaidSecret,
   }) {
     return UserConfig(
         id: id ?? this.id,
@@ -30,6 +32,8 @@ extension UserConfigExtensions on UserConfig {
         simpleFinToken: simpleFinToken ?? this.simpleFinToken,
         coinbaseApiKey: coinbaseApiKey ?? this.coinbaseApiKey,
         coinbaseApiKeyName: coinbaseApiKeyName ?? this.coinbaseApiKeyName,
+        plaidClientId: plaidClientId ?? this.plaidClientId,
+        plaidSecret: plaidSecret ?? this.plaidSecret,
         includeAICapabilities:
             includeAICapabilities ?? this.includeAICapabilities,
         enableBudgeting: enableBudgeting ?? this.enableBudgeting);

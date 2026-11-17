@@ -26,6 +26,8 @@ class UserConfig {
     this.simpleFinToken,
     this.coinbaseApiKey,
     this.coinbaseApiKeyName,
+    this.plaidClientId,
+    this.plaidSecret,
   });
 
   String id;
@@ -82,6 +84,24 @@ class UserConfig {
   ///
   String? coinbaseApiKeyName;
 
+  /// Plaid client ID for this user's connections. This is encrypted in the database.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? plaidClientId;
+
+  /// Plaid secret for this user's connections. This is encrypted in the database.
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? plaidSecret;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -98,7 +118,9 @@ class UserConfig {
           other.enableBudgeting == enableBudgeting &&
           other.simpleFinToken == simpleFinToken &&
           other.coinbaseApiKey == coinbaseApiKey &&
-          other.coinbaseApiKeyName == coinbaseApiKeyName;
+          other.coinbaseApiKeyName == coinbaseApiKeyName &&
+          other.plaidClientId == plaidClientId &&
+          other.plaidSecret == plaidSecret;
 
   @override
   int get hashCode =>
@@ -115,11 +137,13 @@ class UserConfig {
       (enableBudgeting.hashCode) +
       (simpleFinToken == null ? 0 : simpleFinToken!.hashCode) +
       (coinbaseApiKey == null ? 0 : coinbaseApiKey!.hashCode) +
-      (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode);
+      (coinbaseApiKeyName == null ? 0 : coinbaseApiKeyName!.hashCode) +
+      (plaidClientId == null ? 0 : plaidClientId!.hashCode) +
+      (plaidSecret == null ? 0 : plaidSecret!.hashCode);
 
   @override
   String toString() =>
-      'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, enableBudgeting=$enableBudgeting, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName]';
+      'UserConfig[id=$id, netWorthRange=$netWorthRange, emailUpdateFrequency=$emailUpdateFrequency, themeStyle=$themeStyle, currency=$currency, privateMode=$privateMode, secureMode=$secureMode, allowWidgets=$allowWidgets, includeAICapabilities=$includeAICapabilities, enableBudgeting=$enableBudgeting, simpleFinToken=$simpleFinToken, coinbaseApiKey=$coinbaseApiKey, coinbaseApiKeyName=$coinbaseApiKeyName, plaidClientId=$plaidClientId, plaidSecret=$plaidSecret]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -147,6 +171,16 @@ class UserConfig {
       json[r'coinbaseApiKeyName'] = this.coinbaseApiKeyName;
     } else {
       json[r'coinbaseApiKeyName'] = null;
+    }
+    if (this.plaidClientId != null) {
+      json[r'plaidClientId'] = this.plaidClientId;
+    } else {
+      json[r'plaidClientId'] = null;
+    }
+    if (this.plaidSecret != null) {
+      json[r'plaidSecret'] = this.plaidSecret;
+    } else {
+      json[r'plaidSecret'] = null;
     }
     return json;
   }
@@ -221,6 +255,8 @@ class UserConfig {
         simpleFinToken: mapValueOfType<String>(json, r'simpleFinToken'),
         coinbaseApiKey: mapValueOfType<String>(json, r'coinbaseApiKey'),
         coinbaseApiKeyName: mapValueOfType<String>(json, r'coinbaseApiKeyName'),
+        plaidClientId: mapValueOfType<String>(json, r'plaidClientId'),
+        plaidSecret: mapValueOfType<String>(json, r'plaidSecret'),
       );
     }
     return null;

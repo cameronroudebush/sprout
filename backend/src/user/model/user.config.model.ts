@@ -121,6 +121,18 @@ export class UserConfig extends DatabaseBase {
   @IsString()
   coinbaseApiKeyName?: string;
 
+  /** Plaid client ID for this user's connections. This is encrypted in the database. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  plaidClientId?: string;
+
+  /** Plaid secret for this user's connections. This is encrypted in the database. */
+  @DatabaseDecorators.column({ type: "varchar", nullable: true, transformer: new EncryptionTransformer() })
+  @EncryptionTransformer.decorateAPIProperty()
+  @IsString()
+  plaidSecret?: string;
+
   constructor(
     privateMode: boolean,
     netWorthRange: UserConfig["netWorthRange"],

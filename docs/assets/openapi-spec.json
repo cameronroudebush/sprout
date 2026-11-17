@@ -4042,6 +4042,14 @@
           "coinbaseApiKeyName": {
             "type": "string",
             "description": "The key name as given to us by Coinbase to go along with the API key."
+          },
+          "plaidClientId": {
+            "type": "string",
+            "description": "Plaid client ID for this user's connections. This is encrypted in the database."
+          },
+          "plaidSecret": {
+            "type": "string",
+            "description": "Plaid secret for this user's connections. This is encrypted in the database."
           }
         },
         "required": [
@@ -4153,6 +4161,10 @@
         "type": "string",
         "enum": ["Bank Investments", "Real Estate", "Crypto"]
       },
+      "ProviderCredentialsModeEnum": {
+        "type": "string",
+        "enum": ["system", "user"]
+      },
       "ProviderConfig": {
         "type": "object",
         "properties": {
@@ -4167,6 +4179,13 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/ProviderSubTypeEnum"
+              }
+            ]
+          },
+          "credentialsMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProviderCredentialsModeEnum"
               }
             ]
           },
@@ -4188,7 +4207,7 @@
             "default": false
           }
         },
-        "required": ["dbType", "subType", "name", "url", "enabled"]
+        "required": ["dbType", "subType", "credentialsMode", "name", "url", "enabled"]
       },
       "ManualSyncDto": {
         "type": "object",

@@ -19,7 +19,7 @@ import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/providers/sse_provider.dart';
 import 'package:sprout/shared/providers/widget_provider.dart';
 import 'package:sprout/theme/widgets/theme_picker.dart';
-import 'package:sprout/user/models/extensions/use_config_extensions.dart';
+import 'package:sprout/user/models/extensions/user_config_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 import 'package:sprout/user/widgets/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -78,6 +78,8 @@ class SettingsPage extends ConsumerWidget {
         ?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.simpleFin);
     final coinbaseConfig = providers
         ?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.coinbase);
+    final plaidConfig =
+        providers?.firstWhereOrNull((x) => x.dbType == ProviderTypeEnum.plaid);
 
     if (userConfig == null || config == null) {
       return const Center(child: CircularProgressIndicator());
@@ -306,6 +308,42 @@ class SettingsPage extends ConsumerWidget {
                 (c) => c.copyWith(
                   coinbaseApiKeyName: values[0],
                   coinbaseApiKey: values[1],
+                ),
+              ),
+            ),
+          ),
+        if (plaidConfig != null &&
+            plaidConfig.credentialsMode == ProviderCredentialsModeEnum.user)
+          ActionSettingTile(
+            title: "Plaid API Credentials",
+            subtitle: userConfig.plaidClientId?.isNotEmpty == true &&
+                    userConfig.plaidSecret?.isNotEmpty == true
+                ? "Credentials Configured"
+                : "Configure Credentials",
+            icon: FinanceProviderIcon(plaidConfig, size: 32),
+            onTap: () => showSproutEditDialog(
+              context: context,
+              title: "Update Plaid API Credentials",
+              description:
+                  "Enter your Plaid Client ID and Secret. Both values are encrypted and stored securely.",
+              fields: [
+                EditDialogField(
+                  label: "Client ID",
+                  currentValue: userConfig.plaidClientId,
+                  icon: Icons.badge_outlined,
+                ),
+                EditDialogField(
+                  label: "Client Secret",
+                  currentValue: userConfig.plaidSecret,
+                  icon: Icons.key,
+                  obscureText: true,
+                ),
+              ],
+              onSave: (values) => _update(
+                ref,
+                (c) => c.copyWith(
+                  plaidClientId: values[0],
+                  plaidSecret: values[1],
                 ),
               ),
             ),

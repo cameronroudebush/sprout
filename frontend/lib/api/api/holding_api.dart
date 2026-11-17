@@ -395,7 +395,7 @@ class HoldingApi {
 
   /// Get overall portfolio value and daily market performance.
   ///
-  /// Returns the authenticated user's current holding value, estimated daily change, and current S&P 500 performance.
+  /// Returns the authenticated user's current holding value and estimated daily change.
   ///
   /// Note: This method returns the HTTP [Response].
   Future<Response> holdingControllerGetPortfolioSummaryWithHttpInfo() async {
@@ -424,7 +424,7 @@ class HoldingApi {
 
   /// Get overall portfolio value and daily market performance.
   ///
-  /// Returns the authenticated user's current holding value, estimated daily change, and current S&P 500 performance.
+  /// Returns the authenticated user's current holding value and estimated daily change.
   Future<PortfolioSummaryDto?> holdingControllerGetPortfolioSummary() async {
     final response = await holdingControllerGetPortfolioSummaryWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {

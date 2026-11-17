@@ -4,6 +4,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { SimpleFINReturn } from "@backend/providers/simple-fin/return.type";
@@ -23,6 +24,7 @@ export class SimpleFINProviderService extends ProviderBase<void, void, string[],
     ProviderSubType.bankingInvestments,
     "https://www.simplefin.org/",
     "https://beta-bridge.simplefin.org/my-account",
+    ProviderCredentialsMode.USER,
   );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.simpleFin, Configuration.providers.simpleFIN.rateLimit, user);
   override isAvailable = async (user: User) => !!user.config.simpleFinToken;

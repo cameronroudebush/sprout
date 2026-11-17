@@ -1,5 +1,5 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
@@ -11,7 +11,7 @@ import 'package:sprout/shared/providers/secure_storage_provider.dart';
 import 'package:sprout/theme/absolute_dark.dart';
 import 'package:sprout/theme/bliss_light.dart';
 import 'package:sprout/theme/colored_dark.dart';
-import 'package:sprout/user/models/extensions/use_config_extensions.dart';
+import 'package:sprout/user/models/extensions/user_config_extensions.dart';
 
 part 'user_config_provider.g.dart';
 

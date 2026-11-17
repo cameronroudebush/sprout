@@ -341,6 +341,8 @@ class ApiClient {
           return PortfolioSummaryDto.fromJson(value);
         case 'ProviderConfig':
           return ProviderConfig.fromJson(value);
+        case 'ProviderCredentialsModeEnum':
+          return ProviderCredentialsModeEnumTypeTransformer().decode(value);
         case 'ProviderSubTypeEnum':
           return ProviderSubTypeEnumTypeTransformer().decode(value);
         case 'ProviderTypeEnum':

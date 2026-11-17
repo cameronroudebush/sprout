@@ -5,6 +5,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto";
@@ -60,35 +61,88 @@ export class PlaidProviderService extends ProviderBase<
 > {
   protected readonly logger = new Logger("provider:plaid:service");
   override getAppConfiguration = () => Configuration.providers.plaid;
-  config = new ProviderConfig("Plaid", ProviderType.plaid, ProviderSubType.bankingInvestments, "https://plaid.com/");
+  config = new ProviderConfig(
+    "Plaid",
+    ProviderType.plaid,
+    ProviderSubType.bankingInvestments,
+    "https://plaid.com/",
+    undefined,
+    Configuration.providers.plaid.credentialsMode,
+  );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.plaid, Configuration.providers.plaid.rateLimit, user);
-  override isAvailable = async (_user: User) => !!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId;
+  /** Returns whether Plaid has credentials configured for the active credential mode. */
+  override isAvailable = async (user: User) => {
+    if (Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.SYSTEM) {
+      return !!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId;
+    }
 
-  public readonly plaidClient!: PlaidApi;
+    const hasUserClientId = !!user.config.plaidClientId;
+    const hasUserSecret = !!user.config.plaidSecret;
+    return hasUserClientId && hasUserSecret;
+  };
+
+  public plaidClient?: PlaidApi;
+  private readonly plaidClients = new Map<string, PlaidApi>();
 
   constructor() {
     super();
-    if (!!Configuration.providers.plaid.secret && !!Configuration.providers.plaid.clientId) {
-      this.plaidClient = new PlaidApi(
-        new PlaidConfig({
-          basePath: Configuration.providers.plaid.environment,
-          baseOptions: {
-            headers: {
-              "PLAID-CLIENT-ID": Configuration.providers.plaid.clientId,
-              "PLAID-SECRET": Configuration.providers.plaid.secret,
-            },
-          },
-        }),
-      );
+    if (
+      Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.SYSTEM &&
+      !!Configuration.providers.plaid.secret &&
+      !!Configuration.providers.plaid.clientId
+    ) {
+      this.plaidClient = this.createPlaidClient(Configuration.providers.plaid.clientId, Configuration.providers.plaid.secret);
     }
   }
 
-  private checkPlaidClient() {
-    if (this.plaidClient == null) throw new InternalServerErrorException("Plaid is not properly configured.");
+  /** Creates a Plaid API client for the configured environment and credential pair. */
+  private createPlaidClient(clientId: string, secret: string): PlaidApi {
+    return new PlaidApi(
+      new PlaidConfig({
+        basePath: Configuration.providers.plaid.environment,
+        baseOptions: {
+          headers: {
+            "PLAID-CLIENT-ID": clientId,
+            "PLAID-SECRET": secret,
+          },
+        },
+      }),
+    );
+  }
+
+  /** Returns the Plaid client selected by system mode or the user's saved credentials. */
+  getPlaidClient(user: User): PlaidApi {
+    if (Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.SYSTEM) {
+      if (!this.plaidClient) throw new InternalServerErrorException("Plaid is not properly configured.");
+      return this.plaidClient;
+    }
+
+    const userClientId = user.config.plaidClientId;
+    const userSecret = user.config.plaidSecret;
+    if (!userClientId || !userSecret)
+      throw new BadRequestException("Plaid requires per-user credentials. Configure your Plaid client ID and secret in settings.");
+
+    const cacheKey = JSON.stringify([Configuration.providers.plaid.environment, userClientId, userSecret]);
+    let client = this.plaidClients.get(cacheKey);
+    if (!client) {
+      client = this.createPlaidClient(userClientId, userSecret);
+      this.plaidClients.set(cacheKey, client);
+    }
+    return client;
+  }
+
+  /** Gets the shared client when available; per-user mode requires an explicit user context. */
+  private checkPlaidClient(user?: User): PlaidApi {
+    if (user) return this.getPlaidClient(user);
+    if (Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.USER) {
+      throw new InternalServerErrorException("A user context is required for per-user Plaid credentials.");
+    }
+    if (!this.plaidClient) throw new InternalServerErrorException("Plaid is not properly configured.");
+    return this.plaidClient;
   }
 
   override async generateLinkToken(user: User, options?: PlaidLinkOptions): Promise<PlaidLinkTokenDTO> {
-    this.checkPlaidClient();
+    const plaidClient = this.checkPlaidClient(user);
     const webhookUrl = `${options?.publicUrl}${Configuration.server.basePath}/webhooks/plaid`;
     const baseConfig: LinkTokenCreateRequest = {
       user: { client_user_id: user.id },
@@ -109,7 +163,7 @@ export class PlaidProviderService extends ProviderBase<
     if (accessToken) {
       try {
         await this.rateLimit(user).incrementOrError();
-        const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, access_token: accessToken });
+        const response = await plaidClient.linkTokenCreate({ ...baseConfig, access_token: accessToken });
         return new PlaidLinkTokenDTO(response.data.link_token);
       } catch (error) {
         this.logger.warn(`Failed update-mode Link Token for ${options?.institutionId}. Falling back to standard mode.`);
@@ -117,15 +171,15 @@ export class PlaidProviderService extends ProviderBase<
     }
 
     await this.rateLimit(user).incrementOrError();
-    const response = await this.plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions], optional_products: [Products.Investments] });
+    const response = await plaidClient.linkTokenCreate({ ...baseConfig, products: [Products.Transactions], optional_products: [Products.Investments] });
     return new PlaidLinkTokenDTO(response.data.link_token);
   }
 
   protected async performExchange(user: User, payload: PlaidLinkDTO): Promise<ExchangeInstitution<PlaidAuthContext, PlaidAccount>[]> {
-    this.checkPlaidClient();
+    const plaidClient = this.checkPlaidClient(user);
     await this.rateLimit(user).incrementOrError();
 
-    const exchangeResponse = await this.plaidClient.itemPublicTokenExchange({ public_token: payload.publicToken });
+    const exchangeResponse = await plaidClient.itemPublicTokenExchange({ public_token: payload.publicToken });
     const authContext = { accessToken: exchangeResponse.data.access_token, itemId: exchangeResponse.data.item_id };
 
     await this.rateLimit(user).incrementOrError();
@@ -134,7 +188,7 @@ export class PlaidProviderService extends ProviderBase<
     let institutionUrl = this.config.url;
     try {
       await this.rateLimit(user).incrementOrError();
-      const instResponse = await this.plaidClient.institutionsGetById({
+      const instResponse = await plaidClient.institutionsGetById({
         institution_id: payload.metadata.institution.institution_id,
         country_codes: [CountryCode.Us],
         options: { include_optional_metadata: true },
@@ -143,7 +197,7 @@ export class PlaidProviderService extends ProviderBase<
     } catch (e) {
       this.logger.warn(`Could not fetch institution URL metadata for ${payload.metadata.institution.name}`);
     }
-    const accountsResponse = await this.plaidClient.accountsGet({ access_token: authContext.accessToken });
+    const accountsResponse = await plaidClient.accountsGet({ access_token: authContext.accessToken });
 
     return [
       {
@@ -155,17 +209,18 @@ export class PlaidProviderService extends ProviderBase<
     ];
   }
 
-  protected override async rollbackExchange(_user: User, _payload: PlaidLinkDTO, authContext: PlaidAuthContext): Promise<void> {
+  protected override async rollbackExchange(user: User, _payload: PlaidLinkDTO, authContext: PlaidAuthContext): Promise<void> {
     if (authContext?.accessToken) {
       try {
-        await this.plaidClient.itemRemove({ access_token: authContext.accessToken });
+        await this.getPlaidClient(user).itemRemove({ access_token: authContext.accessToken });
       } catch (e) {}
     }
   }
 
   protected async performSync(user: User, asset: PlaidInstitutionAsset, accountsOnly: boolean): Promise<ProviderSyncResult[]> {
+    const plaidClient = this.checkPlaidClient(user);
     await this.rateLimit(user).incrementOrError();
-    const accountsResponse = await this.plaidClient.accountsGet({ access_token: asset.accessToken });
+    const accountsResponse = await plaidClient.accountsGet({ access_token: asset.accessToken });
     const hasInvestment = accountsResponse.data.accounts.some((acc: { type: PlaidAccountType }) => this.mapType(acc.type) === AccountType.investment);
 
     let securities: PlaidSecurity[] | undefined;
@@ -175,7 +230,7 @@ export class PlaidProviderService extends ProviderBase<
     if (hasInvestment && !accountsOnly) {
       try {
         await this.rateLimit(user).incrementOrError();
-        const holdingsRes = await this.plaidClient.investmentsHoldingsGet({ access_token: asset.accessToken });
+        const holdingsRes = await plaidClient.investmentsHoldingsGet({ access_token: asset.accessToken });
         securities = holdingsRes.data.securities;
         allHoldings = holdingsRes.data.holdings;
       } catch (e) {
@@ -265,7 +320,7 @@ export class PlaidProviderService extends ProviderBase<
 
   private async removePlaidItem(user: User, accessToken: string): Promise<void> {
     await this.rateLimit(user).incrementOrError();
-    await this.plaidClient.itemRemove({ access_token: accessToken });
+    await this.getPlaidClient(user).itemRemove({ access_token: accessToken });
   }
 
   protected override async handleSyncError(asset: PlaidInstitutionAsset, error: unknown): Promise<void> {
@@ -325,13 +380,14 @@ export class PlaidProviderService extends ProviderBase<
   }
 
   protected override async upsertInstitutionAsset(institution: Institution, authContext: PlaidAuthContext): Promise<void> {
+    const plaidClient = this.getPlaidClient(institution.user);
     let asset = await PlaidInstitutionAsset.findOne({ where: { institution: { id: institution.id } } });
     if (!asset) {
       await new PlaidInstitutionAsset(institution, authContext.accessToken, authContext.itemId).insert();
     } else {
       if (asset.itemId !== authContext.itemId) {
         try {
-          await this.plaidClient.itemRemove({ access_token: asset.accessToken });
+          await plaidClient.itemRemove({ access_token: asset.accessToken });
         } catch (e) {}
         asset.itemId = authContext.itemId;
         asset.syncCursor = undefined; // Reset cursor for the new item_id
@@ -342,6 +398,7 @@ export class PlaidProviderService extends ProviderBase<
   }
 
   private async fetchAllInstitutionTransactions(user: User, instAsset: PlaidInstitutionAsset) {
+    const plaidClient = this.getPlaidClient(user);
     let added: PlaidTransaction[] = [];
     let modified: PlaidTransaction[] = [];
     let removed: RemovedTransaction[] = [];
@@ -350,7 +407,7 @@ export class PlaidProviderService extends ProviderBase<
 
     while (hasMore) {
       await this.rateLimit(user).incrementOrError();
-      const response = await this.plaidClient.transactionsSync({
+      const response = await plaidClient.transactionsSync({
         access_token: instAsset.accessToken,
         cursor,
         count: 100,
@@ -367,10 +424,11 @@ export class PlaidProviderService extends ProviderBase<
 
   private async fetchInvestmentTransactions(user: User, instAsset: PlaidInstitutionAsset): Promise<PlaidInvestmentTransaction[]> {
     try {
+      const plaidClient = this.getPlaidClient(user);
       await this.rateLimit(user).incrementOrError();
       const startDate = format(subDays(new Date(), Configuration.providers.lookBackDays), "yyyy-MM-dd");
       const endDate = format(new Date(), "yyyy-MM-dd");
-      const response = await this.plaidClient.investmentsTransactionsGet({
+      const response = await plaidClient.investmentsTransactionsGet({
         access_token: instAsset.accessToken,
         start_date: startDate,
         end_date: endDate,
@@ -468,10 +526,8 @@ export class PlaidProviderService extends ProviderBase<
    * its destination webhook URL to match a new server domain layout.
    */
   async updateAllItemWebhooks(newBaseUrl: string): Promise<{ successCount: number; failureCount: number }> {
-    if (!this.plaidClient) throw new InternalServerErrorException("Plaid is not properly configured.");
-
     const assets = await PlaidInstitutionAsset.find({
-      relations: { institution: true },
+      relations: { institution: { user: true } },
     });
 
     const targetWebhookUrl = `${newBaseUrl}${Configuration.server.basePath}/webhooks/plaid`;
@@ -482,7 +538,7 @@ export class PlaidProviderService extends ProviderBase<
 
     for (const asset of assets) {
       try {
-        await this.plaidClient.itemWebhookUpdate({
+        await this.getPlaidClient(asset.institution.user).itemWebhookUpdate({
           access_token: asset.accessToken,
           webhook: targetWebhookUrl,
         });
@@ -500,7 +556,7 @@ export class PlaidProviderService extends ProviderBase<
   /** Removes a Plaid item only when its access token is not tracked in Sprout. */
   async cleanupUntrackedItem(user: User, accessToken: string): Promise<void> {
     if (typeof accessToken !== "string" || !accessToken.trim()) throw new BadRequestException("A valid Plaid access token is required.");
-    this.checkPlaidClient();
+    this.checkPlaidClient(user);
 
     const assets = await PlaidInstitutionAsset.find({ select: { accessToken: true } });
     if (assets.some((asset) => asset.accessToken === accessToken)) {

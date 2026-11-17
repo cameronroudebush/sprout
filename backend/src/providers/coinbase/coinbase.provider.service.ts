@@ -6,6 +6,7 @@ import { Holding } from "@backend/holding/model/holding.model";
 import { Institution } from "@backend/institution/model/institution.model";
 import { ExchangeInstitution, ProviderBase, ProviderSyncResult } from "@backend/providers/base/core";
 import { ProviderConfig } from "@backend/providers/base/model/provider.config.model";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit";
 import { CoinbaseAccount } from "@backend/providers/coinbase/model/coinbase.account";
@@ -35,7 +36,14 @@ export class CoinbaseProviderService extends ProviderBase<void, void, void, Coin
   static readonly CACHE_KEY = "coinbase-exchange-rates";
   protected readonly logger = new Logger("provider:coinbase:service");
   override getAppConfiguration = () => Configuration.providers.coinbase;
-  config = new ProviderConfig("Coinbase", ProviderType.coinbase, ProviderSubType.crypto, "https://www.coinbase.com/", "https://portal.cdp.coinbase.com/");
+  config = new ProviderConfig(
+    "Coinbase",
+    ProviderType.coinbase,
+    ProviderSubType.crypto,
+    "https://www.coinbase.com/",
+    "https://portal.cdp.coinbase.com/",
+    ProviderCredentialsMode.USER,
+  );
   override rateLimit = (user?: User) => new ProviderRateLimit(ProviderType.coinbase, Configuration.providers.coinbase.rateLimit, user);
   override isAvailable = async (user: User) => !!user.config.coinbaseApiKey && !!user.config.coinbaseApiKeyName;
 

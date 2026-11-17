@@ -11,7 +11,7 @@ import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { User } from "@backend/user/model/user.model";
-import { Body, Controller, Get, Inject, InternalServerErrorException, Put } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Inject, InternalServerErrorException, Put } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { startOfDay } from "date-fns";
 import { cloneDeep } from "lodash-es";
@@ -72,6 +72,15 @@ export class BaseProviderController {
       syncs = rawList.filter((x): x is Sync => Boolean(x));
     } else {
       // Otherwise, iterate through the specific requested providers
+      await Promise.all(
+        providers.map(async (providerType) => {
+          const provider = this.providers.find((x) => x.config.dbType === providerType);
+          if (!provider || !provider.getAppConfiguration().enabled || !(await provider.isAvailable(user))) {
+            throw new BadRequestException(`Provider '${providerType}' is not enabled for this user.`);
+          }
+        }),
+      );
+
       const syncResults = await Promise.all(
         providers.map((providerType) => this.providerService.syncUserProviders(user, SyncTriggerType.MANUAL, providerType)),
       );

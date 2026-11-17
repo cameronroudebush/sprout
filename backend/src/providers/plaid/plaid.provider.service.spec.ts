@@ -8,6 +8,7 @@ import { Configuration } from "@backend/config/core.js";
 import { ProviderRateLimit } from "@backend/providers/base/rate-limit.js";
 import { PlaidLinkDTO } from "@backend/providers/plaid/model/api/link.dto.js";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset.js";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type.js";
 import { PlaidAuthContext, PlaidProviderService, PlaidSyncMetadata } from "@backend/providers/plaid/plaid.provider.service.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
@@ -27,6 +28,7 @@ describe("PlaidProviderService", () => {
     Configuration.providers.plaid.clientId = "test-client-id";
     Configuration.providers.plaid.secret = "test-secret";
     Configuration.providers.plaid.environment = "https://sandbox.plaid.com";
+    Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.SYSTEM;
 
     vi.spyOn(ProviderRateLimit.prototype, "incrementOrError").mockResolvedValue(undefined);
 
@@ -45,6 +47,14 @@ describe("PlaidProviderService", () => {
   });
 
   describe("isAvailable & checkPlaidClient", () => {
+    it("should expose the configured credential mode", () => {
+      expect(service.config.credentialsMode).toBe(ProviderCredentialsMode.SYSTEM);
+
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      const userModeService = new PlaidProviderService();
+      expect(userModeService.config.credentialsMode).toBe(ProviderCredentialsMode.USER);
+    });
+
     it("should return availability status based on config", async () => {
       const avail = await service.isAvailable(user);
       expect(avail).toBe(true);
@@ -53,7 +63,9 @@ describe("PlaidProviderService", () => {
     it("should throw InternalServerErrorException if plaidClient is null", async () => {
       (service as unknown as { plaidClient: null }).plaidClient = null;
       expect(() => (service as unknown as { checkPlaidClient: () => void }).checkPlaidClient()).toThrow(InternalServerErrorException);
-      await expect(service.updateAllItemWebhooks("https://url.com")).rejects.toThrow(InternalServerErrorException);
+      expect(() => service.getPlaidClient(user)).toThrow(InternalServerErrorException);
+      vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([]);
+      await expect(service.updateAllItemWebhooks("https://url.com")).resolves.toEqual({ successCount: 0, failureCount: 0 });
     });
 
     it("should report unavailable when Plaid credentials are missing", async () => {
@@ -65,10 +77,55 @@ describe("PlaidProviderService", () => {
       try {
         const unavailableService = new PlaidProviderService();
         expect(await unavailableService.isAvailable(user)).toBe(false);
+        expect(() => unavailableService.getPlaidClient(user)).toThrow(InternalServerErrorException);
       } finally {
         Configuration.providers.plaid.clientId = originalClientId;
         Configuration.providers.plaid.secret = originalSecret;
       }
+    });
+
+    it("should use only per-user credentials in user mode", async () => {
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      expect(await service.isAvailable(user)).toBe(false);
+      expect(() => service.getPlaidClient(user)).toThrow(BadRequestException);
+
+      user.config.plaidClientId = "user-client-id";
+      user.config.plaidSecret = "user-secret";
+
+      expect(await service.isAvailable(user)).toBe(true);
+      const userClient = service.getPlaidClient(user);
+      expect(userClient).not.toBe(service.plaidClient);
+      expect(service.getPlaidClient(user)).toBe(userClient);
+    });
+
+    it("should ignore per-user credentials in system mode", async () => {
+      user.config.plaidClientId = "user-client-id";
+      user.config.plaidSecret = "user-secret";
+
+      expect(await service.isAvailable(user)).toBe(true);
+      expect(service.getPlaidClient(user)).toBe(service.plaidClient);
+    });
+
+    it("should return the shared Plaid client when no user is supplied", () => {
+      expect((service as any).checkPlaidClient()).toBe(service.plaidClient);
+    });
+
+    it("should require user context in user credential mode", () => {
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      expect(() => (service as any).checkPlaidClient()).toThrow(InternalServerErrorException);
+    });
+
+    it("should report unavailable in user mode when credentials are incomplete", async () => {
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      user.config.plaidClientId = "user-client-id";
+      expect(await service.isAvailable(user)).toBe(false);
+      expect(() => service.getPlaidClient(user)).toThrow(BadRequestException);
+    });
+
+    it("should report unavailable in system mode when shared credentials are missing", async () => {
+      Configuration.providers.plaid.clientId = undefined;
+      Configuration.providers.plaid.secret = undefined;
+      expect(await service.isAvailable(user)).toBe(false);
     });
   });
 
@@ -406,6 +463,8 @@ describe("PlaidProviderService", () => {
     it("should updateAllItemWebhooks for registered assets and handle error per item", async () => {
       const asset1 = new PlaidInstitutionAsset(TestEntities.institution, "access-123", "item-123");
       const asset2 = new PlaidInstitutionAsset(TestEntities.institution, "access-456", "item-456");
+      asset1.institution.user = user;
+      asset2.institution.user = user;
       vi.spyOn(PlaidInstitutionAsset, "find").mockResolvedValue([asset1, asset2]);
 
       service.plaidClient.itemWebhookUpdate = vi.fn().mockResolvedValueOnce({}).mockRejectedValueOnce(new Error("Webhook update error"));
@@ -443,6 +502,8 @@ describe("PlaidProviderService", () => {
       expect(initialData).toEqual({ transactions: [], removedTransactionIds: [], holdings: [] });
 
       const asset = new PlaidInstitutionAsset(TestEntities.institution, "access-123", "item-123");
+      const institution = TestEntities.institution;
+      institution.user = user;
       service.plaidClient.itemRemove = vi.fn().mockResolvedValue({});
       await priv.performUnlink(user, asset);
       expect(service.plaidClient.itemRemove).toHaveBeenCalledWith({ access_token: "access-123" });
@@ -457,20 +518,20 @@ describe("PlaidProviderService", () => {
       vi.spyOn(PlaidInstitutionAsset.prototype, "insert").mockImplementation(async function (this: PlaidInstitutionAsset) {
         return this;
       });
-      await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-1", itemId: "i-1" });
+      await priv.upsertInstitutionAsset(institution, { accessToken: "a-1", itemId: "i-1" });
 
       // Existing asset with same itemId
-      const existingAssetSame = new PlaidInstitutionAsset(TestEntities.institution, "a-old", "i-1");
+      const existingAssetSame = new PlaidInstitutionAsset(institution, "a-old", "i-1");
       existingAssetSame.update = vi.fn().mockResolvedValue(existingAssetSame);
       vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(existingAssetSame);
-      await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-new", itemId: "i-1" });
+      await priv.upsertInstitutionAsset(institution, { accessToken: "a-new", itemId: "i-1" });
 
       // Existing asset with new itemId where itemRemove throws error
-      const existingAssetDiff = new PlaidInstitutionAsset(TestEntities.institution, "a-old", "i-old");
+      const existingAssetDiff = new PlaidInstitutionAsset(institution, "a-old", "i-old");
       existingAssetDiff.update = vi.fn().mockResolvedValue(existingAssetDiff);
       service.plaidClient.itemRemove = vi.fn().mockRejectedValue(new Error("Remove failed"));
       vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue(existingAssetDiff);
-      await priv.upsertInstitutionAsset(TestEntities.institution, { accessToken: "a-new", itemId: "i-new" });
+      await priv.upsertInstitutionAsset(institution, { accessToken: "a-new", itemId: "i-new" });
       expect(existingAssetDiff.itemId).toBe("i-new");
       expect(existingAssetDiff.update).toHaveBeenCalled();
     });

@@ -1,4 +1,5 @@
 import { Base } from "@backend/core/model/base";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { ProviderSubType, ProviderType } from "@backend/providers/base/provider.type";
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -23,12 +24,23 @@ export class ProviderConfig extends Base {
   /** If this provider is available to this user. Only used during frontend communication */
   enabled: boolean = false;
 
-  constructor(name: string, dbType: ProviderType, subType: ProviderSubType, url: string, accountFixUrl?: string) {
+  @ApiProperty({ enum: ProviderCredentialsMode, enumName: "ProviderCredentialsModeEnum" })
+  credentialsMode: ProviderCredentialsMode;
+
+  constructor(
+    name: string,
+    dbType: ProviderType,
+    subType: ProviderSubType,
+    url: string,
+    accountFixUrl?: string,
+    credentialsMode = ProviderCredentialsMode.SYSTEM,
+  ) {
     super();
     this.name = name;
     this.dbType = dbType;
     this.url = url;
     this.accountFixUrl = accountFixUrl;
     this.subType = subType;
+    this.credentialsMode = credentialsMode;
   }
 }

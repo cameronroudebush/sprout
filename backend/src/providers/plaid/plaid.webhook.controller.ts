@@ -2,11 +2,12 @@ import { AuthGuard } from "@backend/auth/guard/auth.guard";
 import { Configuration } from "@backend/config/core";
 import { EnabledGuard } from "@backend/config/guard/enabled.guard";
 import { CurrentUser } from "@backend/core/decorator/current-user.decorator";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { ProviderSyncService } from "@backend/providers/base/sync.service";
 import { SyncTriggerType } from "@backend/providers/model/sync.type";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset";
-import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { formatPlaidError } from "@backend/providers/plaid/plaid.error.js";
+import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service";
 import { User } from "@backend/user/model/user.model";
 import {
   BadRequestException,
@@ -34,8 +35,8 @@ import { JWKPublicKey, WebhookUpdateAcknowledgedWebhook } from "plaid";
 @EnabledGuard.attach(Configuration.providers.plaid.enabled)
 export class PlaidWebhookController {
   private readonly logger = new Logger("provider:plaid:controller:webhook");
-  /** Cached signed key to not over-request to verify plaid webhooks */
-  private cachedKey?: JWKPublicKey;
+  /** Cached verification keys scoped to the Plaid app that issued each webhook. */
+  private readonly cachedKeys = new Map<string, JWKPublicKey>();
   constructor(
     private readonly plaidProvider: PlaidProviderService,
     private readonly providerSyncService: ProviderSyncService,
@@ -61,7 +62,7 @@ export class PlaidWebhookController {
     }
 
     // Validate the webhook actually came from Plaid
-    const isValid = await this.verifyPlaidWebhook(rawBody, signedJwt);
+    const isValid = await this.verifyPlaidWebhook(rawBody, signedJwt, payload.item_id);
     if (!isValid) {
       this.logger.error("Webhook signature verification failed.");
       throw new BadRequestException("Invalid webhook signature");
@@ -156,24 +157,36 @@ export class PlaidWebhookController {
   }
 
   /** Verifies the webhook came from plaid. */
-  private async verifyPlaidWebhook(body: string, signedJwt: string): Promise<boolean> {
+  private async verifyPlaidWebhook(body: string, signedJwt: string, itemId?: string): Promise<boolean> {
     try {
       const decoded = jwt.decode(signedJwt, { complete: true });
       if (!decoded || typeof decoded === "string" || !decoded.header?.kid) return false;
       const currentKeyID = decoded.header.kid;
-      if (!this.cachedKey)
+      if (!itemId && Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.USER) return false;
+      let plaidClient = this.plaidProvider.plaidClient;
+      let cacheScope = "shared";
+      if (itemId) {
+        const asset = await this.getPlaidInstitutionAsset({ item_id: itemId } as WebhookUpdateAcknowledgedWebhook);
+        plaidClient = this.plaidProvider.getPlaidClient(asset.institution.user);
+        if (Configuration.providers.plaid.credentialsMode === ProviderCredentialsMode.USER) {
+          cacheScope = `${asset.institution.user.id}:${asset.institution.user.config.plaidClientId}`;
+        }
+      }
+      if (!plaidClient) return false;
+      const cacheKey = `${cacheScope}:${currentKeyID}`;
+      let cachedKey = this.cachedKeys.get(cacheKey);
+      if (!cachedKey)
         try {
-          const response = await this.plaidProvider.plaidClient.webhookVerificationKeyGet({
-            key_id: currentKeyID,
-          });
-          this.cachedKey = response.data.key;
+          const response = await plaidClient.webhookVerificationKeyGet({ key_id: currentKeyID });
+          cachedKey = response.data.key ?? undefined;
+          if (cachedKey) this.cachedKeys.set(cacheKey, cachedKey);
         } catch (error) {
           this.logger.error(`Failed to fetch verification key from API: ${formatPlaidError(error)}`);
           return false;
         }
-      if (!this.cachedKey) return false;
+      if (!cachedKey) return false;
       const publicKey = crypto.createPublicKey({
-        key: this.cachedKey,
+        key: cachedKey,
         format: "jwk",
       });
       let decodedPayload: { request_body_sha256: string };

@@ -17,16 +17,16 @@ class PortfolioSummaryDto {
     required this.dayChange,
     required this.dayChangePercent,
     required this.hasPendingNavs,
-    required this.pendingNavSymbols,
+    this.pendingNavSymbols = const [],
   });
 
   /// Total current market value of the user's portfolio in their configured currency.
   num totalValue;
 
-  /// Estimated value change for holdings priced during the current market session.
+  /// Estimated value change for holdings with prices available during the current market session.
   num dayChange;
 
-  /// Estimated weighted percentage change for holdings priced during the current market session.
+  /// Estimated weighted percentage change for holdings with prices available during the current market session.
   num dayChangePercent;
 
   /// Whether any mutual-fund NAVs are pending.

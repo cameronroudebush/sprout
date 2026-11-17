@@ -7,7 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/shared/providers/logger_provider.dart';
-import 'package:sprout/user/models/extensions/use_config_extensions.dart';
+import 'package:sprout/user/models/extensions/user_config_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
 part 'biometric_provider.g.dart';

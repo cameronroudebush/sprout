@@ -86,6 +86,11 @@ String parameterToString(dynamic value) {
   if (value is InstitutionIconType) {
     return InstitutionIconTypeTypeTransformer().encode(value).toString();
   }
+  if (value is ProviderCredentialsModeEnum) {
+    return ProviderCredentialsModeEnumTypeTransformer()
+        .encode(value)
+        .toString();
+  }
   if (value is ProviderSubTypeEnum) {
     return ProviderSubTypeEnumTypeTransformer().encode(value).toString();
   }

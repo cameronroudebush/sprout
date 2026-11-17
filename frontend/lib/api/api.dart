@@ -103,6 +103,7 @@ part 'model/plaid_provider_controller_cleanup_untracked_item_request.dart';
 part 'model/plaid_webhook_controller_migrate_webhook_urls_request.dart';
 part 'model/portfolio_summary_dto.dart';
 part 'model/provider_config.dart';
+part 'model/provider_credentials_mode_enum.dart';
 part 'model/provider_sub_type_enum.dart';
 part 'model/provider_type_enum.dart';
 part 'model/register_device_dto.dart';

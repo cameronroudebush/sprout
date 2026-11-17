@@ -8,7 +8,7 @@ import { ProviderService } from "@backend/providers/provider.service";
 import { SSEEventType } from "@backend/sse/model/event.model";
 import { SSEService } from "@backend/sse/sse.service";
 import { TestEntities } from "@backend/test/entities";
-import { InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 
 describe("BaseProviderController", () => {
   let controller: BaseProviderController;
@@ -28,7 +28,7 @@ describe("BaseProviderController", () => {
 
     mockProviders = [
       {
-        config: { dbType: "plaid", name: "Plaid", enabled: true },
+        config: { dbType: "plaid", name: "Plaid", enabled: true, credentialsMode: "system" },
         getAppConfiguration: vi.fn().mockReturnValue({ enabled: true }),
         isAvailable: vi.fn().mockResolvedValue(true),
       },
@@ -49,6 +49,7 @@ describe("BaseProviderController", () => {
       expect(config.length).toBe(1);
       expect(config[0]!.dbType).toBe("plaid");
       expect(config[0]!.enabled).toBe(true);
+      expect(config[0]!.credentialsMode).toBe("system");
     });
   });
 
@@ -91,6 +92,23 @@ describe("BaseProviderController", () => {
 
       expect(providerService.syncUserProviders).toHaveBeenCalledWith(user, SyncTriggerType.MANUAL, "plaid");
       expect(sseService.sendToUser).toHaveBeenCalledWith(user, SSEEventType.SYNC);
+    });
+
+    it("should reject a specifically requested provider that is unavailable to the user", async () => {
+      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+      mockProviders[0]!.isAvailable.mockResolvedValue(false);
+
+      await expect(controller.manualSync(user, { providers: ["plaid" as any] })).rejects.toThrow(BadRequestException);
+
+      expect(providerService.syncUserProviders).not.toHaveBeenCalled();
+    });
+
+    it("should reject a specifically requested provider that is globally disabled", async () => {
+      vi.spyOn(Sync, "findOne").mockResolvedValue(null);
+
+      await expect(controller.manualSync(user, { providers: ["disabled_provider" as any] })).rejects.toThrow(BadRequestException);
+
+      expect(providerService.syncUserProviders).not.toHaveBeenCalled();
     });
 
     it("should wrap a single non-array sync result when syncing all providers", async () => {

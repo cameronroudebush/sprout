@@ -38,8 +38,9 @@ For a complete list of all available options, please see the **[Advanced Configu
 | **BrandFetch**                               |          |                    |                                                                                                                                                                |
 | `sprout_server_brandFetch_clientId`          |    No    |                    | We utilize [Brandfetch](https://brandfetch.com/) in our frontend's to display nice looking icons. See [more here](#brand-assets-with-brandfetch).              |
 | **Provider - Plaid**                         |          |                    |                                                                                                                                                                |
-| `sprout_providers_plaid_clientId`            |    No    |                    | Your unique Plaid Client ID found in the dashboard.                                                                                                            |
-| `sprout_providers_plaid_secret`              |    No    |                    | Your Plaid Secret key (Sandbox, Development, or Production).                                                                                                   |
+| `sprout_providers_plaid_clientId`            |    No    |                    | Shared Plaid Client ID, used when `credentialsMode` is `system`.                                                                                               |
+| `sprout_providers_plaid_secret`              |    No    |                    | Shared Plaid secret, used with the shared Client ID in system mode.                                                                                            |
+| `sprout_providers_plaid_credentialsMode`     |    No    |      `system`      | Set to `user` to use each user's Plaid Client ID and secret instead of shared system credentials. See [Plaid setup](./providers.md#plaid).                     |
 
 ## Generating an Encryption Key
 

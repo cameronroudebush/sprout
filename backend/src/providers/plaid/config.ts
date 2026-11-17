@@ -1,5 +1,6 @@
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { BaseProviderConfig } from "@backend/providers/base/config";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
 import { PlaidEnvironments } from "plaid";
 
 /** The configuration for the Plaid provider */
@@ -11,10 +12,16 @@ export class PlaidConfig extends BaseProviderConfig {
   rateLimit: number = 1000;
 
   @ConfigurationMetadata.assign({
-    comment: "The mode that we are searching for data on for our clientId and secret.",
+    comment: "The credential source to use for Plaid API requests.",
     restrictedValues: [PlaidEnvironments["sandbox"], PlaidEnvironments["production"]],
   })
   environment = PlaidEnvironments["production"]!;
+
+  @ConfigurationMetadata.assign({
+    comment: "Which Plaid credentials to use: system-wide credentials or credentials configured by each user.",
+    restrictedValues: Object.values(ProviderCredentialsMode),
+  })
+  credentialsMode = ProviderCredentialsMode.SYSTEM;
 
   @ConfigurationMetadata.assign({ comment: "The client Id for your plaid implementation." })
   clientId!: string;

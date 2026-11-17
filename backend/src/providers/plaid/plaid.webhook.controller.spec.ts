@@ -3,8 +3,10 @@ setupTests();
 
 import { ProviderSyncService } from "@backend/providers/base/sync.service.js";
 import { PlaidInstitutionAsset } from "@backend/providers/plaid/model/plaid.institution.asset.js";
+import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type.js";
 import { PlaidProviderService } from "@backend/providers/plaid/plaid.provider.service.js";
 import { PlaidWebhookController } from "@backend/providers/plaid/plaid.webhook.controller.js";
+import { Configuration } from "@backend/config/core.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import crypto from "crypto";
@@ -18,6 +20,7 @@ describe("PlaidWebhookController", () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.SYSTEM;
     plaidProvider = {
       updateAllItemWebhooks: vi.fn().mockResolvedValue({ updatedCount: 2, failedCount: 0 }),
       plaidClient: {
@@ -206,6 +209,50 @@ describe("PlaidWebhookController", () => {
   });
 
   describe("verifyPlaidWebhook", () => {
+    it("should reject webhooks without item context in user credential mode", async () => {
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "kid-1" } } as any);
+
+      await expect((controller as any).verifyPlaidWebhook("body", "jwt")).resolves.toBe(false);
+      expect(plaidProvider.plaidClient.webhookVerificationKeyGet).not.toHaveBeenCalled();
+    });
+
+    it("should reject webhook verification when no Plaid client is configured", async () => {
+      plaidProvider.plaidClient = undefined as any;
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "kid-1" } } as any);
+
+      await expect((controller as any).verifyPlaidWebhook("body", "jwt")).resolves.toBe(false);
+    });
+
+    it("should use the linked user's Plaid client for webhook verification", async () => {
+      Configuration.providers.plaid.credentialsMode = ProviderCredentialsMode.USER;
+      const user = TestEntities.user;
+      const userClient = { webhookVerificationKeyGet: vi.fn().mockResolvedValue({ data: { key: null } }) };
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue({ institution: { user } } as any);
+      plaidProvider.getPlaidClient = vi.fn().mockReturnValue(userClient) as any;
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "user-kid" } } as any);
+
+      const result = await (controller as any).verifyPlaidWebhook("body", "jwt", "item-123");
+
+      expect(plaidProvider.getPlaidClient).toHaveBeenCalledWith(user);
+      expect(userClient.webhookVerificationKeyGet).toHaveBeenCalledWith({ key_id: "user-kid" });
+      expect(result).toBe(false);
+    });
+
+    it("should verify item webhooks with system credentials in system mode", async () => {
+      const user = TestEntities.user;
+      const deploymentClient = { webhookVerificationKeyGet: vi.fn().mockResolvedValue({ data: { key: null } }) };
+      vi.spyOn(PlaidInstitutionAsset, "findOne").mockResolvedValue({ institution: { user } } as any);
+      plaidProvider.getPlaidClient = vi.fn().mockReturnValue(deploymentClient) as any;
+      vi.spyOn(jwt, "decode").mockReturnValue({ header: { kid: "deployment-kid" } } as any);
+
+      const result = await (controller as any).verifyPlaidWebhook("body", "jwt", "item-123");
+
+      expect(plaidProvider.getPlaidClient).toHaveBeenCalledWith(user);
+      expect(deploymentClient.webhookVerificationKeyGet).toHaveBeenCalledWith({ key_id: "deployment-kid" });
+      expect(result).toBe(false);
+    });
+
     it("should verify webhook signature correctly or return false on error", async () => {
       const verifyFn = (controller as any).verifyPlaidWebhook.bind(controller);
 

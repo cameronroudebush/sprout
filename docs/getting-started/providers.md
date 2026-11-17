@@ -118,16 +118,23 @@ Unlike many financial integrations, Zillow support in Sprout is designed to be "
 
 ### Self-Hosting Configuration
 
-To use Plaid with your self-hosted instance of Sprout, you must provide your own API credentials. This ensures your financial data remains private to your server.
+To use Plaid with your self-hosted instance of Sprout, provide Plaid API credentials. You can use system-wide credentials for all users, or require each Sprout user to provide their own credentials.
 
 !!! danger "Security Warning"
 
     Never share your Plaid **Client ID** or **Secret**. These keys grant access to your financial integrations. If you are using version control (like GitHub) to manage your Sprout deployment, ensure these variables are stored in a secure .env file or as encrypted secrets.
 
-| Variable                          | Description                                                  |
-| --------------------------------- | ------------------------------------------------------------ |
-| `sprout_providers_plaid_clientId` | Your unique Plaid Client ID found in the dashboard.          |
-| `sprout_providers_plaid_secret`   | Your Plaid Secret key (Sandbox, Development, or Production). |
+| Variable                                 | Required | Default  | Description                                                                       |
+| ---------------------------------------- | -------- | -------- | --------------------------------------------------------------------------------- |
+| `sprout_providers_plaid_clientId`        | No       |          | Shared Plaid Client ID. Used when credentials mode is `system`.                   |
+| `sprout_providers_plaid_secret`          | No       |          | Shared Plaid secret. Used with the shared Client ID in system mode.               |
+| `sprout_providers_plaid_credentialsMode` | No       | `system` | Select `system` for shared credentials or `user` for individual user credentials. |
+
+By default, Sprout uses shared system credentials and ignores any per-user credentials. Set `sprout_providers_plaid_credentialsMode` to `user` to use individual credentials exclusively; each user must enter both Client ID and secret. Existing users need to add credentials before switching to `user`, or their Plaid connections will stop syncing until they do.
+
+With per-user credentials enabled, each user enters their Client ID and secret at **Settings → Integrations → Plaid API Credentials**. Sprout encrypts these values in the database using the deployment's encryption key. Keep that key backed up and unchanged; see [generating an encryption key](./configuration.md#generating-an-encryption-key).
+
+The selected Plaid environment applies to shared and per-user credentials, so all keys must belong to the same environment.
 
 ### Setup Instructions
 
@@ -145,8 +152,9 @@ Follow these steps to get your credentials and connect your first account:
     - Copy your Client ID.
     - Under Secrets, reveal and copy the secret for the production environment.
 4. Configure Sprout
-    - Add the copied keys to your environment variables `sprout_providers_plaid_clientId` and `sprout_providers_plaid_secret`.
-    - Restart your Sprout server to apply the changes.
+    - For system-wide credentials, add the copied keys to `sprout_providers_plaid_clientId` and `sprout_providers_plaid_secret`.
+    - For per-user credentials, set `sprout_providers_plaid_credentialsMode` to `user`; each user then adds their keys in Settings.
+    - Restart your Sprout server after changing deployment configuration.
 5. Link Your Accounts
     - In the Sprout app, go to Add Account and select Plaid.
     - Use the secure Plaid Link UI to log in to your bank.
