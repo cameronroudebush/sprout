@@ -1,11 +1,16 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_details.dart';
 import 'package:sprout/account/widgets/account_merge_dialog.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/notification/notification_provider.dart';
+import 'package:sprout/provider/provider_provider.dart';
+import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
+import 'package:sprout/provider/widgets/resync_dialog.dart';
+import 'package:sprout/provider/widgets/snap-trade/snap_trade_helper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/widgets/layout.dart';
@@ -16,10 +21,124 @@ import 'package:sprout/transaction/transaction_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Page specific to display account details
-class AccountDetailsPage extends ConsumerWidget {
+class AccountDetailsPage extends ConsumerStatefulWidget {
   final String? accountId;
 
   const AccountDetailsPage({super.key, this.accountId});
+
+  @override
+  ConsumerState<AccountDetailsPage> createState() => _AccountDetailsPageState();
+}
+
+class _AccountDetailsPageState extends ConsumerState<AccountDetailsPage>
+    with WidgetsBindingObserver {
+  /// Track if we sent the user away to update their institution connection.
+  ProviderTypeEnum? _providerAwaitingReturn;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final provider = _providerAwaitingReturn;
+    if (state == AppLifecycleState.resumed && provider != null) {
+      _providerAwaitingReturn = null;
+      _showReSyncPopup(provider);
+    }
+  }
+
+  void _showReSyncPopup(ProviderTypeEnum providerType) {
+    showSproutPopup(
+      context: context,
+      builder: (ctx) => ReSyncDialog(providerType: providerType),
+    );
+  }
+
+  Future<void> _updateInstitutionConnection(Account account) async {
+    switch (account.provider) {
+      case ProviderTypeEnum.snapTrade:
+        try {
+          final helper = SnapTradeHelper();
+          await helper.linkAccount(
+            ref,
+            onSuccess: () async {
+              if (mounted) _showReSyncPopup(account.provider);
+            },
+            onError: (errorMsg) {
+              if (mounted) {
+                ref
+                    .read(notificationsProvider.notifier)
+                    .parseOpenAPIException(errorMsg);
+              }
+            },
+          );
+        } catch (e) {
+          if (mounted) {
+            ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+          }
+        }
+        break;
+
+      case ProviderTypeEnum.plaid:
+        try {
+          final api = await ref.read(providerApiProvider.future);
+          final response = await api.plaidProviderControllerCreateLinkToken(
+            institutionId: account.institution.id,
+          );
+
+          if (response?.linkToken != null) {
+            final configuration = LinkTokenConfiguration(
+              token: response!.linkToken,
+            );
+            await PlaidLink.create(configuration: configuration);
+            PlaidLink.onSuccess.first.then((success) async {
+              try {
+                final api = await ref.read(providerApiProvider.future);
+                await PlaidSyncHelper.exchangePublicTokenIfNeeded(
+                  success,
+                  api,
+                  fallbackInstitutionName: account.institution.name,
+                );
+                if (mounted) _showReSyncPopup(account.provider);
+              } catch (e) {
+                if (mounted) {
+                  ref
+                      .read(notificationsProvider.notifier)
+                      .parseOpenAPIException(e);
+                }
+              }
+            });
+            PlaidLink.open();
+          }
+        } catch (e) {
+          if (mounted) {
+            ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
+          }
+        }
+        break;
+
+      case ProviderTypeEnum.simpleFin:
+        final url = Uri.parse('https://beta-bridge.simplefin.org/my-account');
+        _providerAwaitingReturn = account.provider;
+        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+          _providerAwaitingReturn = null;
+        }
+        break;
+
+      case ProviderTypeEnum.zillow:
+      default:
+        break;
+    }
+  }
 
   void _showCleanDuplicatesDialog(
     BuildContext context,
@@ -84,13 +203,13 @@ class AccountDetailsPage extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final accountsAsync = ref.watch(accountsProvider);
 
     return accountsAsync.when(
       data: (state) {
         final account = state.accounts.firstWhereOrNull(
-          (a) => a.id == accountId,
+          (a) => a.id == widget.accountId,
         );
 
         if (account == null) {
@@ -104,9 +223,19 @@ class AccountDetailsPage extends ConsumerWidget {
         final zpid = account.provider == ProviderTypeEnum.zillow
             ? ref.watch(zillowInfoProvider(account.id)).value
             : null;
+        final canUpdateConnection = switch (account.provider) {
+          ProviderTypeEnum.plaid ||
+          ProviderTypeEnum.snapTrade ||
+          ProviderTypeEnum.simpleFin =>
+            true,
+          _ => false,
+        };
 
         return Scaffold(
-          body: AccountDetailsView(account: account),
+          body: AccountDetailsView(
+            account: account,
+            onUpdateConnection: () => _updateInstitutionConnection(account),
+          ),
           floatingActionButton: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.sizeOf(context).width <
@@ -116,6 +245,12 @@ class AccountDetailsPage extends ConsumerWidget {
             ),
             child: SproutSpeedDial(
               actions: [
+                if (canUpdateConnection)
+                  FABAction(
+                    icon: Icons.sync,
+                    label: 'Update connection',
+                    onTap: (_) => _updateInstitutionConnection(account),
+                  ),
                 FABAction(
                   icon: Icons.merge,
                   label: 'Merge Accounts',

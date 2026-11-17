@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/account_provider.dart';
+import 'package:sprout/account/widgets/account_icon.dart';
+import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/models/extensions/chat_history_extensions.dart';
 import 'package:sprout/chat/widgets/charts/chat_line_chart.dart';
 import 'package:sprout/chat/widgets/charts/chat_pie_chart.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
+import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/models/extensions/currency_extensions.dart';
 import 'package:sprout/user/user_config_provider.dart';
 
@@ -18,13 +21,15 @@ class ChatMessageContent extends ConsumerStatefulWidget {
   final bool isAi;
   final Color? textColor;
   final bool showTypingWhenLoading;
+  final bool showAccountIcons;
 
   const ChatMessageContent(
       {super.key,
       required this.text,
       this.isAi = true,
       this.textColor,
-      this.showTypingWhenLoading = true});
+      this.showTypingWhenLoading = true,
+      this.showAccountIcons = false});
 
   @override
   ConsumerState<ChatMessageContent> createState() => _ChatMessageContentState();
@@ -121,8 +126,19 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
       data: (accountState) {
         final isPrivate = userConfigAsync.value?.privateMode ?? false;
         final accounts = accountState.accounts;
+        final showAccountIcons = widget.showAccountIcons &&
+            ref.watch(secureConfigProvider).value?.brandFetchClientId != null;
+        final accountIconIds = showAccountIcons
+            ? accounts.map((account) => account.id).toSet()
+            : <String>{};
+        final accountsById = showAccountIcons
+            ? {for (final account in accounts) account.id: account}
+            : <String, Account>{};
 
-        String processedText = _displayedText.deIdentifyAccounts(accounts);
+        String processedText = _displayedText.deIdentifyAccounts(
+          accounts,
+          accountIconIds: accountIconIds,
+        );
         final finalText =
             isPrivate ? processedText.deIdentifyCurrency() : processedText;
         final effectiveColor = widget.textColor ?? theme.colorScheme.onSurface;
@@ -147,7 +163,11 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
           gptThemeData: styledMarkdownTheme,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: _buildContentNodes(finalText, markdownStyle),
+            children: _buildContentNodes(
+              finalText,
+              markdownStyle,
+              accountIconAccounts: accountsById,
+            ),
           ),
         );
       },
@@ -157,15 +177,46 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
   /// Splits the LLM response into Markdown text and Chart widgets as necessary
   ///
   /// [parseCharts] If we should parse charts into their actual chart objects versus leaving them as JSON
-  List<Widget> _buildContentNodes(String text, TextStyle style,
-      {bool parseCharts = true}) {
+  List<Widget> _buildContentNodes(
+    String text,
+    TextStyle style, {
+    bool parseCharts = true,
+    Map<String, Account> accountIconAccounts = const {},
+  }) {
+    final inlinePatterns = accountIconAccounts.isEmpty
+        ? null
+        : [
+            InlinePattern(
+              pattern: RegExp(
+                r'\[\[sprout-account-icon:([a-zA-Z0-9\-]+)\]\]',
+              ),
+              builder: (context, match, style) {
+                final account = accountIconAccounts[match.group(1)];
+                if (account == null) {
+                  return TextSpan(text: match.group(0), style: style);
+                }
+                return WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: AccountIcon(account, size: 16),
+                  ),
+                );
+              },
+            ),
+          ];
+    GptMarkdown renderMarkdown(String markdown) => GptMarkdown(
+          markdown,
+          style: style,
+          inlinePatterns: inlinePatterns,
+        );
+
     // Detects ``` blocks early, including incomplete or partially typed opening tags
     final blockRegex = RegExp(r'```(?:chart)?\s*([\s\S]*?)(?:```|$)');
     final matches = blockRegex.allMatches(text);
 
     // No code/chart blocks so just return markdown
-    if (matches.isEmpty || !parseCharts)
-      return [GptMarkdown(text, style: style)];
+    if (matches.isEmpty || !parseCharts) return [renderMarkdown(text)];
 
     List<Widget> nodes = [];
     int lastMatchEnd = 0;
@@ -173,7 +224,7 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
     for (final match in matches) {
       // Add standard text before the block
       final preText = text.substring(lastMatchEnd, match.start).trim();
-      if (preText.isNotEmpty) nodes.add(GptMarkdown(preText, style: style));
+      if (preText.isNotEmpty) nodes.add(renderMarkdown(preText));
 
       final fullMatchText = match.group(0) ?? "";
       final jsonString = match.group(1)?.trim() ?? "";
@@ -219,7 +270,7 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
                 style: TextStyle(color: Colors.red)));
           } else {
             // Standard non-chart markdown code block fallback
-            nodes.add(GptMarkdown(fullMatchText, style: style));
+            nodes.add(renderMarkdown(fullMatchText));
           }
         }
       }
@@ -228,7 +279,7 @@ class _ChatMessageContentState extends ConsumerState<ChatMessageContent> {
 
     // Add remaining text after the last match
     final postText = text.substring(lastMatchEnd).trim();
-    if (postText.isNotEmpty) nodes.add(GptMarkdown(postText, style: style));
+    if (postText.isNotEmpty) nodes.add(renderMarkdown(postText));
     return nodes;
   }
 }

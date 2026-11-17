@@ -7,20 +7,24 @@ import { ChatTimeframe } from "@backend/chat/model/api/chat.request.dto.js";
 import { ChatHistory } from "@backend/chat/model/chat.history.model.js";
 import { ChatOverview } from "@backend/chat/model/chat.overview.model.js";
 import { ChatOverviewType } from "@backend/chat/model/chat.overview.type.js";
+import { Configuration } from "@backend/config/core.js";
 import { SSEEventType } from "@backend/sse/model/event.model.js";
 import { SSEService } from "@backend/sse/sse.service.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { BadRequestException, ConflictException } from "@nestjs/common";
+import { ThrottlerException, ThrottlerStorage } from "@nestjs/throttler";
 import { Mocked } from "vitest";
 
 describe("ChatController", () => {
   let controller: ChatController;
   let chatService: Mocked<ChatService>;
   let sseService: Mocked<SSEService>;
+  let throttlerStorage: Mocked<ThrottlerStorage>;
   const user = TestEntities.user;
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    Configuration.server.prompt = { chatRateLimit: { requests: 30, windowMs: 14_400_000 } } as any;
 
     chatService = {
       getModel: vi.fn(),
@@ -30,7 +34,11 @@ describe("ChatController", () => {
       sendToUser: vi.fn(),
     } as any;
 
-    controller = new ChatController(chatService, sseService);
+    throttlerStorage = {
+      increment: vi.fn().mockResolvedValue({ totalHits: 1, isBlocked: false }),
+    } as unknown as Mocked<ThrottlerStorage>;
+
+    controller = new ChatController(chatService, sseService, throttlerStorage);
   });
 
   describe("new", () => {
@@ -69,6 +77,17 @@ describe("ChatController", () => {
       expect(mockModel.generateChatContent).toHaveBeenCalledWith(modelChat, ChatTimeframe.threeMonths, true);
       expect(modelChat.model).toBe("test-model");
       expect(res).toBe("AI Response");
+    });
+
+    it("should enforce the configured per-user chat request limit", async () => {
+      Configuration.server.prompt.chatRateLimit = { requests: 2, windowMs: 100 } as any;
+      throttlerStorage.increment.mockResolvedValue({ totalHits: 3, isBlocked: true } as any);
+      const count = vi.spyOn(ChatHistory, "count");
+
+      await expect(controller.new(user, { message: "Hello", timeframe: ChatTimeframe.threeMonths })).rejects.toThrow(ThrottlerException);
+
+      expect(throttlerStorage.increment).toHaveBeenCalledWith(`chat:${user.id}`, 100, 2, 100, "chat");
+      expect(count).not.toHaveBeenCalled();
     });
 
     it("should handle error without message property in catch block", async () => {

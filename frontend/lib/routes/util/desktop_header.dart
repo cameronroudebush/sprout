@@ -159,7 +159,7 @@ class SproutDesktopHeader extends ConsumerWidget {
       ];
     } else if (uri.path == '/reports') {
       queryKey = 'report';
-      options = ReportsPage.reportTabs;
+      options = ReportsPage.desktopReportTabs;
     } else {
       return null;
     }

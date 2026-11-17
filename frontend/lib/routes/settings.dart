@@ -136,10 +136,10 @@ class SettingsPage extends ConsumerWidget {
         ),
         if (config.emailEnabled && userHasEmail)
           ActionSettingTile(
-            title: "Status Update Frequency",
+            title: "Email Status Frequency",
             subtitle: !userHasEmail
                 ? "You must configure an email to set this value"
-                : "How often to receive finance updates",
+                : "How often to receive finance updates via email",
             icon: Icons.notifications_active_outlined,
             trailing: DropdownButtonHideUnderline(
               child: DropdownButton<EmailUpdateFrequencyEnum>(

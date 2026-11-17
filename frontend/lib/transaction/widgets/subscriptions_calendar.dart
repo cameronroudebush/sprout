@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
+import 'package:sprout/routes/util/navigation_provider.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
@@ -178,6 +179,10 @@ class _SubscriptionCalendarWidgetState
                 return TransactionRow(
                   events[i].toMockTransaction(),
                   allowDialog: false,
+                  onTap: () => NavigationProvider.redirect(
+                    "/transactions",
+                    queryParameters: {'search': event.description},
+                  ),
                   icon: AccountIcon(
                     event.account,
                     size: 24,

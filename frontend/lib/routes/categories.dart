@@ -7,6 +7,7 @@ import 'package:sprout/category/widgets/category_icon.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
+import 'package:sprout/shared/widgets/badge.dart' as sprout;
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/speed_dial.dart';
 
@@ -42,7 +43,22 @@ class _CategoryOverviewPageState extends ConsumerState<CategoryOverviewPage> {
       leading: CategoryIcon(c),
       title: Text(c.name, style: theme.textTheme.bodyLarge),
       onTap: () => _openEditSheet(c),
-      trailing: Icon(Icons.chevron_right),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          if (c.excludeFromCashFlow)
+            const Tooltip(
+              message: 'Excluded from cash flow calculations',
+              child: sprout.Badge(
+                label: 'Excluded',
+                icon: Icons.visibility_off_outlined,
+                variant: sprout.BadgeVariant.outline,
+              ),
+            ),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
     );
   }
 

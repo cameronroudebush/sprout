@@ -71,7 +71,7 @@ export class ChatPromptService {
   async buildHoldingsOverviewPrompt(user: User): Promise<ChatPromptResult> {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
-      `Write an ultra-concise, balanced daily investment performance summary covering the last 24 hours. STRICT MAXIMUM of 75 words total.`,
+      `Write a concise, balanced daily investment performance summary covering the last 24 hours.`,
       `Focus exclusively on investment, retirement, and brokerage accounts (e.g., 401(k), IRA, taxable brokerage, crypto). Ignore standard checking, savings, or credit accounts.`,
       `ACCOUNT MOVEMENT RECONCILIATION:
        - 'liveHoldings' contains current share counts, provider-reported values, Yahoo quote data, quote timestamps, and server-computed price movement estimates.
@@ -85,10 +85,10 @@ export class ChatPromptService {
        - Do not infer market causes from portfolio value changes alone.`,
       `FORMAT REQUIREMENTS:`,
       `1. Start with a 1-sentence high-level takeaway summarizing overall portfolio direction today (e.g., "Your overall investments saw solid upward momentum today, lifted by strong broad-market gains.").`,
-      `2. Follow with a MAXIMUM of 3 bullet points (under 15 words each) for only the most notable movers. State the direction of change and provide the qualitative driver (e.g., "Roth IRA trended upward, largely driven by gains in broad index funds").`,
+      `2. Follow with short bullets ONLY for supplied accounts whose comparable live quotes show a non-zero daily movement. Omit accounts with flat movement; do not force one bullet per supplied account. Refer to each included account using its provided unique ID so accounts with identical names remain distinct, and state its direction and qualitative driver when supported.`,
       `3. End with a 1-sentence grounding, long-term perspective note (e.g., "Short-term daily fluctuations are completely standard—your strategy remains focused on long-term growth.").`,
       `4. DO NOT include ANY specific numbers, dollar balances, share counts, or exact percentage gains/losses. Focus entirely on the narrative direction (upward, flat, dip), relative momentum, and market/holding drivers.`,
-      `5. Only cover materially relevant accounts that drove aggregate movement. Omit accounts with flat or unremarkable performance to save space.`,
+      `5. If no accounts have confirmed movement, omit the bullet list. Say movement is flat only when comparable quote data supports that; otherwise note that movement cannot be assessed.`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, [AccountType.investment, AccountType.crypto], true, false, true);

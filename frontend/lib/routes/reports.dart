@@ -30,6 +30,11 @@ class ReportsPage extends ConsumerStatefulWidget {
     SproutTabOption(value: 'spending', label: 'Spending'),
   ];
 
+  /// Report destinations available in the desktop header.
+  static final desktopReportTabs = reportTabs
+      .where((tab) => tab.value != 'calendar')
+      .toList(growable: false);
+
   const ReportsPage({super.key});
 
   @override
@@ -73,10 +78,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   Widget build(BuildContext context) {
     final requestedReport =
         NavigationProvider.queryParameter(context, 'report');
-    final reportView =
-        ReportsPage.reportTabs.any((tab) => tab.value == requestedReport)
-            ? requestedReport!
-            : 'sankey';
+    final isDesktop = MediaQuery.sizeOf(context).width >=
+        SproutLayoutBuilder.desktopBreakpoint;
+    final tabs =
+        isDesktop ? ReportsPage.desktopReportTabs : ReportsPage.reportTabs;
+    final reportView = tabs.any((tab) => tab.value == requestedReport)
+        ? requestedReport!
+        : 'sankey';
     final currentView = CashFlowView.values.firstWhere(
       (view) => view.name == NavigationProvider.queryParameter(context, 'view'),
       orElse: () => CashFlowView.monthly,
@@ -86,7 +94,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     return SproutRouteWrapper(
       size: SproutRouteSize.large,
       child: SproutTabbedLayout(
-        tabs: ReportsPage.reportTabs,
+        tabs: tabs,
         selected: reportView,
         dropdownTooltip: 'Select report',
         dropdownHeading: 'Report Type',

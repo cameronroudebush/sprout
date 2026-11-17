@@ -32,6 +32,7 @@ class HoldingsChatCard extends ConsumerWidget {
             child: ChatMessageContent(
               text: status!.text,
               isAi: true,
+              showAccountIcons: true,
               textColor: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:plaid_flutter/plaid_flutter.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/models/extensions/account_extensions.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
@@ -12,14 +11,10 @@ import 'package:sprout/institution/institution_provider.dart';
 import 'package:sprout/net-worth/net_worth_provider.dart';
 import 'package:sprout/notification/notification_provider.dart';
 import 'package:sprout/provider/provider_provider.dart';
-import 'package:sprout/provider/widgets/plaid/plaid_helper.dart';
 import 'package:sprout/provider/widgets/provider_display.dart';
-import 'package:sprout/provider/widgets/resync_dialog.dart';
-import 'package:sprout/provider/widgets/snap-trade/snap_trade_helper.dart';
 import 'package:sprout/routes/transactions.dart';
 import 'package:sprout/routes/util/main_route_wrapper.dart';
 import 'package:sprout/routes/util/navigation_provider.dart';
-import 'package:sprout/shared/dialog/base_dialog.dart';
 import 'package:sprout/shared/dialog/edit_dialog.dart';
 import 'package:sprout/shared/models/extensions/string_extensions.dart';
 import 'package:sprout/shared/models/notification.dart';
@@ -27,7 +22,6 @@ import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/shared/widgets/notification.dart';
 import 'package:sprout/shared/widgets/tab_selector.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// A simple record type to hold the combined data for our generic widget
 typedef AccountChartData = ({
@@ -38,138 +32,23 @@ typedef AccountChartData = ({
 /// This page provides the overall account details view
 class AccountDetailsView extends ConsumerStatefulWidget {
   final Account account;
+  final VoidCallback onUpdateConnection;
 
-  const AccountDetailsView({super.key, required this.account});
+  const AccountDetailsView({
+    super.key,
+    required this.account,
+    required this.onUpdateConnection,
+  });
 
   @override
   ConsumerState<AccountDetailsView> createState() => _AccountDetailsViewState();
 }
 
-class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
-    with WidgetsBindingObserver {
-  /// Track if we sent the user away to fix their institution connection
-  bool _expectingReturnFromFix = false;
-
+class _AccountDetailsViewState extends ConsumerState<AccountDetailsView> {
   double get _mobileTabScrollInset =>
       MediaQuery.sizeOf(context).width < SproutLayoutBuilder.desktopBreakpoint
           ? SproutTabbedLayout.mobileNavigationScrollInset
           : 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When the user returns to the app after clicking the notification
-    if (state == AppLifecycleState.resumed && _expectingReturnFromFix) {
-      _expectingReturnFromFix = false;
-      _showReSyncPopup();
-    }
-  }
-
-  /// Renders the popup to ask the user if they want to sync
-  void _showReSyncPopup() {
-    showSproutPopup(
-      context: context,
-      builder: (ctx) => ReSyncDialog(
-        providerType: widget.account.provider,
-      ),
-    );
-  }
-
-  /// Launches the necessary content to fix an institution that has an error
-  Future<void> _fixInstitution() async {
-    final provider = widget.account.provider;
-
-    switch (provider) {
-      case ProviderTypeEnum.snapTrade:
-        try {
-          final helper = SnapTradeHelper();
-          await helper.linkAccount(
-            ref,
-            onSuccess: () async {
-              if (mounted) _showReSyncPopup();
-            },
-            onError: (errorMsg) {
-              if (mounted) {
-                ref
-                    .read(notificationsProvider.notifier)
-                    .parseOpenAPIException(errorMsg);
-              }
-            },
-          );
-        } catch (e) {
-          if (mounted) {
-            ref.read(notificationsProvider.notifier).parseOpenAPIException(e);
-          }
-        }
-        break;
-
-      case ProviderTypeEnum.plaid:
-        try {
-          final api = await ref.read(providerApiProvider.future);
-          final response = await api.plaidProviderControllerCreateLinkToken(
-            institutionId: widget.account.institution.id,
-          );
-
-          if (response?.linkToken != null) {
-            // Open Plaid SDK in update mode
-            LinkTokenConfiguration configuration = LinkTokenConfiguration(
-              token: response!.linkToken,
-            );
-            await PlaidLink.create(configuration: configuration);
-            PlaidLink.onSuccess.first.then((success) async {
-              try {
-                final api = await ref.read(providerApiProvider.future);
-
-                // Handle public token exchange if a new link was created
-                await PlaidSyncHelper.exchangePublicTokenIfNeeded(
-                  success,
-                  api,
-                  fallbackInstitutionName: widget.account.institution.name,
-                );
-
-                // Show sync popup whether it was a pure update or a full token exchange
-                if (mounted) _showReSyncPopup();
-              } catch (e) {
-                if (mounted)
-                  ref
-                      .read(notificationsProvider.notifier)
-                      .parseOpenAPIException(e);
-              }
-            });
-            PlaidLink.open();
-          }
-        } catch (e) {
-          ref.read(notificationsProvider.notifier).parseOpenAPIException((e));
-        }
-        break;
-
-      case ProviderTypeEnum.simpleFin:
-        // Handle SimpleFin which is just a simple URL
-        final Uri url =
-            Uri.parse('https://beta-bridge.simplefin.org/my-account');
-        _expectingReturnFromFix = true;
-        if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-          _expectingReturnFromFix = false;
-        }
-        break;
-
-      case ProviderTypeEnum.zillow:
-      default:
-        // No external auth fix flow needed for Zillow or unhandled providers
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +183,6 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
     final providers = ref.watch(providerConfigProvider).value;
     final provider =
         providers?.firstWhereOrNull((x) => x.dbType == account.provider);
-
     final allHistoryAsync = ref.watch(historicalAccountDataProvider);
     final timelineAsync = ref.watch(accountTimelineProvider(widget.account.id));
 
@@ -532,7 +410,7 @@ class _AccountDetailsViewState extends ConsumerState<AccountDetailsView>
       if (widget.account.institution.hasError) {
         message =
             "Connection issue: ${widget.account.institution.name} requires re-authentication to continue syncing.";
-        onTap = _fixInstitution;
+        onTap = widget.onUpdateConnection;
       } else {
         message =
             "This account was missing from the latest provider sync and has been archived. You'll need to re-add this account for it to show back up.";

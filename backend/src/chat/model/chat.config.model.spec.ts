@@ -52,6 +52,7 @@ describe("ChatConfig", () => {
 
     const chat = new ChatConfig();
     expect(chat.maxChatHistory).toBe(10);
+    expect(chat.chatRateLimit).toMatchObject({ requests: 30, windowMs: 14_400_000 });
     expect(chat.type).toBe("gemini");
     expect(chat.openCode).toBeInstanceOf(OpenCodeConfig);
   });

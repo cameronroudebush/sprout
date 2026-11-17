@@ -2,7 +2,10 @@ import 'package:sprout/api/api.dart';
 
 extension ChatHistoryExtensions on String {
   /// Replaces @ID patterns, standalone IDs, and streaming ID prefixes with Account Names
-  String deIdentifyAccounts(List<Account> accounts) {
+  String deIdentifyAccounts(
+    List<Account> accounts, {
+    Set<String> accountIconIds = const {},
+  }) {
     if (accounts.isEmpty) return this;
 
     final idMap = {for (var acc in accounts) acc.id: acc.name};
@@ -16,7 +19,10 @@ extension ChatHistoryExtensions on String {
         final fullMatch = match.group(0)!;
         final rawToken = fullMatch.replaceAll(RegExp(r'[`@]'), '');
         if (idMap.containsKey(rawToken)) {
-          return "**${idMap[rawToken]}**";
+          final icon = accountIconIds.contains(rawToken)
+              ? '[[sprout-account-icon:$rawToken]]'
+              : '';
+          return "$icon**${idMap[rawToken]}**";
         }
         // Check if rawToken is a partial prefix ONLY if it originated from an `@` token
         final isAtMention = fullMatch.contains('@');

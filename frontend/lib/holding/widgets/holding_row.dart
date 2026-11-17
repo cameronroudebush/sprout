@@ -178,7 +178,7 @@ class HoldingRow extends ConsumerWidget {
                                 constraints:
                                     const BoxConstraints(maxWidth: 280),
                                 message:
-                                    "Gains or losses recorded since tracking began via ${rowState.account?.provider ?? "your provider"}. Historical performance from before this account was linked may not be included.",
+                                    "Gains or losses recorded since tracking began via ${rowState.account?.provider ?? "your provider"}. Historical performance from before this account was linked may not be included. This may lag behind live market movements.",
                                 child: Icon(
                                   Icons.info_outline,
                                   size: 14,

@@ -270,6 +270,29 @@ describe("ChatPromptService", () => {
       expect(promptText).toContain("its movement cannot yet be assessed");
     });
 
+    it("should include every investment account and distinguish accounts with identical names", async () => {
+      const accounts = Array.from({ length: 5 }, (_, index) =>
+        Account.fromPlain({
+          ...TestEntities.account,
+          id: `investment-account-${index}`,
+          name: "Brokerage",
+          type: "investment",
+        }),
+      );
+      vi.spyOn(Account, "find").mockResolvedValue(accounts);
+
+      const payload = await service.buildHoldingsOverviewPrompt(user);
+      const promptText = payload.contents[0]!.parts[0]!.text;
+      const contextData = JSON.parse(promptText.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(contextData.accounts).toHaveLength(5);
+      expect(contextData.accounts.map((account: { i: string }) => account.i)).toEqual(["Acc_0", "Acc_1", "Acc_2", "Acc_3", "Acc_4"]);
+      expect(new Set(accounts.map((account) => payload.idMap.get(account.id))).size).toBe(5);
+      expect(promptText).toContain("ONLY for supplied accounts whose comparable live quotes show a non-zero daily movement");
+      expect(promptText).toContain("Omit accounts with flat movement");
+      expect(promptText).toContain("If no accounts have confirmed movement, omit the bullet list");
+    });
+
     it("should flag post-market mutual-fund NAV as uncomparable when timestamp predates latest market close", async () => {
       const fund = Holding.fromPlain({ ...TestEntities.holding, symbol: "RFKTX", shares: 2, marketValue: 63.32, currency: "USD" });
       vi.spyOn(Holding, "find").mockResolvedValue([fund]);

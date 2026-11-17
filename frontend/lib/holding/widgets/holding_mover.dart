@@ -26,12 +26,14 @@ class HoldingMoverWidget extends ConsumerWidget {
   final String title;
   final List<Account> investmentAccounts;
   final int count;
+  final int desktopCount;
 
   const HoldingMoverWidget(
       {super.key,
       this.title = "Today's Top Movers",
       required this.investmentAccounts,
-      this.count = 4});
+      this.count = 4,
+      this.desktopCount = 5});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,16 +84,9 @@ class HoldingMoverWidget extends ConsumerWidget {
     final allStates = mergedHoldings.values.toList();
     allStates.sort((a, b) => b.dayPercent.compareTo(a.dayPercent));
 
-    final gainers =
-        allStates.where((s) => s.dayPercent > 0).take(count).toList();
-    final losers = allStates
-        .where((s) => s.dayPercent < 0)
-        .toList()
-        .reversed
-        .take(count)
-        .toList();
+    final hasMovers = allStates.any((s) => s.dayPercent != 0);
 
-    if (gainers.isEmpty && losers.isEmpty && !hasPendingNavs) {
+    if (!hasMovers && !hasPendingNavs) {
       return const SizedBox.shrink();
     }
 
@@ -118,6 +113,17 @@ class HoldingMoverWidget extends ConsumerWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               final isCompact = constraints.maxWidth < 500;
+              final moverCount = isCompact ? count : desktopCount;
+              final gainers = allStates
+                  .where((s) => s.dayPercent > 0)
+                  .take(moverCount)
+                  .toList();
+              final losers = allStates
+                  .where((s) => s.dayPercent < 0)
+                  .toList()
+                  .reversed
+                  .take(moverCount)
+                  .toList();
 
               if (isCompact) {
                 return Column(

@@ -33,6 +33,7 @@ class DashboardDailyChatCard extends ConsumerWidget {
               text: status!.text,
               isAi: true,
               showTypingWhenLoading: false,
+              showAccountIcons: true,
               textColor: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),

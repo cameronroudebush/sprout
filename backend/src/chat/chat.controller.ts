@@ -16,6 +16,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  Inject,
   Logger,
   ParseEnumPipe,
   ParseIntPipe,
@@ -23,7 +24,8 @@ import {
   Query,
   RequestTimeoutException,
 } from "@nestjs/common";
-import { ApiBody, ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConflictResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags, ApiTooManyRequestsResponse } from "@nestjs/swagger";
+import { ThrottlerException, ThrottlerStorage } from "@nestjs/throttler";
 import { CronExpressionParser } from "cron-parser";
 import { startCase } from "lodash-es";
 
@@ -37,6 +39,7 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly sseService: SSEService,
+    @Inject(ThrottlerStorage) private readonly throttlerStorage: ThrottlerStorage,
   ) {}
 
   @Post("new")
@@ -44,8 +47,13 @@ export class ChatController {
   @ApiBody({ type: ChatRequestDTO })
   @ApiOkResponse({ description: "Returns the generated text from the prompt." })
   @ApiConflictResponse({ description: "Thrown if the LLM is already running a request for the current user." })
+  @ApiTooManyRequestsResponse({ description: "Thrown if the user exceeds the chat request limit." })
   @EnabledGuard.attachDemoMode()
   async new(@CurrentUser() user: User, @Body() data: ChatRequestDTO) {
+    const { requests, windowMs } = Configuration.server.prompt.chatRateLimit;
+    const rateLimit = await this.throttlerStorage.increment(`chat:${user.id}`, windowMs, requests, windowMs, "chat");
+    if (rateLimit.isBlocked || rateLimit.totalHits > requests) throw new ThrottlerException("You have exceeded the chat request limit. Try again later.");
+
     const isLoading = await ChatHistory.count({ where: { user: { id: user.id }, isThinking: true } });
     if (isLoading > 0) throw new ConflictException("A request is already running. Please try again later");
     if (data.message.trim() === "") throw new BadRequestException("No valid message given");

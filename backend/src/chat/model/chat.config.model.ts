@@ -34,12 +34,24 @@ export class OpenCodeConfig {
   key?: string;
 }
 
+/** Per-user chat request rate limit. */
+export class ChatRateLimitConfig {
+  @ConfigurationMetadata.assign({ comment: "Maximum number of chat requests allowed per user during the rate limit window." })
+  requests: number = 30;
+
+  @ConfigurationMetadata.assign({ comment: "Duration of the per-user chat rate limit window in milliseconds." })
+  windowMs: number = 4 * 60 * 60 * 1000;
+}
+
 /** Contains LLM configuration options */
 export class ChatConfig {
   @ConfigurationMetadata.assign({
     comment: "The number of chats that should be included in context and kept in the db. We will remove anything over this number.",
   })
   maxChatHistory: number = 10;
+
+  @ConfigurationMetadata.assign({ comment: "Rate limit for chat requests." })
+  chatRateLimit = new ChatRateLimitConfig();
 
   @ConfigurationMetadata.assign({ comment: "What LLM source should be used.", restrictedValues: ["gemini", "opencode-zen", "opencode-go"] })
   type: ChatProviderType = "gemini";
