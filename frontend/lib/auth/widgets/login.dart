@@ -19,8 +19,16 @@ class LoginPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final packageInfo = ref.watch(packageInfoProvider).value;
     final unsecureConfig = ref.watch(unsecureConfigProvider).value;
-    final packageVersion = packageInfo?.version.split("-").take(2).join("-");
-    final serverVersion = unsecureConfig?.version.split("-").take(2).join("-");
+    final packageVersion = packageInfo?.version
+        .split("-")
+        .take(2)
+        .join("-")
+        .replaceFirst(RegExp(r"^v"), "");
+    final serverVersion = unsecureConfig?.version
+        .split("-")
+        .take(2)
+        .join("-")
+        .replaceFirst(RegExp(r"^v"), "");
     final versionInfo = Text(
       [
         if (packageVersion != null && packageVersion.isNotEmpty)
