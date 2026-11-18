@@ -172,8 +172,8 @@ When writing, updating, or reorganizing documentation under `/docs`:
     - Use a single level-1 heading (`# Page Title`) per document.
     - Organize sub-sections using level-2 (`## Section`) and level-3 (`### Sub-section`) headings sequentially. Avoid skipping heading levels.
 
-3. **MkDocs Material Admonitions:**
-    - Use standard MkDocs Material admonition blocks for important tips, notes, warnings, or security warnings:
+3. **Documentation Admonitions:**
+    - Use standard Zensical admonition blocks for important tips, notes, warnings, or security warnings:
         ```markdown
         !!! note "Optional Configuration"
         Content goes here.
@@ -181,7 +181,7 @@ When writing, updating, or reorganizing documentation under `/docs`:
         !!! warning "Security Warning"
         Content goes here.
         ```
-    - Ensure indented code blocks or lists inside admonitions are indented properly (4 spaces per level) so MkDocs renders them cleanly.
+    - Ensure indented code blocks or lists inside admonitions are indented properly (4 spaces per level) so Zensical renders them cleanly.
 
 4. **Environment Variables & Configuration Standards:**
     - All environment variable references must strictly match application runtime keys (prefixed with `sprout_` and using underscores for nested YAML properties, e.g., `sprout_server_publicUrl`).
@@ -197,4 +197,4 @@ When writing, updating, or reorganizing documentation under `/docs`:
 
 7. **Doc Formatting & Validation:**
     - Validate Markdown and code formatting by running `npm run prettier:write`.
-    - Verify that documentation builds cleanly without syntax errors using `python3 -m mkdocs build` (or `npm run docs:serve` via Docker).
+    - Verify that documentation builds cleanly without syntax errors using `npm run docs:build` (install dependencies first with `npm run docs:install`).

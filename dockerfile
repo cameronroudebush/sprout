@@ -59,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:80/ && \
       wget --no-verbose --tries=1 --spider http://127.0.0.1:8001/api/core/heartbeat || exit 1
 
-ENTRYPOINT ["/bin/sh", "-c" , "nginx & node --enable-source-maps /app/dist/main.js"]
+ENTRYPOINT ["/bin/sh", "-c", "if [ \"$#\" -gt 0 ]; then exec node --enable-source-maps /app/dist/main.js \"$@\"; fi; nginx -g 'daemon off;' & nginx_pid=$!; node --enable-source-maps /app/dist/main.js & node_pid=$!; shutdown() { signal=\"$1\"; trap - INT TERM; kill -\"$signal\" \"$node_pid\" 2>/dev/null; kill -QUIT \"$nginx_pid\" 2>/dev/null; wait \"$node_pid\"; status=$?; wait \"$nginx_pid\" 2>/dev/null; exit \"$status\"; }; trap 'shutdown INT' INT; trap 'shutdown TERM' TERM; wait \"$node_pid\"; status=$?; kill -QUIT \"$nginx_pid\" 2>/dev/null; wait \"$nginx_pid\" 2>/dev/null; exit \"$status\"", "--"]

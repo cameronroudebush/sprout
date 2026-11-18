@@ -19,7 +19,7 @@ The project is structured as a monorepo with clear separation between the server
 sprout/
 ├── backend/                  # NestJS TypeScript Backend API & Background Workers
 ├── frontend/                 # Flutter Cross-Platform Client (Web, Android, iOS)
-├── docs/                     # MkDocs documentation site & OpenAPI specifications
+├── docs/                     # Zensical documentation site & OpenAPI specifications
 ├── scripts/                  # Docker build, screenshot generation, and CLI utilities
 └── dockerfile                # Container definition for unified production deployment
 ```
@@ -229,5 +229,5 @@ The frontend is a cross-platform client written in Flutter (Dart), targeting Web
 | Export OpenAPI Spec      | `npm run export:api:spec --prefix backend` |
 | Generate Dart API Client | `npm run api:generate:dart`                |
 | Code Formatting          | `npm run prettier:write`                   |
-| Build MkDocs Site        | `python3 -m mkdocs build`                  |
+| Build Documentation Site | `npm run docs:build`                       |
 | Analyze Flutter Code     | `cd frontend && flutter analyze`           |

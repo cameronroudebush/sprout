@@ -16,16 +16,74 @@ description: Learn how to start using Sprout today.
     <img src="https://media.githubusercontent.com/media/cameronroudebush/sprout/master/frontend/assets/logo/color-transparent.png" width="50%">
 </p>
 
-**Welcome to Sprout!** This guide will walk you through setting up, configuring, and using the application.
+**Welcome to Sprout!** Follow these steps to configure and launch your self-hosted instance.
 
-To get started, follow these guides in order:
+## Prerequisites
 
-1.  **[Installation](./installation.md)**: Set up **Sprout** using the recommended Docker method.
-2.  **[Configuration](./configuration.md)**: Learn about the available settings to customize your instance.
-    1.  **[Authentication](./auth.md)**: Learn about the available authentication strategies, including OIDC.
-    2.  **[Notification](./notification.md)**: Learn how you can get push notifications for your app.
-    3.  **[AI](./llm.md)**: Learn how you can use chat bots to help digest your finances.
-    4.  **[Email](./email.md)**: Learn how to setup email support for **Sprout**.
-3.  **[Access](./access.md)**: Connect to **Sprout** from your phone or desktop.
-4.  **[Backups](./backups.md)**: Understand how to protect your financial data.
-5.  **[Currencies](./currency.md)**: Understand how **Sprout** supports multiple currencies.
+- [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/).
+- A host or server with a persistent directory for Sprout's database and backups.
+- (**Recommended for internet-facing instances**) A domain and HTTPS reverse proxy.
+
+## Install Sprout with Docker Compose
+
+1. **Create a directory for your deployment.** Run the following commands, then use this directory for the files below:
+
+    ```bash
+    mkdir sprout
+    cd sprout
+    ```
+
+2. **Generate an encryption key.** Run this command and keep its output private:
+
+    ```bash
+    docker run --rm croudebush/sprout:stable generate-key
+    ```
+
+    Save the key somewhere secure. Sprout uses it to encrypt sensitive data; losing or changing it can make encrypted data unreadable. See [encryption key details](./configuration.md#generating-an-encryption-key).
+
+3. **Create `compose.yaml`** in the deployment directory:
+
+    ```yaml title="compose.yaml" linenums="1"
+    services:
+        sprout:
+            container_name: sprout
+            image: croudebush/sprout:stable
+            restart: unless-stopped
+            ports:
+                - "80:80"
+            volumes:
+                - /appdata/sprout:/sprout
+            environment:
+                TZ: America/New_York
+                sprout_encryptionKey: paste-your-generated-key-here
+                sprout_server_publicUrl: http://localhost
+    ```
+
+    Update the example values:
+
+    - Replace the encryption key placeholder with your generated key.
+    - Change `/appdata/sprout` to a persistent host directory.
+    - Set `TZ` to your [time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+    - Set the public URL to the address users will open. Use your HTTPS URL behind a reverse proxy.
+    - Keep your Compose file private because it contains your encryption key.
+
+4. **Start Sprout.** From the directory containing `compose.yaml`, run:
+
+    ```bash
+    docker compose up -d
+    ```
+
+5. **Open Sprout** at the address configured in Compose (by default, [http://localhost](http://localhost)) and complete the in-app setup. For remote access and connecting from other devices, see [Accessing Sprout](./access.md).
+
+For all available settings, see [Configuration](./configuration.md).
+
+## Configure your instance
+
+After setup, continue with the guides most relevant to your deployment:
+
+- **[Authentication](./auth.md)**: Configure local login or OIDC.
+- **[Notifications](./notification.md)**: Set up push notifications.
+- **[AI](./llm.md)** and **[Email](./email.md)**: Configure optional integrations.
+- **[Access](./access.md)**: Connect from phones and other devices.
+- **[Backups](./backups.md)**: Protect your database and encryption key.
+- **[Currencies](./currency.md)**: Configure supported currencies.

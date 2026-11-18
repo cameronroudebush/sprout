@@ -46,32 +46,33 @@ For a complete list of all available options, please see the **[Advanced Configu
 
 Sprout uses `AES-256-GCM` encryption to protect various fields within the database, as well as cookie encryption. You must provide a valid `32-byte` key represented as a `64-character` hexadecimal string.
 
-Once complete, you can either place it in your [`configuration.yml`](../developer/configuration.md) file or use the environment variable listed above.
+Store the key in your [`sprout.config.yml`](../developer/configuration.md) file or set the `sprout_encryptionKey` environment variable. Keep a secure backup of the key and do not change it after Sprout stores encrypted data.
 
-You can generate this key using one of the methods below.
+### Recommended: Sprout Docker image
 
-### Option 1: Automatic Generation (Easiest)
-
-If you start Sprout without providing an encryption key, the application will generate a secure random key for you, print it to the logs, and then exit (or fail to start).
-
-Check the logs of the container and look for the following info:
-
-```
-Error: An encryption key must be specified for Sprout to start and must be exactly 32 characters. See the configuration guide for more info.
-Here is a randomly generated key you might want to use: RANDOM_KEY_HERE
-```
-
-### Option 2: Linux / macOS
+Use Sprout's Docker image to generate a key without starting the server:
 
 ```bash
-openssl rand -hex 32
+docker run --rm croudebush/sprout:stable generate-key
 ```
 
-### Option 3: Windows (PowerShell)
+Copy the output into your deployment's secret store or environment configuration. The command also works with other image tags, such as `croudebush/sprout:dev`.
 
-```powershell
--join ((1..32) | ForEach-Object { "{0:x2}" -f (Get-Random -Min 0 -Max 256) })
-```
+??? note "Other ways to generate a key"
+
+    If you cannot use Docker, generate a 32-byte key with one of these alternatives.
+
+    **Linux / macOS**
+
+    ```bash
+    openssl rand -hex 32
+    ```
+
+    **Windows (PowerShell)**
+
+    ```powershell
+    -join ((1..32) | ForEach-Object { "{0:x2}" -f (Get-Random -Min 0 -Max 256) })
+    ```
 
 ## Brand Assets with Brandfetch
 

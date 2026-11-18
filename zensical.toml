@@ -1,0 +1,104 @@
+[project]
+site_name = "Sprout"
+site_url = "https://docs.sprout.croudebush.net"
+repo_name = "cameronroudebush/sprout"
+repo_url = "https://github.com/cameronroudebush/sprout"
+copyright = 'Copyright &copy; <span id="copyright-year">2026</span> Sprout. All rights reserved.'
+extra_javascript = ["javascripts/extra.js"]
+extra_css = [
+  "stylesheets/extra.css",
+  "stylesheets/custom-html.css",
+]
+nav = [
+  { "Home" = "index.md" },
+  { "Features" = [
+    "features/index.md",
+    { "Images" = [
+      { "Desktop" = "features/desktop.md" },
+      { "Mobile" = "features/mobile.md" },
+    ] },
+  ] },
+  { "Getting Started" = [
+    { "Overview" = "getting-started/index.md" },
+    { "Configuration" = [
+      { "Overview" = "getting-started/configuration.md" },
+      { "Authentication" = "getting-started/auth.md" },
+      { "Notification" = "getting-started/notification.md" },
+      { "AI Integration" = "getting-started/llm.md" },
+      { "Email" = "getting-started/email.md" },
+    ] },
+    { "Providers" = "getting-started/providers.md" },
+    { "Accessing Sprout" = [
+      { "Overview" = "getting-started/access.md" },
+      { "Apps" = "getting-started/apps.md" },
+    ] },
+    { "Backups" = "getting-started/backups.md" },
+    { "Currency Support" = "getting-started/currency.md" },
+  ] },
+  { "Developer" = [
+    { "Overview" = "developer/index.md" },
+    { "Architecture & Layout" = "developer/architecture.md" },
+    { "UI & Design System" = "developer/design.md" },
+    { "Configuration" = "developer/configuration.md" },
+    { "Known Issues" = "developer/known-issues.md" },
+    { "API Docs" = "developer/api.md" },
+  ] },
+  { "Privacy Policy" = "privacy-policy.md" },
+]
+exclude_docs = """
+*.xcf
+agents/**
+"""
+
+[project.theme]
+variant = "classic"
+logo = "assets/favicon-bg.svg"
+favicon = "assets/favicon-bg.svg"
+custom_dir = "docs/overrides/"
+features = [
+  "header.autohide",
+  "navigation.tabs",
+  "content.code.copy",
+  "content.code.annotate",
+  "navigation.top",
+  "navigation.expand",
+  "navigation.footer",
+]
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "custom"
+accent = "custom"
+
+[project.extra]
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/cameronroudebush/sprout"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/docker"
+link = "https://hub.docker.com/r/croudebush/sprout"
+
+[project.extra.analytics]
+provider = "custom"
+property = "foobar"
+
+[project.plugins.search]
+enabled = true
+
+[project.plugins.social]
+cards = true
+cards_layout_options.background_color = "#1d2127"
+cards_layout_options.color = "#FFFFFF"
+
+[project.markdown_extensions]
+admonition = {}
+pymdownx.details = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.snippets = {}
+pymdownx.superfences = {}
+pymdownx.tabbed.alternate_style = true

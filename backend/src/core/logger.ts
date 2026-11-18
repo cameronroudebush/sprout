@@ -13,6 +13,7 @@ export class SproutLogger extends ConsoleLogger {
   // Color codes for console display
   private readonly colorCodes = {
     red: "\x1b[31m",
+    green: "\x1b[32m",
     yellow: "\x1b[33m",
     reset: "\x1b[0m",
     dim: "\x1b[2m",
@@ -21,6 +22,11 @@ export class SproutLogger extends ConsoleLogger {
   /** Applies our selected color to the output */
   private applyColor(text: string, color: keyof typeof this.colorCodes): string {
     return `${this.colorCodes[color]}${text}${this.colorCodes.reset}`;
+  }
+
+  /** Logs a success message in green. */
+  success(message: string): void {
+    this.log(this.applyColor(message, "green"));
   }
 
   override log(...args: any[]): void {

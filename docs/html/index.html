@@ -120,14 +120,14 @@
       const revealImages = [...page.querySelectorAll("[data-reveal-image]")];
 
       revealing.forEach((element) => element.classList.add("opacity-0", "translate-y-6", "transition-all", "duration-700", "ease-out"));
-      revealImages.forEach((element) => element.classList.add("opacity-0", "scale-105", "transition-all", "duration-1000", "ease-out"));
+      revealImages.forEach((element) => element.classList.add("opacity-0", "transition-opacity", "duration-1000", "ease-out"));
 
       const observer = new IntersectionObserver(
         (entries, currentObserver) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
-            entry.target.classList.remove("opacity-0", "translate-y-6", "scale-105");
-            entry.target.classList.add("opacity-100", "translate-y-0", "scale-100");
+            entry.target.classList.remove("opacity-0", "translate-y-6");
+            entry.target.classList.add("opacity-100", "translate-y-0");
             currentObserver.unobserve(entry.target);
           });
         },
@@ -203,7 +203,7 @@
       </a>
       <a
         class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-sprout-primary/50 bg-sprout-surface/80 px-6 text-sm font-bold !text-sprout-text transition duration-200 hover:-translate-y-1 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
-        href="/getting-started/installation/"
+        href="/getting-started/"
       >
         <svg
           class="h-5 w-5 shrink-0"
@@ -342,19 +342,18 @@
 
     <div class="feature-cards gap-6">
       <article
-        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl"
+        class="group mx-auto flex w-full max-w-[412px] flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl"
         data-reveal
       >
-        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
-          <div class="relative h-[115%] w-full -top-[15%]">
-            <img
-              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/accounts.png"
-              alt="Sprout accounts view showing balances across cash, investments, credit cards, and loans"
-              loading="lazy"
-              data-reveal-image
-            />
-          </div>
+        <div class="relative aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <img
+            class="absolute inset-0 w-full aspect-[1.15/1] object-cover"
+            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/accounts.png"
+            alt="Sprout accounts view showing balances across cash, investments, credit cards, and loans"
+            loading="lazy"
+            data-reveal-image
+            style="object-position: center 75%"
+          />
         </div>
         <div class="flex flex-col gap-1 p-3">
           <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">Every account, in one place</h3>
@@ -363,20 +362,18 @@
       </article>
 
       <article
-        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-100"
+        class="group mx-auto flex w-full max-w-[412px] flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-100"
         data-reveal
       >
-        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
-          <div class="relative h-[115%] w-full -top-[15%]">
-            <img
-              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/budget.png"
-              alt="Sprout budget view showing category limits, monthly progress, and historical spending"
-              loading="lazy"
-              data-reveal-image
-              style="object-position: center 23%"
-            />
-          </div>
+        <div class="relative aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <img
+            class="absolute inset-0 w-full aspect-[1.15/1] object-cover"
+            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/budget.png"
+            alt="Sprout budget view showing category limits, monthly progress, and historical spending"
+            loading="lazy"
+            data-reveal-image
+            style="object-position: center 10%"
+          />
         </div>
         <div class="flex flex-col gap-1 p-3">
           <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">A budget that fits your life</h3>
@@ -385,20 +382,18 @@
       </article>
 
       <article
-        class="group flex flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-200"
+        class="group mx-auto flex w-full max-w-[412px] flex-col overflow-hidden rounded-xl border border-sprout-primary/20 bg-sprout-surface transition duration-300 hover:-translate-y-1 hover:border-sprout-primary/50 hover:shadow-xl delay-200"
         data-reveal
       >
-        <div class="aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
-          <div class="relative h-[115%] w-full -top-[40%]">
-            <img
-              class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-              src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/high-res/chat.png"
-              alt="Sprout AI assistant answering a question about personal finances"
-              loading="lazy"
-              data-reveal-image
-              style="object-position: center 36%"
-            />
-          </div>
+        <div class="relative aspect-[1.15/1] overflow-hidden border-b border-sprout-secondary/25 bg-sprout-bg">
+          <img
+            class="absolute inset-0 w-full aspect-[1.15/1] object-cover"
+            src="https://media.githubusercontent.com/media/cameronroudebush/sprout/refs/heads/master/docs/images/mobile/chat.png"
+            alt="Sprout AI assistant answering a question about personal finances"
+            loading="lazy"
+            data-reveal-image
+            style="object-position: center 75%"
+          />
         </div>
         <div class="flex flex-col gap-1 p-3">
           <h3 class="text-lg font-semibold tracking-tight text-sprout-text mt-1!">Get answers in plain language</h3>
@@ -423,7 +418,9 @@
       class="grid w-full grid-cols-1 gap-8 overflow-hidden rounded-2xl border border-sprout-primary/30 bg-sprout-primary-container p-6 shadow-xl shadow-sprout-secondary/10 md:grid-cols-[0.92fr_1.08fr] md:gap-10 md:p-6 pt-0!"
     >
       <div class="flex flex-col justify-center md:-translate-y-2" data-reveal>
-        <h2 class="!block !text-3xl md:!text-4xl lg:!text-5xl !font-semibold !leading-[1.02] !tracking-[-0.06em] !text-sprout-text [text-wrap:balance]">
+        <h2
+          class="!block text-center md:text-left !text-3xl md:!text-4xl lg:!text-5xl !font-semibold !leading-[1.02] !tracking-[-0.06em] !text-sprout-text [text-wrap:balance]"
+        >
           <span class="text-sprout-text">Your money.</span><br /><span class="text-sprout-text">Your server.</span><br /><span class="text-sprout-primary"
             >Your call.</span
           >
@@ -499,7 +496,7 @@
       >
       <a
         class="inline-flex min-h-12 items-center gap-2 rounded-xl border border-sprout-primary/50 bg-sprout-surface/80 px-6 text-sm font-bold !text-sprout-text transition duration-200 hover:-translate-y-1 hover:border-sprout-primary hover:bg-sprout-primary/15 hover:!text-sprout-text"
-        href="/getting-started/installation/"
+        href="/getting-started/"
       >
         <svg
           class="h-5 w-5 shrink-0"

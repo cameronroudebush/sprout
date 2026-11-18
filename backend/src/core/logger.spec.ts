@@ -65,4 +65,18 @@ describe("SproutLogger", () => {
     superLog.mockRestore();
     vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
   });
+
+  it("should log success messages in green", () => {
+    vi.mocked(SproutLogger.prototype.log).mockRestore();
+
+    const logger = new SproutLogger("Sprout");
+    const consoleLog = vi.spyOn(ConsoleLogger.prototype, "log").mockImplementation(() => {});
+
+    logger.success("success message");
+
+    expect(consoleLog).toHaveBeenCalledWith("\x1b[32msuccess message\x1b[0m");
+
+    consoleLog.mockRestore();
+    vi.spyOn(SproutLogger.prototype, "log").mockImplementation(() => {});
+  });
 });
