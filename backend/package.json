@@ -6,7 +6,7 @@
   "description": "The backend for the Sprout financial app",
   "bin": "./dist/main.js",
   "author": "Cameron Roudebush",
-  "license": "ISC",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@google/genai": "^2.0.1",
     "@keyv/redis": "^6.1.0",
