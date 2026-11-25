@@ -1,7 +1,7 @@
 import { ConfigurationMetadata } from "@backend/config/model/configuration.metadata";
 import { BaseProviderConfig } from "@backend/providers/base/config";
 import { ProviderCredentialsMode } from "@backend/providers/base/model/provider.credential.type";
-import { PlaidEnvironments } from "plaid";
+import { PlaidEnvironments } from "plaid/legacy";
 
 /** The configuration for the Plaid provider */
 export class PlaidConfig extends BaseProviderConfig {

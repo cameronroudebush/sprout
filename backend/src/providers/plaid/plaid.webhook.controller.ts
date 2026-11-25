@@ -27,7 +27,7 @@ import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
 import crypto from "crypto";
 import { Request } from "express";
 import jwt from "jsonwebtoken";
-import { JWKPublicKey, WebhookUpdateAcknowledgedWebhook } from "plaid";
+import { JWKPublicKey, WebhookUpdateAcknowledgedWebhook } from "plaid/legacy";
 
 /** Controller that allow plaid to communicate directly with the backend to trigger auto updates. */
 @Controller("webhooks/plaid")
