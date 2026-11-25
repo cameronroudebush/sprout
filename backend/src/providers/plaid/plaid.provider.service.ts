@@ -31,7 +31,7 @@ import {
   Transaction as PlaidTransaction,
   Products,
   RemovedTransaction,
-} from "plaid";
+} from "plaid/legacy";
 import { FindOptionsWhere, In } from "typeorm";
 
 export interface PlaidLinkOptions {

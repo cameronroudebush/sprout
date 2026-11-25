@@ -15,7 +15,7 @@ import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { User } from "@backend/user/model/user.model.js";
 import { BadRequestException, InternalServerErrorException } from "@nestjs/common";
 import { format } from "date-fns";
-import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid";
+import { AccountBase as PlaidAccount, AccountType as PlaidAccountType } from "plaid/legacy";
 
 describe("PlaidProviderService", () => {
   let service: PlaidProviderService;
