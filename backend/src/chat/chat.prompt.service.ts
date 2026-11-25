@@ -13,6 +13,7 @@ import { HoldingService } from "@backend/holding/holding.service";
 import { MarketIndexDto, MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.index.dto";
 import { HoldingHistory } from "@backend/holding/model/holding.history.model";
 import { Holding } from "@backend/holding/model/holding.model";
+import { Sync } from "@backend/providers/model/sync.model";
 import { Transaction } from "@backend/transaction/model/transaction.model";
 import { TransactionService } from "@backend/transaction/transaction.service";
 import { User } from "@backend/user/model/user.model";
@@ -44,7 +45,11 @@ export class ChatPromptService {
   async buildDailyOverviewPrompt(user: User, includePendingTransactions = false): Promise<ChatPromptResult> {
     const instructions = [
       ...this.getSharedSystemInstructions(user, false),
-      `Write a warm, natural daily financial summary over the last 24 hours.`,
+      `Write a warm, natural daily financial summary using the latest available financial data. Do not describe the data as covering the last 24 hours unless the latest successful sync timestamp confirms that the data is current for that period.`,
+      `SYNC FRESHNESS:
+       - The contextual data includes lastSuccessfulSyncStartedAt, the start time of the latest successful sync, or null if no successful sync is recorded.
+       - Use this timestamp to qualify how current the account and transaction data is.
+       - If the timestamp is missing or older than 24 hours, say that newer activity may not be reflected. Do not claim that no activity occurred since then or that accounts were steady during an uncovered period.`,
       `ACCOUNT MOVEMENT RECONCILIATION:
        - Compare the current balance with the most recent prior balance available.
        - Attribute movement only when supported by matching posted transactions or holding history.
@@ -61,7 +66,7 @@ export class ChatPromptService {
       `2. Follow with short key bullet points ONLY for accounts with notable activity. DO NOT list accounts with no changes or activity. State the direction of the change and summarize the *reason* based on transaction categories or descriptions (e.g., "Checking decreased slightly, mostly due to dining out and groceries" or "Credit card balance went up following a travel purchase").`,
       `3. End with a 1-sentence reassuring context note (e.g., "Overall, just normal day-to-day spending.").`,
       `4. DO NOT include ANY specific numbers, dollar amounts, percentages, or balances in your response. Focus entirely on the narrative, the direction of the changes, and the spending categories.`,
-      `5. If there is no notable activity across any accounts, provide a simple 1-2 sentence summary stating that accounts are steady and OMIT the bulleted list entirely.`,
+      `5. If sufficiently current data shows no notable activity, provide a simple 1-2 sentence summary that accounts appear steady within the available data and OMIT the bulleted list entirely. If data may be stale, qualify the summary instead of claiming no activity.`,
     ];
 
     return this.createPromptPayload(user, ChatTimeframe.oneDay, instructions, false, undefined, includePendingTransactions, false, true);
@@ -282,9 +287,11 @@ export class ChatPromptService {
     includeLiveHoldingQuotes = false,
   ) {
     const historicalTimeFrame = this.getTimeframeDate(timeframe);
+    const isOneDayTimeframe = timeframe === ChatTimeframe.oneDay;
     const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
     if (validAccountTypes) accountWhere.type = In(validAccountTypes);
     const accounts = Account.convertListToTargetCurrency(Utility.shuffleArray(await Account.find({ where: accountWhere })), user);
+    const lastSuccessfulSync = isOneDayTimeframe ? await Sync.findOne({ where: { user: { id: user.id }, status: "complete" }, order: { time: "DESC" } }) : null;
     const holdingsByAccountId = new Map<string, Holding[]>();
     let liveQuotesBySymbol = new Map<string, MarketIndexDto>();
     let marketReferenceAsOf: string | undefined;
@@ -324,7 +331,6 @@ export class ChatPromptService {
 
     let accIndex = 0;
     const isExtendedTimeframe = timeframe === ChatTimeframe.sixMonths || timeframe === ChatTimeframe.oneYear;
-    const isOneDayTimeframe = timeframe === ChatTimeframe.oneDay;
     const todayStr = formatDate(new Date(), "MM/dd");
 
     const accountData = await Promise.all(
@@ -508,6 +514,7 @@ export class ChatPromptService {
       accounts: accountData,
       transactions: compactTransactions,
       subscriptions: compactSubscriptions,
+      ...(isOneDayTimeframe ? { lastSuccessfulSyncStartedAt: lastSuccessfulSync?.time.toISOString() ?? null } : {}),
       ...(includeLiveHoldingQuotes
         ? {
             liveMarketReference: {

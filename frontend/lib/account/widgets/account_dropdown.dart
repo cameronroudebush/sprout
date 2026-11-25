@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/account/account_provider.dart';
 import 'package:sprout/account/widgets/account_icon.dart';
 import 'package:sprout/api/api.dart';
@@ -26,22 +26,39 @@ class AccountDropdown extends ConsumerWidget {
 
   /// Returns account icon, name, institution, and formatted balance.
   Widget _getAccountDisplay(
-      ThemeData theme, Account account, CurrencyFormatter formatter) {
+      ThemeData theme, Account account, CurrencyFormatter formatter,
+      {bool selected = false}) {
+    final text = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(account.name, overflow: TextOverflow.ellipsis, maxLines: 1),
+        Text(account.institution.name,
+            style: theme.textTheme.bodySmall,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1),
+      ],
+    );
+
     return Row(
       spacing: 8,
       children: [
         AccountIcon(account, size: 24),
         Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(account.name, overflow: TextOverflow.ellipsis, maxLines: 1),
-              Text(account.institution.name,
-                  style: theme.textTheme.bodySmall,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1),
-            ],
+          child: Transform.translate(
+            offset: Offset(0, selected ? -8 : 0),
+            child: selected
+                ? LayoutBuilder(
+                    builder: (context, constraints) => OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minWidth: constraints.maxWidth,
+                      maxWidth: constraints.maxWidth,
+                      minHeight: 0,
+                      maxHeight: double.infinity,
+                      child: text,
+                    ),
+                  )
+                : text,
           ),
         ),
         Text(formatter.format(account.balance)),
@@ -94,6 +111,7 @@ class AccountDropdown extends ConsumerWidget {
 
     return DropdownButtonFormField<Account>(
       isExpanded: true,
+      itemHeight: null,
       menuMaxHeight: MediaQuery.of(context).size.height * 0.5,
       dropdownColor: theme.colorScheme.surfaceContainerHighest,
       initialValue: selectedValue,
@@ -107,8 +125,8 @@ class AccountDropdown extends ConsumerWidget {
       validator: validator,
       selectedItemBuilder: (BuildContext context) => [
         if (allowNoAccount) const Text("No Account"),
-        ...accounts
-            .map((account) => _getAccountDisplay(theme, account, formatter)),
+        ...accounts.map((account) =>
+            _getAccountDisplay(theme, account, formatter, selected: true)),
       ],
       items: items,
       onChanged: !enabled ? null : onChanged,

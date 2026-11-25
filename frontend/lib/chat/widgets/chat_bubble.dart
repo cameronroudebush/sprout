@@ -1,10 +1,10 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/auth/auth_provider.dart';
 import 'package:sprout/chat/widgets/chat_message_content.dart';
-import 'package:sprout/chat/widgets/chat_model_indicator.dart';
 import 'package:sprout/chat/widgets/chat_typing_indicator.dart';
+import 'package:sprout/shared/widgets/built_with_ai_indicator.dart';
 import 'package:sprout/shared/widgets/icon.dart';
 import 'package:sprout/shared/widgets/layout.dart';
 import 'package:sprout/user/widgets/user_avatar.dart';
@@ -83,15 +83,15 @@ class ChatBubble extends ConsumerWidget {
                                 isAi: isAi,
                                 textColor: Colors.white,
                               ),
-                        if (isAi &&
-                            !message.isThinking &&
-                            message.model != null) ...[
+                        if (isAi && !message.isThinking) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              ChatModelIndicator(
+                              BuiltWithAiIndicator(
                                 model: message.model,
-                                textAfter: false,
+                                size: 16,
+                                tooltipDirection:
+                                    BuiltWithAiTooltipDirection.right,
                               ),
                             ],
                           )

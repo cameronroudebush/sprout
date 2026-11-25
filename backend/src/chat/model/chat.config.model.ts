@@ -9,10 +9,10 @@ export type OpenCodeGateway = Extract<ChatProviderType, "opencode-zen" | "openco
 /** Config related to gemini */
 export class GeminiConfig {
   @ConfigurationMetadata.assign({ comment: "The model gemini should use for conversations." })
-  chatModel: string = "gemini-flash-latest";
+  chatModel: string = "gemini-3.8-flash";
 
   @ConfigurationMetadata.assign({ comment: "The model gemini should use to generate overviews." })
-  overviewModel: string = "gemini-flash-lite-latest";
+  overviewModel: string = "gemini-3.5-flash-lite";
 
   @ConfigurationMetadata.assign({ comment: "A global key to use to authenticate to gemini." })
   key?: string;

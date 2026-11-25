@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_message_content.dart';
-import 'package:sprout/chat/widgets/chat_model_indicator.dart';
 import 'package:sprout/config/config_provider.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
 import 'package:sprout/shared/widgets/card.dart';
+import 'package:sprout/shared/widgets/built_with_ai_indicator.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 
 /// Displays an AI-generated summary of budget performance.
@@ -52,13 +52,8 @@ class BudgetChatCard extends ConsumerWidget {
             title: 'Budget Overview',
             subheader:
                 'Insights for ${DateFormat('MMMM yyyy').format(DateTime(overviewYear, overviewMonth))}',
-            left: const Tooltip(
-              message: 'Powered by AI',
-              child: Icon(Icons.auto_awesome),
-            ),
-            right: ChatModelIndicator(
+            left: BuiltWithAiIndicator(
               model: overviewAsync.value?.model,
-              compact: true,
             ),
           ),
           content,

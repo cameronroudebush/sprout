@@ -13,6 +13,7 @@ import { MarketQuoteType, MarketState } from "@backend/holding/model/api/mark.in
 import { HoldingHistory } from "@backend/holding/model/holding.history.model.js";
 import { Holding } from "@backend/holding/model/holding.model.js";
 import { HoldingService } from "@backend/holding/holding.service.js";
+import { Sync } from "@backend/providers/model/sync.model.js";
 import { TestEntities } from "@backend/test/entities.js";
 import { Transaction } from "@backend/transaction/model/transaction.model.js";
 import { TransactionService } from "@backend/transaction/transaction.service.js";
@@ -93,6 +94,7 @@ describe("ChatPromptService", () => {
 
     vi.spyOn(HoldingHistory, "find").mockResolvedValue([]);
     vi.spyOn(HoldingHistory, "convertListToTargetCurrency").mockImplementation((list: any) => list);
+    vi.spyOn(Sync, "findOne").mockResolvedValue(null);
 
     vi.spyOn(ChatHistory, "find").mockResolvedValue([]);
   });
@@ -222,6 +224,22 @@ describe("ChatPromptService", () => {
       expect(contextData.accounts[0].liveHoldings[0].liveQuote.estimatedMarketValue).toBe(2000);
       expect(contextData.accounts[0].b).toBe("1000.00");
       expect(payload.contents[0]!.parts[0]!.text).toContain("never add holding values on top of the account balance");
+      expect(payload.contents[0]!.parts[0]!.text).toContain("Do not describe the data as covering the last 24 hours");
+      expect(contextData.lastSuccessfulSyncStartedAt).toBeNull();
+    });
+
+    it("should include latest successful sync timestamp in daily overview context", async () => {
+      const syncTime = new Date("2026-11-05T09:30:00.000Z");
+      vi.mocked(Sync.findOne).mockResolvedValue(Sync.fromPlain({ status: "complete", time: syncTime }) as any);
+
+      const payload = await service.buildDailyOverviewPrompt(user);
+      const contextData = JSON.parse(payload.contents[0]!.parts[0]!.text.split("CONTEXTUAL DATA:")[1]!);
+
+      expect(Sync.findOne).toHaveBeenCalledWith({
+        where: { user: { id: user.id }, status: "complete" },
+        order: { time: "DESC" },
+      });
+      expect(contextData.lastSuccessfulSyncStartedAt).toBe(syncTime.toISOString());
     });
 
     it("should build holdings overview prompt", async () => {

@@ -13,10 +13,16 @@ import 'package:sprout/shared/api/browser_client.dart'
     if (dart.library.html) 'package:http/browser_client.dart';
 import 'package:sprout/shared/api/cookie_client.dart';
 import 'package:sprout/shared/api/header_client.dart';
+import 'package:sprout/shared/api/retry_policy_client.dart';
 import 'package:sprout/shared/api/timeout_client.dart';
 import 'package:sprout/shared/providers/bg_job_provider.dart';
 
 part 'base_api.g.dart';
+
+/// Requests with non-idempotent side effects must not be replayed on failure.
+const _noRetryRequestRules = <NoRetryRequestRule>[
+  NoRetryRequestRule(method: 'POST', pathSuffix: ['chat', 'new']),
+];
 
 /// Root client to use with every other client
 @Riverpod(keepAlive: true)
@@ -31,11 +37,17 @@ Future<http.Client> rootHttpClient(Ref ref) async {
     client = CookieClient(innerClient: http.Client(), cookieJar: jar);
   }
 
-  return RetryClient(
+  final retryClient = RetryClient(
     client,
     retries: 2,
     when: (response) =>
         response.statusCode >= 500 && response.statusCode <= 599,
+  );
+
+  return RetryPolicyClient(
+    retryClient: retryClient,
+    innerClient: client,
+    noRetryRules: _noRetryRequestRules,
   );
 }
 

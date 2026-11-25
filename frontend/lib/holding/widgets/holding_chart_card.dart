@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sprout/api/api.dart';
 import 'package:sprout/chat/chat_provider.dart';
 import 'package:sprout/chat/widgets/chat_message_content.dart';
-import 'package:sprout/chat/widgets/chat_model_indicator.dart';
 import 'package:sprout/shared/models/extensions/async_value_extensions.dart';
+import 'package:sprout/shared/widgets/built_with_ai_indicator.dart';
 import 'package:sprout/shared/widgets/card.dart';
 import 'package:sprout/shared/widgets/charts/util/header.dart';
 
@@ -47,23 +47,10 @@ class HoldingsChatCard extends ConsumerWidget {
         spacing: 4,
         children: [
           SproutChartHeader(
-              title: "24-Hour Overview",
-              subheader: "Based on last synced data",
-              left: Row(
-                children: [
-                  const Tooltip(
-                    message: "Powered by AI",
-                    child: Icon(Icons.auto_awesome),
-                  ),
-                ],
-              ),
-              right: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ChatModelIndicator(
-                      model: chatStatusAsync.value?.model, compact: true)
-                ],
-              )),
+            title: "24-Hour Overview",
+            subheader: "Based on last synced data",
+            left: BuiltWithAiIndicator(model: chatStatusAsync.value?.model),
+          ),
           mobile ? content : Expanded(child: content),
         ],
       ),

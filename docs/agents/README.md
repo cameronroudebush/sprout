@@ -10,3 +10,4 @@ Internal agent guidance lives here. These files track repository-specific implem
 ## Guides
 
 - [Android home screen widgets](./android-widgets.md)
+- [HTTP retry policy](./http-retry-policy.md)
