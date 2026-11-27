@@ -1,0 +1,48 @@
+name: opencode
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  opencode:
+    if: |
+      contains(github.event.comment.body, '/oc') ||
+      contains(github.event.comment.body, '/opencode')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Sign in to OpenCode
+        env:
+          AUDIENCE: https://opencode.ai/console
+        run: |
+          set -euo pipefail
+          oidc=$(curl -sSf --oauth2-bearer "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$AUDIENCE" | jq -r .value)
+          token=$(curl -sSf https://opencode.ai/console/auth/oauth/token \
+            -d grant_type=urn:ietf:params:oauth:grant-type:token-exchange \
+            -d subject_token_type=urn:ietf:params:oauth:token-type:jwt \
+            -d client_id=sk_9848d037-cad6-484d-9683-367ec424aa49 \
+            -d subject_token="$oidc" | jq -r .access_token)
+          if [[ -z "$token" || "$token" == "null" ]]; then
+            echo "OpenCode token exchange returned no access token" >&2
+            exit 1
+          fi
+          echo "::add-mask::$token"
+          echo "OPENCODE_API_KEY=$token" >> "$GITHUB_ENV"
+
+      - name: Run OpenCode
+        uses: anomalyco/opencode/github@latest
+        with:
+          model: opencode-go/gpt-6-luna
+          # share: true
