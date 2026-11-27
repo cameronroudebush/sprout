@@ -11,7 +11,7 @@ export class TransactionRuleService {
   /**
    * Applies transaction rules to a user's transactions.
    *
-   * This function iterates through all of a user's transaction rules, ordered by priority (descending).
+   * This function iterates through all of a user's transaction rules, ordered by priority (ascending).
    * It applies the first matching rule to each transaction and updates the transaction's category.
    * To prevent a transaction from being matched multiple times, it keeps track of matched
    * transaction IDs and skips them in subsequent, lower-priority rule checks. This ensures
@@ -29,7 +29,7 @@ export class TransactionRuleService {
     const recalculateMatches = account == null && !onlyApplyToEmpty;
     const rules = await TransactionRule.find({
       where: { user: { id: user.id } },
-      order: { order: "DESC" },
+      order: { order: "ASC" },
     });
     const accountWhere: FindOptionsWhere<Account> = { user: { id: user.id } };
     if (account) accountWhere.id = account.id;

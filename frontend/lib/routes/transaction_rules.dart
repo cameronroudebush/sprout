@@ -121,7 +121,7 @@ class _TransactionRulesPageState extends ConsumerState<TransactionRulesPage> {
                       leading: Icon(Icons.info_outline),
                       title: Text("How rules are applied"),
                       subtitle: Text(
-                        "Enabled rules run from highest number to lowest. The first match assigns its category. Description rules can match exact text or partial text; use | for alternatives. Re-run all rules to apply them to existing transactions.",
+                        "Enabled rules run from lowest number to highest. The first match assigns its category. Description rules can match exact text or partial text; use | for alternatives. Re-run all rules to apply them to existing transactions.",
                       ),
                     ),
                   ),

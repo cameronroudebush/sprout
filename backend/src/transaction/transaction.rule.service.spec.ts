@@ -32,6 +32,55 @@ describe("TransactionRuleService", () => {
       expect(Object.prototype.hasOwnProperty.call(passedWhere, "category")).toBe(false);
     });
 
+    it("should apply the lowest-numbered matching rule first", async () => {
+      const payrollCategory = TestEntities.category;
+      payrollCategory.id = "payroll-category";
+      payrollCategory.name = "Payroll Contribution";
+      const contributionsCategory = TestEntities.category;
+      contributionsCategory.id = "contributions-category";
+      contributionsCategory.name = "Contributions";
+
+      const specificRule = TransactionRule.fromPlain({
+        id: "specific-rule",
+        user,
+        enabled: true,
+        type: "description",
+        strict: false,
+        value: "AF TRGT DATE 2055 R6 - contribution",
+        order: 18,
+        matches: 0,
+        category: payrollCategory,
+      });
+      const broadRule = TransactionRule.fromPlain({
+        id: "broad-rule",
+        user,
+        enabled: true,
+        type: "description",
+        strict: false,
+        value: "contribution",
+        order: 19,
+        matches: 0,
+        category: contributionsCategory,
+      });
+      specificRule.update = vi.fn().mockResolvedValue(specificRule);
+      broadRule.update = vi.fn().mockResolvedValue(broadRule);
+
+      const transaction = TestEntities.transaction;
+      transaction.description = "AF TRGT DATE 2055 R6 - contribution";
+      transaction.manuallyEdited = false;
+      transaction.update = vi.fn().mockResolvedValue(transaction);
+
+      const findRulesSpy = vi.spyOn(TransactionRule, "find").mockResolvedValue([specificRule, broadRule]);
+      vi.spyOn(Transaction, "find").mockResolvedValue([transaction]);
+
+      await service.applyRulesToTransactions(user);
+
+      expect(findRulesSpy).toHaveBeenCalledWith({ where: { user: { id: user.id } }, order: { order: "ASC" } });
+      expect(transaction.category).toEqual(payrollCategory);
+      expect(specificRule.matches).toBe(1);
+      expect(broadRule.matches).toBe(0);
+    });
+
     it("should construct query options with category: IsNull() when onlyApplyToEmpty is true", async () => {
       vi.spyOn(TransactionRule, "find").mockResolvedValue([]);
       const findSpy = vi.spyOn(Transaction, "find").mockResolvedValue([]);
